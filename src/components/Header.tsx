@@ -1,7 +1,13 @@
-import { Heart, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { usePrivy } from "@privy-io/react-auth";
 
 export function Header() {
+    const { ready, authenticated, user, login, logout } = usePrivy();
+
+  // Wait until the Privy client is ready before taking any actions
+  if (!ready) {
+    return null;
+  }
   return (
     <header className="sticky top-0 z-50 bg-green-50 px-6 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -40,18 +46,34 @@ export function Header() {
           />
             rewards
           </Button>
-          <Button 
+          {ready && authenticated ? (
+            <div>
+              <Button onClick={logout}
             variant="ghost" 
             className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
           >
-             <img 
-            src="/assets/account.png"
-            alt="Featured livestream"
-            className="w-full h-full"
-          />
-            {/* <User className="w-4 h-4 mr-1" /> */}
-            account
+            <img 
+              src="/assets/account.png"
+              alt="Login icon"
+              className="w-4 h-4 mr-1"
+            />
+            Log Out
           </Button>
+            </div>
+          ) : (
+            <Button onClick={login}
+            variant="ghost" 
+            className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+          >
+            <img 
+              src="/assets/account.png"
+              alt="Login icon"
+              className="w-4 h-4 mr-1"
+            />
+            Login
+          </Button> 
+          )
+          }
         </nav>
       </div>
     </header>

@@ -6,8 +6,8 @@ import { Footer } from './components/Footer';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-900 p-2">
-      <div className="min-h-screen bg-green-50 border-4 border-blue-400 rounded-lg overflow-hidden">
+    <div className="min-h-screen bg-gray-900">
+      <div className="min-h-screen bg-green-50 overflow-hidden">
         {/* Top border line */}
         <div className="border-b border-gray-800">
           <Header />

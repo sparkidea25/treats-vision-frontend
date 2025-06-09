@@ -1,4 +1,4 @@
-import { Eye, Users } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export function HeroSection() {
