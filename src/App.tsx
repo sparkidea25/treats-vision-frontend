@@ -1,0 +1,38 @@
+import { Header } from './components/Header';
+import { HeroSection } from './components/HeroSection';
+import { LiveSection } from './components/LiveSection';
+import { ReplaySection } from './components/ReplaySection';
+import { Footer } from './components/Footer';
+
+function App() {
+  return (
+    <div className="min-h-screen bg-gray-900 p-2">
+      <div className="min-h-screen bg-green-50 border-4 border-blue-400 rounded-lg overflow-hidden">
+        {/* Top border line */}
+        <div className="border-b border-gray-800">
+          <Header />
+        </div>
+        
+        {/* Hero section with border */}
+        <div className="border-b border-gray-800">
+          <HeroSection />
+        </div>
+        
+        {/* Live section with border */}
+        <div className="border-b border-gray-800">
+          <LiveSection />
+        </div>
+        
+        {/* Replay section with border */}
+        <div className="border-b border-gray-800">
+          <ReplaySection />
+        </div>
+        
+        {/* Footer */}
+        <Footer />
+      </div>
+    </div>
+  );
+}
+
+export default App;
