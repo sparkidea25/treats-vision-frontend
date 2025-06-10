@@ -8,6 +8,8 @@ export function Header() {
   if (!ready) {
     return null;
   }
+
+  console.log(user, 'login items');
   return (
     <header className="sticky top-0 z-50 bg-green-50 px-6 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -22,8 +24,61 @@ export function Header() {
           </div>
           </div>
         </div>
+<nav className="flex items-center space-x-6">
+  <Button 
+    variant="ghost" 
+    className="text-gray-700 hover:bg-gray-100 text-sm font-normal"
+  >
+    <img 
+      src="/assets/live.png"
+      alt="Featured livestream"
+      className="w-full h-full"
+    />
+    go live
+  </Button>
+  {ready && authenticated && (
+    <Button 
+      variant="ghost" 
+      className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+    >
+      <img 
+        src="/assets/rewards.png"
+        alt="Featured livestream"
+        className="w-full h-full"
+      />
+      rewards
+    </Button>
+  )}
+  {ready && authenticated ? (
+    <div>
+      <Button onClick={logout}
+        variant="ghost" 
+        className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+      >
+        <img 
+          src="/assets/account.png"
+          alt="Login icon"
+          className="w-4 h-4 mr-1"
+        />
+        Log Out
+      </Button>
+    </div>
+  ) : (
+    <Button onClick={login}
+      variant="ghost" 
+      className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+    >
+      <img 
+        src="/assets/account.png"
+        alt="Login icon"
+        className="w-4 h-4 mr-1"
+      />
+      Connect Wallet
+    </Button> 
+  )}
+</nav>
         
-        <nav className="flex items-center space-x-6">
+        {/* <nav className="flex items-center space-x-6">
           <Button 
             variant="ghost" 
             className="text-gray-700 hover:bg-gray-100 text-sm font-normal"
@@ -70,11 +125,11 @@ export function Header() {
               alt="Login icon"
               className="w-4 h-4 mr-1"
             />
-            Login
+            Connect Wallet
           </Button> 
           )
           }
-        </nav>
+        </nav> */}
       </div>
     </header>
   );
