@@ -1,5 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { usePrivy } from "@privy-io/react-auth";
+import { Menu } from '@headlessui/react';
+import { ApiStrings } from '@/lib/apiStrings';
+import { useEffect } from 'react';
 
 export function Header() {
     const { ready, authenticated, user, login, logout } = usePrivy();
@@ -9,7 +12,52 @@ export function Header() {
     return null;
   }
 
-  console.log(user, 'login items');
+    useEffect(() => {
+  if (authenticated && user) {
+    handlePrivyLogin();
+  }
+}, [authenticated, user]);
+
+    // console.log(await login, 'login items');
+
+    // create function to signup user with privy user data
+    const handlePrivyLogin = async () => {
+       console.log(await login, 'login items');
+    if (!user) return;
+    try {
+      const response = await fetch(`${ApiStrings.API_BASE_URL}/${ApiStrings.signUp}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          // name: user.name,
+          email: user.email,
+          privy_id: user.id,
+          wallet_address: user.wallet?.address,
+          // password: user.password, // Uncomment if you have a password field
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to connect wallet');
+      }
+      const data = await response.json();
+      console.log('User connected:', data);
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+    }
+  };
+
+
+   
+
+// Helper function to shorten wallet address
+function shortenAddress(address?: string) {
+  if (!address) return 'User';
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+
   return (
     <header className="sticky top-0 z-50 bg-green-50 px-6 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -50,9 +98,9 @@ export function Header() {
     </Button>
   )}
   {ready && authenticated ? (
-    <div>
-      <Button onClick={logout}
-        variant="ghost" 
+    <Menu as="div" className="relative">
+      <Menu.Button as={Button}
+        variant="ghost"
         className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
       >
         <img 
@@ -60,9 +108,42 @@ export function Header() {
           alt="Login icon"
           className="w-4 h-4 mr-1"
         />
-        Log Out
-      </Button>
-    </div>
+        Profile
+      </Menu.Button>
+      
+      <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg focus:outline-none z-50">
+        <div className="px-4 py-3 border-b border-gray-100">
+          <p className="text-sm font-medium text-gray-900">{shortenAddress(user?.wallet.address) ?? 'User'}</p>
+        </div>
+         <Menu.Item>
+            {({ active }) => (
+              <button
+                className={`${
+                  active ? 'bg-gray-100' : ''
+                } w-full text-left px-4 py-2 text-sm text-gray-700`}
+                // TODO: Replace with your profile navigation logic
+                onClick={() => window.location.href = '/profile'}
+              >
+                Go to Profile
+              </button>
+            )}
+          </Menu.Item>
+        <div className="py-1">
+          <Menu.Item>
+            {({ active }) => (
+              <button
+                className={`${
+                  active ? 'bg-gray-100' : ''
+                } w-full text-left px-4 py-2 text-sm text-gray-700`}
+                onClick={logout}
+              >
+                Log Out
+              </button>
+            )}
+          </Menu.Item>
+        </div>
+      </Menu.Items>
+    </Menu>
   ) : (
     <Button onClick={login}
       variant="ghost" 
