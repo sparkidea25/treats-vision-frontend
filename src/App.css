@@ -4,3 +4,12 @@
   padding: 2rem;
   text-align: center;
 }
+
+/* Add to your navbar CSS */
+.navbar {
+  border-bottom: 1px solid #000; /* Change #000 to your desired color */
+}
+
+header {
+  border-bottom: 1px solid #000 !important;
+}

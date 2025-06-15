@@ -1,24 +1,24 @@
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { usePrivy } from "@privy-io/react-auth";
 import { Menu } from '@headlessui/react';
 import { ApiStrings } from '@/lib/apiStrings';
-import { useEffect } from 'react';
+
 
 export function Header() {
     const { ready, authenticated, user, login, logout } = usePrivy();
 
-  // Wait until the Privy client is ready before taking any actions
-  if (!ready) {
-    return null;
-  }
 
     useEffect(() => {
   if (authenticated && user) {
     handlePrivyLogin();
   }
 }, [authenticated, user]);
-
-    // console.log(await login, 'login items');
+  // Wait until the Privy client is ready before taking any actions
+  if (!ready) {
+    return null;
+  }
+  // console.log(await login, 'login items');
 
     // create function to signup user with privy user data
     const handlePrivyLogin = async () => {
@@ -59,7 +59,7 @@ function shortenAddress(address?: string) {
 
 
   return (
-    <header className="sticky top-0 z-50 bg-green-50 px-6 py-3">
+<header className="w-full border-b border-black px-6 py-3 bg-green-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <div className="flex items-center space-x-2">
@@ -72,145 +72,92 @@ function shortenAddress(address?: string) {
           </div>
           </div>
         </div>
-<nav className="flex items-center space-x-6">
-  <Button 
-    variant="ghost" 
-    className="text-gray-700 hover:bg-gray-100 text-sm font-normal"
-  >
-    <img 
-      src="/assets/live.png"
-      alt="Featured livestream"
-      className="w-full h-full"
-    />
-    go live
-  </Button>
-  {ready && authenticated && (
-    <Button 
-      variant="ghost" 
-      className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
-    >
-      <img 
-        src="/assets/rewards.png"
-        alt="Featured livestream"
-        className="w-full h-full"
-      />
-      rewards
-    </Button>
-  )}
-  {ready && authenticated ? (
-    <Menu as="div" className="relative">
-      <Menu.Button as={Button}
-        variant="ghost"
-        className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
-      >
-        <img 
-          src="/assets/account.png"
-          alt="Login icon"
-          className="w-4 h-4 mr-1"
-        />
-        Profile
-      </Menu.Button>
-      
-      <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg focus:outline-none z-50">
-        <div className="px-4 py-3 border-b border-gray-100">
-          <p className="text-sm font-medium text-gray-900">{shortenAddress(user?.wallet.address) ?? 'User'}</p>
-        </div>
-         <Menu.Item>
-            {({ active }) => (
-              <button
-                className={`${
-                  active ? 'bg-gray-100' : ''
-                } w-full text-left px-4 py-2 text-sm text-gray-700`}
-                // TODO: Replace with your profile navigation logic
-                onClick={() => window.location.href = '/profile'}
-              >
-                Go to Profile
-              </button>
-            )}
-          </Menu.Item>
-        <div className="py-1">
-          <Menu.Item>
-            {({ active }) => (
-              <button
-                className={`${
-                  active ? 'bg-gray-100' : ''
-                } w-full text-left px-4 py-2 text-sm text-gray-700`}
-                onClick={logout}
-              >
-                Log Out
-              </button>
-            )}
-          </Menu.Item>
-        </div>
-      </Menu.Items>
-    </Menu>
-  ) : (
-    <Button onClick={login}
-      variant="ghost" 
-      className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
-    >
-      <img 
-        src="/assets/account.png"
-        alt="Login icon"
-        className="w-4 h-4 mr-1"
-      />
-      Connect Wallet
-    </Button> 
-  )}
-</nav>
-        
-        {/* <nav className="flex items-center space-x-6">
-          <Button 
-            variant="ghost" 
-            className="text-gray-700 hover:bg-gray-100 text-sm font-normal"
-          >
-            <img 
-            src="/assets/live.png"
-            alt="Featured livestream"
-            className="w-full h-full"
-          />
-            go live
-          </Button>
-          <Button 
-            variant="ghost" 
-            className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
-          >
-             <img 
-            src="/assets/rewards.png"
-            alt="Featured livestream"
-            className="w-full h-full"
-          />
-            rewards
-          </Button>
-          {ready && authenticated ? (
-            <div>
-              <Button onClick={logout}
-            variant="ghost" 
-            className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
-          >
-            <img 
-              src="/assets/account.png"
-              alt="Login icon"
-              className="w-4 h-4 mr-1"
-            />
-            Log Out
-          </Button>
-            </div>
-          ) : (
-            <Button onClick={login}
-            variant="ghost" 
-            className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
-          >
-            <img 
-              src="/assets/account.png"
-              alt="Login icon"
-              className="w-4 h-4 mr-1"
-            />
-            Connect Wallet
-          </Button> 
-          )
-          }
-        </nav> */}
+              <nav className="flex items-center space-x-6">
+                <Button 
+                  variant="ghost" 
+                  className="text-gray-700 hover:bg-gray-100 text-sm font-normal"
+                >
+                  <img 
+                    src="/assets/live.png"
+                    alt="Featured livestream"
+                    className="w-full h-full"
+                  />
+                  go live
+                </Button>
+                {ready && authenticated && (
+                  <Button 
+                    variant="ghost" 
+                    className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+                  >
+                    <img 
+                      src="/assets/rewards.png"
+                      alt="Featured livestream"
+                      className="w-full h-full"
+                    />
+                    rewards
+                  </Button>
+                )}
+                {ready && authenticated ? (
+                  <Menu as="div" className="relative">
+                    <Menu.Button as={Button}
+                      variant="ghost"
+                      className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+                    >
+                      <img 
+                        src="/assets/account.png"
+                        alt="Login icon"
+                        className="w-4 h-4 mr-1"
+                      />
+                      Profile
+                    </Menu.Button>
+                    
+                    <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg focus:outline-none z-50">
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900">{shortenAddress(user?.wallet.address) ?? 'User'}</p>
+                      </div>
+                      <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              className={`${
+                                active ? 'bg-gray-100' : ''
+                              } w-full text-left px-4 py-2 text-sm text-gray-700`}
+                              // TODO: Replace with your profile navigation logic
+                              onClick={() => window.location.href = '/profile'}
+                            >
+                              Go to Profile
+                            </button>
+                          )}
+                        </Menu.Item>
+                      <div className="py-1">
+                        <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              className={`${
+                                active ? 'bg-gray-100' : ''
+                              } w-full text-left px-4 py-2 text-sm text-gray-700`}
+                              onClick={logout}
+                            >
+                              Log Out
+                            </button>
+                          )}
+                        </Menu.Item>
+                      </div>
+                    </Menu.Items>
+                  </Menu>
+                ) : (
+                  <Button onClick={login}
+                    variant="ghost" 
+                    className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+                  >
+                    <img 
+                      src="/assets/account.png"
+                      alt="Login icon"
+                      className="w-4 h-4 mr-1"
+                    />
+                    Connect Wallet
+                  </Button> 
+                )}
+              </nav>
       </div>
     </header>
   );
