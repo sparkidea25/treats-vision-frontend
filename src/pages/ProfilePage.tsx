@@ -3,9 +3,10 @@ import { Camera } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { usePrivy } from "@privy-io/react-auth";
 import { Footer } from '@/components/Footer';
+import { ApiStrings } from '@/lib/apiStrings';
 
 export default function ProfilePage() {
-  const { authenticated, user } = usePrivy();
+  const {  user } = usePrivy();
   const [displayName, setDisplayName] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [treetsBalance, setTreetsBalance] = useState(50);
@@ -15,19 +16,12 @@ export default function ProfilePage() {
     fetchUserName();
   }, [user]);
 
-  //    useEffect(() => {
-  //      if (authenticated && user) {
-  //   updateUserName(user.id);
-  // }
-  //   // updateUserName(user.id);
-  // }, [authenticated, user]);
-
 
   // fetch user name from /auth/:privyId passing privyId from user object
   const fetchUserName = async () => {
     if (!user) return;
     try {
-      const response = await fetch(`/auth/${user.id}`);
+      const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/${user.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch user name');
       }
@@ -42,7 +36,7 @@ export default function ProfilePage() {
   const updateUserName = async (newName: string) => {
     if (!user) return;
     try {
-      const response = await fetch(`/auth/update-name/${user.id}`, {
+      const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/update-name/${user.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,6 +53,20 @@ export default function ProfilePage() {
       console.error('Error updating user name:', error);
     }
   };
+
+  const users = [
+  { name: "Ernest", status: "banned" },
+  { name: "User1", status: "active" },
+  { name: "User 2", status: "access requested" },
+  { name: "User 3", status: "active" },
+  { name: "User 4", status: "banned" },
+];
+
+const statusColors = {
+  banned: "bg-red-400 text-white",
+  active: "bg-lime-200 text-black",
+  "access requested": "bg-yellow-100 text-black",
+};
 
 
 
@@ -104,36 +112,38 @@ export default function ProfilePage() {
               <div className="flex flex-col flex-1">
                 <label className="block text-sm text-gray-600 mb-2">display name</label>
                 {isEditing ? (
-                  <div className="flex space-x-2 w-full">
-                    <input
-                      type="text"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      onClick={() => setIsEditing(false)}
-                      className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
-                    >
-                      Save
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg font-medium text-gray-900">{displayName}</span>
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="text-xs text-blue-600 hover:text-blue-800 underline"
-                    >
-                      EDIT DISPLAY NAME
-                    </button>
-                  </div>
-                )}
+                    <div className="flex space-x-2 w-full">
+                      <input
+                        type="text"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <button
+                        onClick={async () => {
+                          await updateUserName(displayName);
+                          setIsEditing(false);
+                        }}
+                        className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg font-medium text-gray-900">{displayName}</span>
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="text-xs text-blue-600 hover:text-blue-800 underline"
+                      >
+                        EDIT DISPLAY NAME
+                      </button>
+                    </div>
+                  )}
               </div>
             </div>
           </div>
           {/* </div> */}
-
           {/* Right Column - TV Rewards */}
           <div className="lg:col-span-2">
             <h2 className="text-4xl font-bold text-gray-900 mb-8">tv rewards</h2>
@@ -175,7 +185,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Current Balance */}
-              <div className="bg-gray-900 text-white rounded-lg p-6 relative">
+              <div className="bg-gray-900 text-white rounded-lg p-6 relative custom-shadow">
                 <div className="space-y-4">
                   <div className="flex justify-between">
                     <span>TREETS price:</span>
@@ -249,8 +259,60 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-          <Footer />
+
+          <div>
+          <h2 className="text-4xl font-bold text-gray-900 mb-8">Admin</h2>
+                    <div className="absolute top-12 left-10">
+        {/* <span className="text-[72px] font-serif font-normal text-black leading-none">admin</span> */}
+      </div>
+
+      {/* Table and Note */}
+      <div className="flex flex-col items-center justify-center flex-1">
+        {/* Table */}
+        <table className="mb-16 border border-gray-400">
+          <thead>
+            <tr>
+              <th className="px-6 py-2 border-b border-gray-400 bg-white font-normal">streamer</th>
+              <th className="px-6 py-2 border-b border-gray-400 bg-white font-normal">status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u, i) => (
+              <tr key={u.name}>
+                <td className="px-6 py-2 border-b border-gray-300 bg-white">{u.name}</td>
+                <td className={`px-6 py-2 border-b border-gray-300 ${statusColors[u.status] || ""}`}>
+                  {u.status}
+                </td>
+              </tr>
+            ))}
+            </tbody>
+        </table>
+
+        {/* Note Bar */}
+        <div className="relative w-[480px]">
+          <div className="absolute left-2 top-2 w-full h-full bg-black opacity-80 rounded shadow-lg z-0"></div>
+          <div className="relative bg-yellow-200 rounded shadow-lg p-6 z-10 border-2 border-black">
+            <div className="flex items-center mb-2">
+              <span className="font-bold text-black mr-2">Note</span>
+              <span className="ml-auto bg-yellow-300 rounded-full p-2 border border-yellow-400">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                  <rect width="14" height="18" x="5" y="3" fill="#fff8c7" stroke="#eab308" strokeWidth="2" rx="2"/>
+                  <rect width="10" height="2" x="7" y="7" fill="#eab308" rx="1"/>
+                  <rect width="10" height="2" x="7" y="11" fill="#eab308" rx="1"/>
+                  <rect width="6" height="2" x="7" y="15" fill="#eab308" rx="1"/>
+                </svg>
+              </span>
+            </div>
+            <div className="font-bold text-xl text-black leading-tight">
+              users without streaming access don’t need to show up here (users banned for shitty comments)
+            </div>
           </div>
+        </div>
+      </div>
+          </div>
+
+          </div>
+                    <Footer />
         </div>
       </div>
     </div>
