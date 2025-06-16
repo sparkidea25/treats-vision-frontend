@@ -11,9 +11,15 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [treetsBalance, setTreetsBalance] = useState(50);
   const [nibsBalance, setNibsBalance] = useState(50);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+  //   useEffect(() => {
+  //   fetchUserName();
+  // }, [user]);
 
     useEffect(() => {
     fetchUserName();
+    checkUserRole().then(setIsAdmin); // 2. Check admin status on user change
   }, [user]);
 
 
@@ -31,6 +37,31 @@ export default function ProfilePage() {
       console.error('Error fetching user name:', error);
     }
   };
+
+  // add function to check userrole to display admin section in ui
+// ...existing code...
+const checkUserRole = async (role = "admin") => {
+  if (!user) return false;
+  try {
+    const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/check-role/${user.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ role }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to check user role');
+    }
+    const data = await response.json();
+    console.log(data, 'user role data');
+    return data.hasRole === true;
+  } catch (error) {
+    console.error('Error checking user role:', error);
+    return false;
+  }
+};
+// ...existing code...
 
   // add function to update username by privyId
   const updateUserName = async (newName: string) => {
@@ -260,14 +291,15 @@ const statusColors = {
             </div>
           </div>
 
-          <div>
+  {isAdmin && (
+      <div>
           <h2 className="text-4xl font-bold text-gray-900 mb-8">Admin</h2>
                     <div className="absolute top-12 left-10">
         {/* <span className="text-[72px] font-serif font-normal text-black leading-none">admin</span> */}
-      </div>
+          </div>
 
-      {/* Table and Note */}
-      <div className="flex flex-col items-center justify-center flex-1">
+        {/* Table and Note */}
+          <div className="flex flex-col items-center justify-center flex-1">
         {/* Table */}
         <table className="mb-16 border border-gray-400">
           <thead>
@@ -289,7 +321,7 @@ const statusColors = {
         </table>
 
         {/* Note Bar */}
-        <div className="relative w-[480px]">
+          <div className="relative w-[480px]">
           <div className="absolute left-2 top-2 w-full h-full bg-black opacity-80 rounded shadow-lg z-0"></div>
           <div className="relative bg-yellow-200 rounded shadow-lg p-6 z-10 border-2 border-black">
             <div className="flex items-center mb-2">
@@ -302,16 +334,16 @@ const statusColors = {
                   <rect width="6" height="2" x="7" y="15" fill="#eab308" rx="1"/>
                 </svg>
               </span>
-            </div>
-            <div className="font-bold text-xl text-black leading-tight">
+                </div>
+                <div className="font-bold text-xl text-black leading-tight">
               users without streaming access don’t need to show up here (users banned for shitty comments)
-            </div>
-          </div>
+                </div>
+                </div>
+              </div>
+                </div>
+                </div>
+                )}
         </div>
-      </div>
-          </div>
-
-          </div>
                     <Footer />
         </div>
       </div>
