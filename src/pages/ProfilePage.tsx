@@ -1,15 +1,66 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Camera } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { usePrivy } from "@privy-io/react-auth";
 import { Footer } from '@/components/Footer';
 
 export default function ProfilePage() {
-  const { user } = usePrivy();
-  const [displayName, setDisplayName] = useState('Ernest');
+  const { authenticated, user } = usePrivy();
+  const [displayName, setDisplayName] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [treetsBalance, setTreetsBalance] = useState(50);
   const [nibsBalance, setNibsBalance] = useState(50);
+
+    useEffect(() => {
+    fetchUserName();
+  }, [user]);
+
+  //    useEffect(() => {
+  //      if (authenticated && user) {
+  //   updateUserName(user.id);
+  // }
+  //   // updateUserName(user.id);
+  // }, [authenticated, user]);
+
+
+  // fetch user name from /auth/:privyId passing privyId from user object
+  const fetchUserName = async () => {
+    if (!user) return;
+    try {
+      const response = await fetch(`/auth/${user.id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch user name');
+      }
+      const data = await response.json();
+      setDisplayName(data.name);
+    } catch (error) {
+      console.error('Error fetching user name:', error);
+    }
+  };
+
+  // add function to update username by privyId
+  const updateUserName = async (newName: string) => {
+    if (!user) return;
+    try {
+      const response = await fetch(`/auth/update-name/${user.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newName }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update user name');
+      }
+      const data = await response.json();
+      console.log('User name updated:', data);  
+      setDisplayName(newName);
+    } catch (error) {
+      console.error('Error updating user name:', error);
+    }
+  };
+
+
 
   const handleClaimRewards = () => {
     // Simulate claiming rewards
@@ -25,8 +76,10 @@ export default function ProfilePage() {
   console.log(user, 'user details');
 
   return (
-    <div className="min-h-screen bg-green-50">
-
+    <div className="min-h-screen bg-green-50 overflow-hidden border-l border-r border-black relative z-20">
+      <div className="relative z-20 min-h-screen bg-green-50 overflow-hidden border-l border-r border-black">
+         <div className="absolute inset-y-0 left-6 w-px bg-black z-10"></div>
+        <div className="absolute inset-y-0 right-6 w-px bg-black z-10"></div>
       <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-row-1 lg:grid-row-3 gap-8">
@@ -111,12 +164,12 @@ export default function ProfilePage() {
                 
                 <button
                   onClick={handleClaimRewards}
-                  className="mt-6 bg-white text-gray-900 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
+                  className="mt-6 bg-green-50 text-gray-900 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
                 >
                   claim rewards
                 </button>
                 
-                <div className="absolute -bottom-2 -left-2 bg-blue-200 text-blue-800 p-3 rounded text-xs max-w-xs">
+                <div className="absolute -bottom-2 -left-2 bg-cyan-50 text-black p-3 rounded text-xs max-w-xs">
                   NIBS will be transferred to the rewards factory. TREETS and POL will be transferred to your wallet
                 </div>
               </div>
@@ -151,26 +204,29 @@ export default function ProfilePage() {
                 
                 <button
                   onClick={handleGetTreetsTokens}
-                  className="mt-6 bg-white text-gray-900 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
+                  className="mt-6 bg-green-50 text-gray-900 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
                 >
                   get treets tokens
                 </button>
                 
-                <div className="absolute -bottom-2 -right-2 bg-yellow-200 text-yellow-800 p-3 rounded text-xs max-w-xs">
+                <div className="absolute -bottom-2 -right-2 bg-cyan-50 text-black p-3 rounded text-xs max-w-xs">
                   Buy TREETS tokens on uniswap: contract address: 0xjDcn4GHD3ZJDCjsr8
                 </div>
               </div>
             </div>
 
             {/* Rewards Factory */}
-            <div className="mt-8 bg-gradient-to-r from-green-200 to-pink-200 rounded-lg p-6">
+            <div className="mt-8 bg-gradient-to-r from-green-400 to-pink-200 rounded-lg p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="w-20 h-16 bg-gradient-to-b from-pink-300 to-green-300 rounded-lg flex items-center justify-center relative">
-                    <div className="w-12 h-12 bg-pink-400 rounded border-4 border-white flex items-center justify-center">
-                      <div className="w-6 h-6 bg-black rounded-sm"></div>
-                    </div>
-                  </div>
+                   <a href="/">
+              <img
+                src="/assets/par.png"
+                alt="Livestream Logo"
+                className="h-16 w-20"
+                style={{ cursor: 'pointer' }}
+              />
+            </a>
                   <div>
                     <h3 className="text-lg font-bold text-gray-900">Your rewards factory</h3>
                     <p className="text-sm text-gray-700">50TREETS / 10NIBS IN FACTORY</p>
@@ -194,6 +250,7 @@ export default function ProfilePage() {
             </div>
           </div>
           <Footer />
+          </div>
         </div>
       </div>
     </div>
