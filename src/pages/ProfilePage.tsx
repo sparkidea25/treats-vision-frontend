@@ -1,15 +1,74 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Camera } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { usePrivy } from "@privy-io/react-auth";
 import { Footer } from '@/components/Footer';
+import { ApiStrings } from '@/lib/apiStrings';
 
 export default function ProfilePage() {
-  const { user } = usePrivy();
-  const [displayName, setDisplayName] = useState('Ernest');
+  const {  user } = usePrivy();
+  const [displayName, setDisplayName] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [treetsBalance, setTreetsBalance] = useState(50);
   const [nibsBalance, setNibsBalance] = useState(50);
+
+    useEffect(() => {
+    fetchUserName();
+  }, [user]);
+
+
+  // fetch user name from /auth/:privyId passing privyId from user object
+  const fetchUserName = async () => {
+    if (!user) return;
+    try {
+      const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/${user.id}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch user name');
+      }
+      const data = await response.json();
+      setDisplayName(data.name);
+    } catch (error) {
+      console.error('Error fetching user name:', error);
+    }
+  };
+
+  // add function to update username by privyId
+  const updateUserName = async (newName: string) => {
+    if (!user) return;
+    try {
+      const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/update-name/${user.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newName }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update user name');
+      }
+      const data = await response.json();
+      console.log('User name updated:', data);  
+      setDisplayName(newName);
+    } catch (error) {
+      console.error('Error updating user name:', error);
+    }
+  };
+
+  const users = [
+  { name: "Ernest", status: "banned" },
+  { name: "User1", status: "active" },
+  { name: "User 2", status: "access requested" },
+  { name: "User 3", status: "active" },
+  { name: "User 4", status: "banned" },
+];
+
+const statusColors = {
+  banned: "bg-red-400 text-white",
+  active: "bg-lime-200 text-black",
+  "access requested": "bg-yellow-100 text-black",
+};
+
+
 
   const handleClaimRewards = () => {
     // Simulate claiming rewards
@@ -25,8 +84,10 @@ export default function ProfilePage() {
   console.log(user, 'user details');
 
   return (
-    <div className="min-h-screen bg-green-50">
-
+    <div className="min-h-screen bg-green-50 overflow-hidden border-l border-r border-black relative z-20">
+      <div className="relative z-20 min-h-screen bg-green-50 overflow-hidden border-l border-r border-black">
+         <div className="absolute inset-y-0 left-6 w-px bg-black z-10"></div>
+        <div className="absolute inset-y-0 right-6 w-px bg-black z-10"></div>
       <Header />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-row-1 lg:grid-row-3 gap-8">
@@ -51,36 +112,38 @@ export default function ProfilePage() {
               <div className="flex flex-col flex-1">
                 <label className="block text-sm text-gray-600 mb-2">display name</label>
                 {isEditing ? (
-                  <div className="flex space-x-2 w-full">
-                    <input
-                      type="text"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      onClick={() => setIsEditing(false)}
-                      className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
-                    >
-                      Save
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <span className="text-lg font-medium text-gray-900">{displayName}</span>
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="text-xs text-blue-600 hover:text-blue-800 underline"
-                    >
-                      EDIT DISPLAY NAME
-                    </button>
-                  </div>
-                )}
+                    <div className="flex space-x-2 w-full">
+                      <input
+                        type="text"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <button
+                        onClick={async () => {
+                          await updateUserName(displayName);
+                          setIsEditing(false);
+                        }}
+                        className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg font-medium text-gray-900">{displayName}</span>
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="text-xs text-blue-600 hover:text-blue-800 underline"
+                      >
+                        EDIT DISPLAY NAME
+                      </button>
+                    </div>
+                  )}
               </div>
             </div>
           </div>
           {/* </div> */}
-
           {/* Right Column - TV Rewards */}
           <div className="lg:col-span-2">
             <h2 className="text-4xl font-bold text-gray-900 mb-8">tv rewards</h2>
@@ -111,18 +174,18 @@ export default function ProfilePage() {
                 
                 <button
                   onClick={handleClaimRewards}
-                  className="mt-6 bg-white text-gray-900 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
+                  className="mt-6 bg-green-50 text-gray-900 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
                 >
                   claim rewards
                 </button>
                 
-                <div className="absolute -bottom-2 -left-2 bg-blue-200 text-blue-800 p-3 rounded text-xs max-w-xs">
+                <div className="absolute -bottom-2 -left-2 bg-cyan-50 text-black p-3 rounded text-xs max-w-xs">
                   NIBS will be transferred to the rewards factory. TREETS and POL will be transferred to your wallet
                 </div>
               </div>
 
               {/* Current Balance */}
-              <div className="bg-gray-900 text-white rounded-lg p-6 relative">
+              <div className="bg-gray-900 text-white rounded-lg p-6 relative custom-shadow">
                 <div className="space-y-4">
                   <div className="flex justify-between">
                     <span>TREETS price:</span>
@@ -151,26 +214,29 @@ export default function ProfilePage() {
                 
                 <button
                   onClick={handleGetTreetsTokens}
-                  className="mt-6 bg-white text-gray-900 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
+                  className="mt-6 bg-green-50 text-gray-900 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
                 >
                   get treets tokens
                 </button>
                 
-                <div className="absolute -bottom-2 -right-2 bg-yellow-200 text-yellow-800 p-3 rounded text-xs max-w-xs">
+                <div className="absolute -bottom-2 -right-2 bg-cyan-50 text-black p-3 rounded text-xs max-w-xs">
                   Buy TREETS tokens on uniswap: contract address: 0xjDcn4GHD3ZJDCjsr8
                 </div>
               </div>
             </div>
 
             {/* Rewards Factory */}
-            <div className="mt-8 bg-gradient-to-r from-green-200 to-pink-200 rounded-lg p-6">
+            <div className="mt-8 bg-gradient-to-r from-green-400 to-pink-200 rounded-lg p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="w-20 h-16 bg-gradient-to-b from-pink-300 to-green-300 rounded-lg flex items-center justify-center relative">
-                    <div className="w-12 h-12 bg-pink-400 rounded border-4 border-white flex items-center justify-center">
-                      <div className="w-6 h-6 bg-black rounded-sm"></div>
-                    </div>
-                  </div>
+                   <a href="/">
+              <img
+                src="/assets/par.png"
+                alt="Livestream Logo"
+                className="h-16 w-20"
+                style={{ cursor: 'pointer' }}
+              />
+            </a>
                   <div>
                     <h3 className="text-lg font-bold text-gray-900">Your rewards factory</h3>
                     <p className="text-sm text-gray-700">50TREETS / 10NIBS IN FACTORY</p>
@@ -193,7 +259,60 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-          <Footer />
+
+          <div>
+          <h2 className="text-4xl font-bold text-gray-900 mb-8">Admin</h2>
+                    <div className="absolute top-12 left-10">
+        {/* <span className="text-[72px] font-serif font-normal text-black leading-none">admin</span> */}
+      </div>
+
+      {/* Table and Note */}
+      <div className="flex flex-col items-center justify-center flex-1">
+        {/* Table */}
+        <table className="mb-16 border border-gray-400">
+          <thead>
+            <tr>
+              <th className="px-6 py-2 border-b border-gray-400 bg-white font-normal">streamer</th>
+              <th className="px-6 py-2 border-b border-gray-400 bg-white font-normal">status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u, i) => (
+              <tr key={u.name}>
+                <td className="px-6 py-2 border-b border-gray-300 bg-white">{u.name}</td>
+                <td className={`px-6 py-2 border-b border-gray-300 ${statusColors[u.status] || ""}`}>
+                  {u.status}
+                </td>
+              </tr>
+            ))}
+            </tbody>
+        </table>
+
+        {/* Note Bar */}
+        <div className="relative w-[480px]">
+          <div className="absolute left-2 top-2 w-full h-full bg-black opacity-80 rounded shadow-lg z-0"></div>
+          <div className="relative bg-yellow-200 rounded shadow-lg p-6 z-10 border-2 border-black">
+            <div className="flex items-center mb-2">
+              <span className="font-bold text-black mr-2">Note</span>
+              <span className="ml-auto bg-yellow-300 rounded-full p-2 border border-yellow-400">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                  <rect width="14" height="18" x="5" y="3" fill="#fff8c7" stroke="#eab308" strokeWidth="2" rx="2"/>
+                  <rect width="10" height="2" x="7" y="7" fill="#eab308" rx="1"/>
+                  <rect width="10" height="2" x="7" y="11" fill="#eab308" rx="1"/>
+                  <rect width="6" height="2" x="7" y="15" fill="#eab308" rx="1"/>
+                </svg>
+              </span>
+            </div>
+            <div className="font-bold text-xl text-black leading-tight">
+              users without streaming access don’t need to show up here (users banned for shitty comments)
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+
+          </div>
+                    <Footer />
         </div>
       </div>
     </div>

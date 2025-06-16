@@ -14,10 +14,10 @@ function Home() {
         <div className="absolute inset-y-0 left-6 w-px bg-black z-10"></div>
         <div className="absolute inset-y-0 right-6 w-px bg-black z-10"></div>
 
-       {/* <div className=""> */}
-  {/* <header className="sticky top-0 z-50 bg-green-50 px-6 py-3 border-b border-black"> */}
-    <Header />
-  {/* </header> */}
+                {/* <div className=""> */}
+            {/* <header className="sticky top-0 z-50 bg-green-50 px-6 py-3 border-b border-black"> */}
+              <Header />
+            {/* </header> */}
 
 
         {/* Hero section with border */}

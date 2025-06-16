@@ -85,7 +85,5 @@
 }
 
 .custom-shadow {
-  box-shadow: 16px 16px 32px 0px #FF96FF80;
-  /* 16px right, 16px down, 32px blur, 0px spread, #FF96FF with 50% opacity */
-  backdrop-filter: blur(6px);
+  box-shadow: 8px 8px 0 0 #FF96FF;
 }
