@@ -64,11 +64,14 @@ function shortenAddress(address?: string) {
         <div className="flex items-center space-x-8">
           <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-2">
-            <img
-              src="/assets/logo.png"
-              alt="Livestream Logo"
-              className="h-6 w-auto"
-            />
+            <a href="/">
+              <img
+                src="/assets/logo.png"
+                alt="Livestream Logo"
+                className="h-6 w-auto"
+                style={{ cursor: 'pointer' }}
+              />
+            </a>
           </div>
           </div>
         </div>
