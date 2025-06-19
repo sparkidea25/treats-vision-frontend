@@ -11,7 +11,7 @@ const StreamingPage = () => {
   // const [ready, setReady] = useState(true);
   // const [authenticated, setAuthenticated] = useState(true);
   // const [user, setUser] = useState({ wallet: { address: '0x1234567890abcdef' } });
-  const [chatMessages, setChatMessages] = useState([
+  const [chatMessages] = useState([
     { id: 1, user: 'adriana clouart', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
     { id: 2, user: 'steph pine', message: 'A bunch of words bla filling the chat here with soe wordsthe chat here with soe wordsthe chat here with soe wordsthe chat here with soe words', avatar: '👤' },
     { id: 3, user: 'claus gusman', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
@@ -66,7 +66,7 @@ const StreamingPage = () => {
         {/* Video Stream Area */}
         <div className="flex-1 bg-black relative">
           {/* Video placeholder with futuristic overlay https://gist.github.com/sparkidea25/03209b2d179be4886737d79f45029a58 */}
-          <Player.Root src={getSrc(vodSource)}>
+          <Player.Root src={getSrc("ipfs://" + 3)}>
       <Player.Container className="h-full w-full overflow-hidden bg-gray-950">
         <Player.Video title="Live stream" className="h-full w-full" />
 
