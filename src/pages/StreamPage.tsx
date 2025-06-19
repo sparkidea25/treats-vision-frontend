@@ -66,7 +66,7 @@ const StreamingPage = () => {
         {/* Video Stream Area */}
         <div className="flex-1 bg-black relative">
           {/* Video placeholder with futuristic overlay https://gist.github.com/sparkidea25/03209b2d179be4886737d79f45029a58 */}
-          <Player.Root src={getSrc("ipfs://" + 3)}>
+          <Player.Root src={getSrc("https://gateway.lighthouse.storage/ipfs/bafybeiep4gfmm2xhp5msy4wroy62bodbb3qmjhd3agj4f77id2wd3fmb3a")}>
       <Player.Container className="h-full w-full overflow-hidden bg-gray-950">
         <Player.Video title="Live stream" className="h-full w-full" />
 
