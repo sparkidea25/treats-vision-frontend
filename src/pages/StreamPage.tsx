@@ -8,9 +8,9 @@ import * as Player from "@livepeer/react/player";
 
 
 const StreamingPage = () => {
-  const [ready, setReady] = useState(true);
-  const [authenticated, setAuthenticated] = useState(true);
-  const [user, setUser] = useState({ wallet: { address: '0x1234567890abcdef' } });
+  // const [ready, setReady] = useState(true);
+  // const [authenticated, setAuthenticated] = useState(true);
+  // const [user, setUser] = useState({ wallet: { address: '0x1234567890abcdef' } });
   const [chatMessages, setChatMessages] = useState([
     { id: 1, user: 'adriana clouart', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
     { id: 2, user: 'steph pine', message: 'A bunch of words bla filling the chat here with soe wordsthe chat here with soe wordsthe chat here with soe wordsthe chat here with soe words', avatar: '👤' },
@@ -25,36 +25,36 @@ const StreamingPage = () => {
 
 
 
-  const sendMessage = () => {
-    if (newMessage.trim()) {
-      setChatMessages([...chatMessages, {
-        id: chatMessages.length + 1,
-        user: 'You',
-        message: newMessage,
-        avatar: '👤'
-      }]);
-      setNewMessage('');
-    }
-  };
+  // const sendMessage = () => {
+  //   if (newMessage.trim()) {
+  //     setChatMessages([...chatMessages, {
+  //       id: chatMessages.length + 1,
+  //       user: 'You',
+  //       message: newMessage,
+  //       avatar: '👤'
+  //     }]);
+  //     setNewMessage('');
+  //   }
+  // };
 
-  const Button = ({ children, variant = 'default', className = '', onClick, ...props }) => {
-    const baseClasses = 'px-4 py-2 rounded-md font-medium transition-colors';
-    const variantClasses = {
-      default: 'bg-blue-600 text-white hover:bg-blue-700',
-      ghost: 'bg-transparent hover:bg-gray-100',
-      outline: 'border border-gray-300 bg-white hover:bg-gray-50'
-    };
+  // const Button = ({ children, variant = 'default', className = '', onClick, ...props }) => {
+  //   const baseClasses = 'px-4 py-2 rounded-md font-medium transition-colors';
+  //   const variantClasses = {
+  //     default: 'bg-blue-600 text-white hover:bg-blue-700',
+  //     ghost: 'bg-transparent hover:bg-gray-100',
+  //     outline: 'border border-gray-300 bg-white hover:bg-gray-50'
+  //   };
     
-    return (
-      <button
-        className={`${baseClasses} ${variantClasses[variant]} ${className}`}
-        onClick={onClick}
-        {...props}
-      >
-        {children}
-      </button>
-    );
-  };
+  //   return (
+  //     <button
+  //       className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+  //       onClick={onClick}
+  //       {...props}
+  //     >
+  //       {children}
+  //     </button>
+  //   );
+  // };
 
   return (
     <div className="min-h-screen bg-gray-100">

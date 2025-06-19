@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Camera } from 'lucide-react';
+// import { Camera } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { usePrivy } from "@privy-io/react-auth";
 import { Footer } from '@/components/Footer';
@@ -85,7 +85,9 @@ const checkUserRole = async (role = "admin") => {
     }
   };
 
-  const users = [
+type UserStatus = "banned" | "active" | "access requested";
+
+const users: { name: string; status: UserStatus }[] = [
   { name: "Ernest", status: "banned" },
   { name: "User1", status: "active" },
   { name: "User 2", status: "access requested" },
@@ -93,7 +95,7 @@ const checkUserRole = async (role = "admin") => {
   { name: "User 4", status: "banned" },
 ];
 
-const statusColors = {
+const statusColors: Record<UserStatus, string> = {
   banned: "bg-red-400 text-white",
   active: "bg-lime-200 text-black",
   "access requested": "bg-yellow-100 text-black",
@@ -311,7 +313,7 @@ const statusColors = {
             </tr>
           </thead>
           <tbody>
-            {users.map((u, i) => (
+            {users.map((u) => (
               <tr key={u.name}>
                 <td className="px-6 py-2 border-b border-gray-300 bg-white">{u.name}</td>
                 <td className={`px-6 py-2 border-b border-gray-300 ${statusColors[u.status] || ""}`}>
