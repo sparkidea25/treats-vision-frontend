@@ -10,6 +10,7 @@ export default defineConfig({
   define: {
     "process.env.VITE_PRIVY_APP_ID": JSON.stringify(process.env.VITE_PRIVY_APP_ID),
     "process.env.VITE_PRIVY_APP_SECRET": JSON.stringify(process.env.VITE_PRIVY_APP_SECRET),
+    "process.env.VITE_API_LINK": JSON.stringify(process.env.VITE_API_LINK),
   },
   resolve: {
     alias: {

@@ -129,50 +129,52 @@ const statusColors = {
   >
     account
   </h1>
-  <div className="flex-1 flex flex-row items-center space-x-8">
-      <div className="relative">
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">E</span>
-                  </div>
+<div className="flex flex-row">
+              {/* Profile Photo Section */}
+              <div className="flex flex-col items-center mb-8">
+                {/* Profile Image */}
+                <img
+                  src='/assets/Icons.png'
+                  alt="Profile"
+                  className="w-100 h-100 rounded-full object-cover mb-4 border-4 border-black"
+                />
+                <span className="text-center text-xs tracking-widest mt-2">
+                  CLICK IMAGE TO UPDATE PROFILE PHOTO
+                </span>
+              </div>
+
+              {/* Display Name Section */}
+              <div className="flex flex-col items-center w-full max-w-xl">
+              <label className="text-1xl font-mono tracking-wide mb-2 block">display name</label>
+              {isEditing ? (
+                <div className="flex w-full">
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    className="flex-1 px-6 py-6 border border-black text-2xl font-mono rounded-none bg-transparent"
+                  />
+                  <button
+                    onClick={async () => {
+                      await updateUserName(displayName);
+                      setIsEditing(false);
+                    }}
+                    className="ml-2 px-4 py-2 bg-black text-white rounded-none text-lg"
+                  >
+                    Save
+                  </button>
                 </div>
-                <button className="absolute bottom-1 right-1 w-6 h-6 bg-white rounded-full border-2 border-gray-200 flex items-center justify-center hover:bg-gray-50">
-                  <Camera className="w-3 h-3 text-gray-600" />
-                </button>
+              ) : (
+                <div
+                  className="w-full px-6 py-6 border border-black text-2xl font-mono rounded-none bg-transparent cursor-pointer"
+                  onClick={() => setIsEditing(true)}
+                >
+                  {displayName}
+                </div>
+              )}
               </div>
-              <div className="flex flex-col flex-1">
-                <label className="block text-sm text-gray-600 mb-2">display name</label>
-                {isEditing ? (
-                    <div className="flex space-x-2 w-full">
-                      <input
-                        type="text"
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <button
-                        onClick={async () => {
-                          await updateUserName(displayName);
-                          setIsEditing(false);
-                        }}
-                        className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg font-medium text-gray-900">{displayName}</span>
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className="text-xs text-blue-600 hover:text-blue-800 underline"
-                      >
-                        EDIT DISPLAY NAME
-                      </button>
-                    </div>
-                  )}
               </div>
-            </div>
+
           </div>
           {/* </div> */}
           {/* Right Column - TV Rewards */}
@@ -344,9 +346,21 @@ const statusColors = {
                 </div>
                 )}
         </div>
-                    <Footer />
+        <br />
+        <div className="relative">
+
+     
+ <div className="w-screen border-t border-gray-800"></div>
+<div className="container mx-auto">
+  {/* Admin content */}
+  <Footer />
+</div>
+   </div>
+        {/* <div className="custom-footer-border"></div> */}
+        {/* <Footer /> */}
+                   
         </div>
       </div>
-    </div>
+     </div>
   )
 }

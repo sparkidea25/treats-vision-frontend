@@ -87,3 +87,7 @@
 .custom-shadow {
   box-shadow: 8px 8px 0 0 #FF96FF;
 }
+
+.custom-footer-border {
+  border-top: 1px solid #1f2937 !important; /* Tailwind's gray-800 */
+}
