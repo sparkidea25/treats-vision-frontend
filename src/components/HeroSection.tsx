@@ -6,7 +6,7 @@ export function HeroSection() {
   return (
     <section className="bg-green-50 p-6">
       <div className="max-w-7xl mx-auto">
-        <Link to="/stream" className="block group" tabIndex={-1}>
+        {/* <Link to="/stream" className="block group" tabIndex={-1}> */}
           <div className="relative rounded-lg overflow-hidden bg-black aspect-video border border-gray-800 cursor-pointer transition ring-rose-400/40 group-hover:ring-4">
             <img 
               src="/assets/herovideo.png"
@@ -29,7 +29,7 @@ export function HeroSection() {
               </div>
             </div>
           </div>
-        </Link>
+        {/* </Link> */}
         
         {/* Bottom border for hero content */}
         <div className="border-t border-gray-800 mt-6 pt-4 text-center">

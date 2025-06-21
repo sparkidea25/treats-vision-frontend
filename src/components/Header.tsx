@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { usePrivy } from "@privy-io/react-auth";
 import { Menu } from '@headlessui/react';
 import { ApiStrings } from '@/lib/apiStrings';
+import { Link } from 'react-router-dom';
 
 export function Header() {
   const { ready, authenticated, user, login, logout } = usePrivy();
@@ -72,17 +73,19 @@ export function Header() {
           </div>
         </div>
         <nav className="flex items-center space-x-6">
-          <Button 
-            variant="ghost" 
-            className="text-gray-700 hover:bg-gray-100 text-sm font-normal"
-          >
-            <img 
-              src="/assets/live.png"
-              alt="Featured livestream"
-              className="w-full h-full"
-            />
-            go live
-          </Button>
+        <Link to="/stream">
+  <Button 
+    variant="ghost" 
+    className="text-gray-700 hover:bg-gray-100 text-sm font-normal"
+  >
+    <img 
+      src="/assets/live.png"
+      alt="Featured livestream"
+      className="w-full h-full"
+    />
+    go live
+  </Button>
+</Link>
           {ready && authenticated && (
             <Button 
               variant="ghost" 

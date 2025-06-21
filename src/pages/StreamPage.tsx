@@ -49,7 +49,7 @@ const LiveStream = async () => {
         'Content-Type': 'application/json',
       },
       // Add body if required by your API, e.g.:
-      body: JSON.stringify({ name: "My Stream" }),
+      body: JSON.stringify({ name: "stream - treatsvision ama" }),
     });
 
     if (!response.ok) {

@@ -71,7 +71,7 @@ export function BroadcastWithControls({
             </div>
           </Broadcast.ErrorIndicator>
 
-          <Broadcast.Controls className="bg-gradient-to-b gap-1 px-3 md:px-3 py-1.5 flex-col-reverse flex from-black/20 via-80% via-black/30 duration-1000 to-black/60 data-[visible=true]:animate-in data-[visible=false]:animate-out data-[visible=false]:fade-out-0 data-[visible=true]:fade-in-0">
+          <Broadcast.Controls className="bg-gradient-to-b gap-1 px-3 md:px-3 py-1.5 flex-col-reverse flex from-white/20 via-80% via-white/30 duration-1000 to-white/60 data-[visible=true]:animate-in data-[visible=false]:animate-out data-[visible=false]:fade-out-0 data-[visible=true]:fade-in-0">
             <div className="flex justify-between gap-4">
               <div className="flex flex-1 items-center gap-3">
                 <Broadcast.VideoEnabledTrigger className="w-6 h-6 hover:scale-110 transition flex-shrink-0">
@@ -125,7 +125,7 @@ export function BroadcastWithControls({
               matcher={false}
               className="flex flex-1 items-center justify-center"
             >
-              <Broadcast.EnabledTrigger className="rounded-md px-4 py-2 bg-black/60 hover:bg-black/70 gap-1 flex items-center justify-center">
+              <Broadcast.EnabledTrigger className="rounded-md px-4 py-2 bg-white/60 hover:bg-white/70 gap-1 flex items-center justify-center">
                 <EnableVideoIcon className="w-7 h-7" />
                 <span className="text-sm">Start broadcast</span>
               </Broadcast.EnabledTrigger>
@@ -133,13 +133,13 @@ export function BroadcastWithControls({
             <Broadcast.EnabledIndicator asChild>
               <Broadcast.EnabledTrigger className="top-1 right-2 absolute flex items-center justify-center gap-1 rounded-md px-4 py-2 bg-white/5 hover:bg-white/10">
                 <StopIcon className="w-7 h-7" />
-                <span className="text-sm">Stop broadcast</span>
+                <span className="text-sm text-white">Stop broadcast</span>
               </Broadcast.EnabledTrigger>
             </Broadcast.EnabledIndicator>
           </Broadcast.Controls>
 
           <Broadcast.LoadingIndicator asChild matcher={false}>
-            <div className="absolute overflow-hidden py-1 px-2 rounded-full top-1 left-1 bg-black/50 flex items-center backdrop-blur">
+            <div className="absolute overflow-hidden py-1 px-2 rounded-full top-1 left-1 bg-white/50 flex items-center backdrop-blur">
               <Broadcast.StatusIndicator
                 matcher="live"
                 className="flex gap-2 items-center"
@@ -222,7 +222,7 @@ export const Settings = React.forwardRef(
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content
-            className="w-60 rounded-md bg-black/50 border border-white/50 backdrop-blur-md p-3 shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
+            className="w-60 rounded-md bg-white/50 border border-white/50 backdrop-blur-md p-3 shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2"
             side="top"
             alignOffset={-70}
             align="end"
@@ -303,7 +303,7 @@ export const SourceSelectComposed = React.forwardRef(
               </Broadcast.SelectIcon>
             </Broadcast.SelectTrigger>
             <Broadcast.SelectPortal>
-              <Broadcast.SelectContent className="overflow-hidden bg-black rounded-sm">
+              <Broadcast.SelectContent className="overflow-hidden bg-white rounded-sm">
                 <Broadcast.SelectViewport className="p-1">
                   <Broadcast.SelectGroup>
                     {devices?.map((device) => (
