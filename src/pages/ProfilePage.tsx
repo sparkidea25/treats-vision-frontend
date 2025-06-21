@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 // import { Camera } from 'lucide-react';
-import { Header } from '@/components/Header';
+// import { Header } from '@/components/Header';
 import { usePrivy } from "@privy-io/react-auth";
-import { Footer } from '@/components/Footer';
+// import { Footer } from '@/components/Footer';
 import { ApiStrings } from '@/lib/apiStrings';
 
 export default function ProfilePage() {
   const {  user } = usePrivy();
   const [displayName, setDisplayName] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [treetsBalance, setTreetsBalance] = useState(50);
-  const [nibsBalance, setNibsBalance] = useState(50);
+  // const [isEditing, setIsEditing] = useState(false);
+  // const [treetsBalance, setTreetsBalance] = useState(50);
+  // const [nibsBalance, setNibsBalance] = useState(50);
     const [isAdmin, setIsAdmin] = useState(false);
 
   //   useEffect(() => {
@@ -103,16 +103,16 @@ const statusColors: Record<UserStatus, string> = {
 
 
 
-  const handleClaimRewards = () => {
-    // Simulate claiming rewards
-    setTreetsBalance(prev => prev + 50);
-    setNibsBalance(prev => prev + 10);
+  // const handleClaimRewards = () => {
+  //   // Simulate claiming rewards
+  //   setTreetsBalance(prev => prev + 50);
+  //   setNibsBalance(prev => prev + 10);
   };
 
-  const handleGetTreetsTokens = () => {
-    // Simulate purchasing tokens
-    setTreetsBalance(prev => prev + 100);
-  };
+  // const handleGetTreetsTokens = () => {
+  //   // Simulate purchasing tokens
+  //   setTreetsBalance(prev => prev + 100);
+  // };
 
   console.log(user, 'user details');
 
