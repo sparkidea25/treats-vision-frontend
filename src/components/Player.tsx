@@ -16,6 +16,7 @@ import {
 } from "@livepeer/react/assets";
 import * as Broadcast from "@livepeer/react/broadcast";
 import * as Popover from "@radix-ui/react-popover";
+import { getIngest } from "@livepeer/react/external";
 import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 import React from "react";
 

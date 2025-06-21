@@ -5,6 +5,7 @@ import { EnableVideoIcon, StopIcon } from "@livepeer/react/assets";
 import * as Broadcast from "@livepeer/react/broadcast";
 import { getIngest } from "@livepeer/react/external";
 import { ApiStrings } from '@/lib/apiStrings';
+import { BroadcastWithControls } from '@/components/Player';
 // import { streamKey } from "./stream-key";
 // import { vodSource } from "./source";
 
@@ -106,7 +107,8 @@ console.log(LiveStream, 'livestream app')
         {/* Video Stream Area */}
         <div className="flex-1 bg-green-50 relative">
           {/* Video placeholder with futuristic overlay https://gist.github.com/sparkidea25/03209b2d179be4886737d79f45029a58 */}
-     <Broadcast.Root ingestUrl={getIngest(streamId)}>
+          <BroadcastWithControls streamKey={streamId} />
+     {/* <Broadcast.Root ingestUrl={getIngest(streamId)}>
       <Broadcast.Container>
         <Broadcast.Video
           title="Livestream"
@@ -156,7 +158,7 @@ console.log(LiveStream, 'livestream app')
           </div>
         </Broadcast.LoadingIndicator>
       </Broadcast.Container>
-    </Broadcast.Root>
+    </Broadcast.Root> */}
 
               </div>
               <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
