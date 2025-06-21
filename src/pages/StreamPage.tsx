@@ -1,9 +1,11 @@
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
-import { useState } from 'react';
-import { PauseIcon, PlayIcon } from "@livepeer/react/assets";
-import { getSrc } from "@livepeer/react/external";
-import * as Player from "@livepeer/react/player";
+import { useEffect, useState } from 'react';
+import { EnableVideoIcon, StopIcon } from "@livepeer/react/assets";
+import * as Broadcast from "@livepeer/react/broadcast";
+import { getIngest } from "@livepeer/react/external";
+import { ApiStrings } from '@/lib/apiStrings';
+// import { streamKey } from "./stream-key";
 // import { vodSource } from "./source";
 
 
@@ -22,9 +24,47 @@ const StreamingPage = () => {
     { id: 8, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
   ]);
   const [newMessage, setNewMessage] = useState('');
+    const [streamId, setStreamId] = useState(null);
+
+  // https://treatsvision.onrender.com//livepeer/stream create function with link to return stream details
+
+  useEffect(() => {
+    const fetchStream = async () => {
+      const streamDetails = await LiveStream();
+      console.log(streamDetails, 'stream Details already')
+      if (streamDetails && streamDetails.data && streamDetails.data.id) {
+        setStreamId(streamDetails.data.id);
+      }
+    }
+     fetchStream();
+  }, []);
 
 
+const LiveStream = async () => {
+  try {
+    const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Add body if required by your API, e.g.:
+      body: JSON.stringify({ name: "My Stream" }),
+    });
 
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    // const streamDetails = await response.json();
+    // return response;
+    const streamDetails = await response.json();
+    return streamDetails;
+  } catch (error) {
+    console.error('Error creating stream:', error);
+    return null;
+  }
+};
+
+console.log(LiveStream, 'livestream app')
   // const sendMessage = () => {
   //   if (newMessage.trim()) {
   //     setChatMessages([...chatMessages, {
@@ -64,24 +104,59 @@ const StreamingPage = () => {
       {/* Main Content */}
       <div className="flex h-screen">
         {/* Video Stream Area */}
-        <div className="flex-1 bg-black relative">
+        <div className="flex-1 bg-green-50 relative">
           {/* Video placeholder with futuristic overlay https://gist.github.com/sparkidea25/03209b2d179be4886737d79f45029a58 */}
-          <Player.Root src={getSrc("https://gateway.lighthouse.storage/ipfs/bafybeiep4gfmm2xhp5msy4wroy62bodbb3qmjhd3agj4f77id2wd3fmb3a")}>
-      <Player.Container className="h-full w-full overflow-hidden bg-gray-950">
-        <Player.Video title="Live stream" className="h-full w-full" />
+     <Broadcast.Root ingestUrl={getIngest(streamId)}>
+      <Broadcast.Container>
+        <Broadcast.Video
+          title="Livestream"
+          style={{
+            height: "100%",
+            width: "100%",
+            objectFit: "contain",
+          }}
+        />
 
-        <Player.Controls className="flex items-center justify-center">
-          <Player.PlayPauseTrigger className="w-10 h-10 hover:scale-105 flex-shrink-0">
-            <Player.PlayingIndicator asChild matcher={false}>
-              <PlayIcon className="w-full h-full" />
-            </Player.PlayingIndicator>
-            <Player.PlayingIndicator asChild>
-              <PauseIcon className="w-full h-full" />
-            </Player.PlayingIndicator>
-          </Player.PlayPauseTrigger>
-        </Player.Controls>
-      </Player.Container>
-    </Player.Root>
+        <Broadcast.Controls className="flex items-center justify-center">
+          <Broadcast.EnabledTrigger className="w-10 h-10 hover:scale-105 flex-shrink-0">
+            <Broadcast.EnabledIndicator asChild matcher={false}>
+              <EnableVideoIcon className="w-full h-full" />
+            </Broadcast.EnabledIndicator>
+            <Broadcast.EnabledIndicator asChild>
+              <StopIcon className="w-full h-full" />
+            </Broadcast.EnabledIndicator>
+          </Broadcast.EnabledTrigger>
+        </Broadcast.Controls>
+
+        <Broadcast.LoadingIndicator asChild matcher={false}>
+          <div className="absolute overflow-hidden py-1 px-2 rounded-full top-1 left-1 bg-black/50 flex items-center backdrop-blur">
+            <Broadcast.StatusIndicator
+              matcher="live"
+              className="flex gap-2 items-center"
+            >
+              <div className="bg-red-500 animate-pulse h-1.5 w-1.5 rounded-full" />
+              <span className="text-xs select-none">LIVE</span>
+            </Broadcast.StatusIndicator>
+
+            <Broadcast.StatusIndicator
+              className="flex gap-2 items-center"
+              matcher="pending"
+            >
+              <div className="bg-white/80 h-1.5 w-1.5 rounded-full animate-pulse" />
+              <span className="text-xs select-none">LOADING</span>
+            </Broadcast.StatusIndicator>
+
+            <Broadcast.StatusIndicator
+              className="flex gap-2 items-center"
+              matcher="idle"
+            >
+              <div className="bg-white/80 h-1.5 w-1.5 rounded-full" />
+              <span className="text-xs select-none">IDLE</span>
+            </Broadcast.StatusIndicator>
+          </div>
+        </Broadcast.LoadingIndicator>
+      </Broadcast.Container>
+    </Broadcast.Root>
 
               </div>
               <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
@@ -92,8 +167,8 @@ const StreamingPage = () => {
 
             {/* Stream title overlay */}
             <div className="absolute bottom-8 left-8 text-white">
-              <h1 className="text-3xl font-bold mb-2">Ernie's stream - treatsvision ama</h1>
-              <p className="text-gray-300">Some descriptive text about the stream here</p>
+              <h1 className="text-3xl text-black font-bold mb-2">Ernie's stream - treatsvision ama</h1>
+              <p className="text-black">Some descriptive text about the stream here</p>
             </div>
 
         {/* Chat Sidebar */}
@@ -152,6 +227,7 @@ const StreamingPage = () => {
           </div>
         </div>
       </div>
+      <div className="w-screen border-t border-gray-800"></div>
 
       {/* Footer */}
       <Footer />

@@ -180,120 +180,7 @@ const statusColors: Record<UserStatus, string> = {
           </div>
           {/* </div> */}
           {/* Right Column - TV Rewards */}
-          <div className="lg:col-span-2">
-            <h2 className="text-4xl font-bold text-gray-900 mb-8">tv rewards</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Rewards Summary */}
-              <div className="bg-gray-900 text-white rounded-lg p-6 relative custom-shadow">
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span>NIBS:</span>
-                    <span>10 ($10)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>TREETS:</span>
-                    <span>50 ($50)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>POL (TV fees):</span>
-                    <span>50 ($40)</span>
-                  </div>
-                  <div className="border-t border-gray-700 pt-4">
-                    <div className="flex justify-between font-bold">
-                      <span>total:</span>
-                      <span>$100</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <button
-                  onClick={handleClaimRewards}
-                  className="mt-6 bg-green-50 text-gray-900 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
-                >
-                  claim rewards
-                </button>
-                
-                <div className="absolute -bottom-2 -left-2 bg-cyan-50 text-black p-3 rounded text-xs max-w-xs">
-                  NIBS will be transferred to the rewards factory. TREETS and POL will be transferred to your wallet
-                </div>
-              </div>
-
-              {/* Current Balance */}
-              <div className="bg-gray-900 text-white rounded-lg p-6 relative custom-shadow">
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span>TREETS price:</span>
-                    <span>10 ($10)</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>wallet balance:</span>
-                      <div className="text-right">
-                        <div>TREETS {treetsBalance} ($50)</div>
-                        <div>NIBS {nibsBalance} ($50)</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>rewards factory</span>
-                    <span>50 ($40)</span>
-                  </div>
-                  <div className="border-t border-gray-700 pt-4">
-                    <div className="flex justify-between font-bold">
-                      <span>Total:</span>
-                      <span>$100</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <button
-                  onClick={handleGetTreetsTokens}
-                  className="mt-6 bg-green-50 text-gray-900 px-6 py-2 rounded-full font-medium hover:bg-gray-100 transition-colors"
-                >
-                  get treets tokens
-                </button>
-                
-                <div className="absolute -bottom-2 -right-2 bg-cyan-50 text-black p-3 rounded text-xs max-w-xs">
-                  Buy TREETS tokens on uniswap: contract address: 0xjDcn4GHD3ZJDCjsr8
-                </div>
-              </div>
-            </div>
-
-            {/* Rewards Factory */}
-            <div className="mt-8 bg-gradient-to-r from-green-400 to-pink-200 rounded-lg p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                   <a href="/">
-              <img
-                src="/assets/par.png"
-                alt="Livestream Logo"
-                className="h-16 w-20"
-                style={{ cursor: 'pointer' }}
-              />
-            </a>
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">Your rewards factory</h3>
-                    <p className="text-sm text-gray-700">50TREETS / 10NIBS IN FACTORY</p>
-                    <p className="text-sm font-bold text-gray-900">40NIBS($500) UNLOCKED</p>
-                  </div>
-                </div>
-                
-                <div className="flex space-x-2">
-                  <button className="bg-white text-gray-900 px-6 py-2 rounded-full font-medium border border-gray-300 hover:bg-gray-50">
-                    store TREETS here to access your NIBS
-                  </button>
-                  <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-300 hover:bg-gray-50">
-                    <span className="text-xl">?</span>
-                  </button>
-                </div>
-              </div>
-              
-              <div className="mt-4 bg-blue-100 text-blue-800 p-3 rounded text-sm">
-                Connect your NIBS tokens and earn TREETS by putting your NIBS tokens in the rewards factory. The more TREETS you store here the quicker you receive your NIBS tokens :)
-              </div>
-            </div>
-          </div>
+{/* https://gist.github.com/sparkidea25/235437a6da2f819c435afab81d938175 */}
 
   {isAdmin && (
       <div>
@@ -350,19 +237,16 @@ const statusColors: Record<UserStatus, string> = {
         </div>
         <br />
         <div className="relative">
-
-     
- <div className="w-screen border-t border-gray-800"></div>
-<div className="container mx-auto">
-  {/* Admin content */}
-  <Footer />
-</div>
-   </div>
         {/* <div className="custom-footer-border"></div> */}
-        {/* <Footer /> */}
-                   
+        {/* <Footer /> */}              
         </div>
       </div>
+       <div className="w-screen border-t border-gray-800"></div>
+{/* <div className="container mx-auto"> */}
+  {/* Admin content */}
+  <Footer />
+{/* </div> */}
+   </div>
      </div>
   )
 }
