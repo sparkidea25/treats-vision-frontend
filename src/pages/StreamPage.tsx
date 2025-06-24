@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 // import { getIngest } from "@livepeer/react/external";
 import { ApiStrings } from '@/lib/apiStrings';
 import { BroadcastWithControls } from '@/components/Player';
+import { useLocation } from 'react-router-dom';
 // import { streamKey } from "./stream-key";
 // import { vodSource } from "./source";
 
@@ -26,12 +27,14 @@ const StreamingPage = () => {
   ]);
   const [newMessage, setNewMessage] = useState('');
     const [streamId, setStreamId] = useState(null);
+      const location = useLocation();
+  const form = location.state;
 
   // https://treatsvision.onrender.com//livepeer/stream create function with link to return stream details
 
   useEffect(() => {
     const fetchStream = async () => {
-      const streamDetails = await LiveStream();
+      const streamDetails = await LiveStream(form);
       console.log(streamDetails.stream.id, 'stream Details already')
       // if (streamDetails && streamDetails.data && streamDetails.data.id) {
         setStreamId(streamDetails.stream.id);
@@ -40,8 +43,7 @@ const StreamingPage = () => {
      fetchStream();
   }, []);
 
-
-const LiveStream = async () => {
+const LiveStream = async (form: any) => {
   try {
     const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream`, {
       method: 'POST',
@@ -49,7 +51,17 @@ const LiveStream = async () => {
         'Content-Type': 'application/json',
       },
       // Add body if required by your API, e.g.:
-      body: JSON.stringify({ name: "stream - treatsvision ama" }),
+      body: JSON.stringify({ name: form.title || "stream - treatsvision ama",
+        description: form.description,
+        source: form.source,
+        tokenAddress: form.tokenAddress,
+        requiredTokens: form.tokenAmount, 
+        tvChat: form.tvChat,
+        tokenAccess: form.tokenAccess,
+        publicAccess: form.publicAccess,
+
+
+      }),
     });
 
     if (!response.ok) {
@@ -108,58 +120,6 @@ console.log(LiveStream, 'livestream app')
         <div className="flex-1 bg-green-50 relative">
           {/* Video placeholder with futuristic overlay https://gist.github.com/sparkidea25/03209b2d179be4886737d79f45029a58 */}
           <BroadcastWithControls streamKey={streamId} />
-     {/* <Broadcast.Root ingestUrl={getIngest(streamId)}>
-      <Broadcast.Container>
-        <Broadcast.Video
-          title="Livestream"
-          style={{
-            height: "100%",
-            width: "100%",
-            objectFit: "contain",
-          }}
-        />
-
-        <Broadcast.Controls className="flex items-center justify-center">
-          <Broadcast.EnabledTrigger className="w-10 h-10 hover:scale-105 flex-shrink-0">
-            <Broadcast.EnabledIndicator asChild matcher={false}>
-              <EnableVideoIcon className="w-full h-full" />
-            </Broadcast.EnabledIndicator>
-            <Broadcast.EnabledIndicator asChild>
-              <StopIcon className="w-full h-full" />
-            </Broadcast.EnabledIndicator>
-          </Broadcast.EnabledTrigger>
-        </Broadcast.Controls>
-
-        <Broadcast.LoadingIndicator asChild matcher={false}>
-          <div className="absolute overflow-hidden py-1 px-2 rounded-full top-1 left-1 bg-black/50 flex items-center backdrop-blur">
-            <Broadcast.StatusIndicator
-              matcher="live"
-              className="flex gap-2 items-center"
-            >
-              <div className="bg-red-500 animate-pulse h-1.5 w-1.5 rounded-full" />
-              <span className="text-xs select-none">LIVE</span>
-            </Broadcast.StatusIndicator>
-
-            <Broadcast.StatusIndicator
-              className="flex gap-2 items-center"
-              matcher="pending"
-            >
-              <div className="bg-white/80 h-1.5 w-1.5 rounded-full animate-pulse" />
-              <span className="text-xs select-none">LOADING</span>
-            </Broadcast.StatusIndicator>
-
-            <Broadcast.StatusIndicator
-              className="flex gap-2 items-center"
-              matcher="idle"
-            >
-              <div className="bg-white/80 h-1.5 w-1.5 rounded-full" />
-              <span className="text-xs select-none">IDLE</span>
-            </Broadcast.StatusIndicator>
-          </div>
-        </Broadcast.LoadingIndicator>
-      </Broadcast.Container>
-    </Broadcast.Root> */}
-
               </div>
               <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
               <button className="bg-green-50 rounded-full font-semibold backdrop-blur-sm border border-white border-opacity-30 transition-all">
