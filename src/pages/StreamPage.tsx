@@ -129,8 +129,8 @@ console.log(LiveStream, 'livestream app')
 
             {/* Stream title overlay */}
             <div className="absolute bottom-8 left-8 text-white">
-              <h1 className="text-3xl text-black font-bold mb-2">Ernie's stream - treatsvision ama</h1>
-              <p className="text-black">Some descriptive text about the stream here</p>
+              <h1 className="text-3xl text-black font-bold mb-2">{form.title}</h1>
+              <p className="text-black">{form.description}</p>
             </div>
 
         {/* Chat Sidebar */}
