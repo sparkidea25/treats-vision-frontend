@@ -228,7 +228,32 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
         <div className="fixed inset-0 bg-lime-100 border-2 border-lime-400 opacity-30" aria-hidden="true" />
         <DialogPanel className="border-r-4 border-lime-400 shadow-[0_0_16px_4px_rgba(163,230,53,0.15)] bg-lime-100 border-6 border-gray-950 p-0 w-full max-w-md rounded-lg relative z-10">
           <div className="flex items-center justify-between p-4 border-b border-lime-300">
-            <h2 className="text-lg font-semibold text-gray-800">Step-by-Step Process</h2>
+            {/* <h2 className="text-lg font-semibold text-gray-800">Step-by-Step Process</h2> */}
+            <div className="flex flex-col gap-2 w-full">
+  {/* <h2 className="text-lg font-semibold text-gray-800 text-center">Step-by-Step Process</h2> */}
+  {/* Stepper */}
+  <div className="flex items-center justify-center mb-2">
+    {[1, 2, 3].map((s, idx) => (
+      <React.Fragment key={s}>
+        <div className="flex flex-col items-center">
+          <div
+            className={`flex items-center justify-center rounded-full w-8 h-8 border-2 
+              ${step === s ? 'bg-lime-400 border-lime-600 text-white font-bold shadow-lg' : 'bg-white border-lime-400 text-lime-600'}
+              transition-all duration-200`}
+          >
+            {s}
+          </div>
+          <span className={`text-xs mt-1 ${step === s ? 'text-lime-700 font-semibold' : 'text-gray-500'}`}>
+            {s === 1 ? 'Create' : s === 2 ? 'Preview' : 'Token'}
+          </span>
+        </div>
+        {idx < 2 && (
+          <div className="w-8 h-1 bg-lime-300 mx-1 rounded-full" />
+        )}
+      </React.Fragment>
+    ))}
+  </div>
+</div>
             <button
               className="text-gray-700 hover:text-black"
               onClick={onClose}
