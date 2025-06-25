@@ -1,14 +1,12 @@
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { useEffect, useState } from 'react';
-// import { EnableVideoIcon, StopIcon } from "@livepeer/react/assets";
-// import * as Broadcast from "@livepeer/react/broadcast";
-// import { getIngest } from "@livepeer/react/external";
 import { ApiStrings } from '@/lib/apiStrings';
-import { BroadcastWithControls } from '@/components/Player';
+// import { BroadcastWithControls } from '@/components/Player';
+import { EnableVideoIcon, StopIcon } from "@livepeer/react/assets";
+import * as Broadcast from "@livepeer/react/broadcast";
+import { getIngest } from "@livepeer/react/external";
 import { useLocation } from 'react-router-dom';
-// import { streamKey } from "./stream-key";
-// import { vodSource } from "./source";
 
 
 const StreamingPage = () => {
@@ -35,9 +33,9 @@ const StreamingPage = () => {
   useEffect(() => {
     const fetchStream = async () => {
       const streamDetails = await LiveStream(form);
-      console.log(streamDetails.stream.id, 'stream Details already')
+      console.log(streamDetails.data.stream.id, 'stream Details already')
       // if (streamDetails && streamDetails.data && streamDetails.data.id) {
-        setStreamId(streamDetails.stream.id);
+        setStreamId(streamDetails.data.stream.id);
       // }
     }
      fetchStream();
@@ -119,7 +117,51 @@ console.log(LiveStream, 'livestream app')
         {/* Video Stream Area */}
         <div className="flex-1 bg-green-50 relative">
           {/* Video placeholder with futuristic overlay https://gist.github.com/sparkidea25/03209b2d179be4886737d79f45029a58 */}
-          <BroadcastWithControls streamKey={streamId} />
+          {/* <BroadcastWithControls streamKey={streamId} /> */}
+              <Broadcast.Root ingestUrl={getIngest(streamId)}>
+      <Broadcast.Container className="h-full w-full bg-gray-950">
+        <Broadcast.Video title="Current livestream" className="h-full w-full" />
+
+        <Broadcast.Controls className="flex items-center justify-center">
+          <Broadcast.EnabledTrigger className="w-10 h-10 hover:scale-105 flex-shrink-0">
+            <Broadcast.EnabledIndicator asChild matcher={false}>
+              <EnableVideoIcon className="w-full h-full" />
+            </Broadcast.EnabledIndicator>
+            <Broadcast.EnabledIndicator asChild>
+              <StopIcon className="w-full h-full" />
+            </Broadcast.EnabledIndicator>
+          </Broadcast.EnabledTrigger>
+        </Broadcast.Controls>
+
+        <Broadcast.LoadingIndicator asChild matcher={false}>
+          <div className="absolute overflow-hidden py-1 px-2 rounded-full top-1 left-1 bg-black/50 flex items-center backdrop-blur">
+            <Broadcast.StatusIndicator
+              matcher="live"
+              className="flex gap-2 items-center"
+            >
+              <div className="bg-red-500 animate-pulse h-1.5 w-1.5 rounded-full" />
+              <span className="text-xs select-none">LIVE</span>
+            </Broadcast.StatusIndicator>
+
+            <Broadcast.StatusIndicator
+              className="flex gap-2 items-center"
+              matcher="pending"
+            >
+              <div className="bg-white/80 h-1.5 w-1.5 rounded-full animate-pulse" />
+              <span className="text-xs select-none">LOADING</span>
+            </Broadcast.StatusIndicator>
+
+            <Broadcast.StatusIndicator
+              className="flex gap-2 items-center"
+              matcher="idle"
+            >
+              <div className="bg-white/80 h-1.5 w-1.5 rounded-full" />
+              <span className="text-xs select-none">IDLE</span>
+            </Broadcast.StatusIndicator>
+          </div>
+        </Broadcast.LoadingIndicator>
+      </Broadcast.Container>
+    </Broadcast.Root>
               </div>
               <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
               <button className="bg-green-50 rounded-full font-semibold backdrop-blur-sm border border-white border-opacity-30 transition-all">
@@ -128,12 +170,12 @@ console.log(LiveStream, 'livestream app')
             </div>
 
             {/* Stream title overlay */}
-            <div className="absolute bottom-8 left-8 text-white">
+            <div className="absolute bottom-8 left-8 text-blue">
               <h1 className="text-3xl text-black font-bold mb-2">{form.title}</h1>
               <p className="text-black">{form.description}</p>
             </div>
 
-        {/* Chat Sidebar */}
+          {/* Chat Sidebar */}
         <div className="w-80 bg-green-50 border-l border-gray-200 flex flex-col">
           {/* Chat header */}
           <div className="p-4 border-b border-gray-200 flex items-center justify-between">
