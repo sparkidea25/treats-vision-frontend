@@ -33,9 +33,9 @@ const StreamingPage = () => {
   useEffect(() => {
     const fetchStream = async () => {
       const streamDetails = await LiveStream(form);
-      console.log(streamDetails.data.stream.id, 'stream Details already')
+      console.log(streamDetails.data.stream.streamKey, 'stream Details already')
       // if (streamDetails && streamDetails.data && streamDetails.data.id) {
-        setStreamId(streamDetails.data.stream.id);
+        setStreamId(streamDetails.data.stream.streamKey);
       // }
     }
      fetchStream();
@@ -134,13 +134,13 @@ console.log(LiveStream, 'livestream app')
         </Broadcast.Controls>
 
         <Broadcast.LoadingIndicator asChild matcher={false}>
-          <div className="absolute overflow-hidden py-1 px-2 rounded-full top-1 left-1 bg-black/50 flex items-center backdrop-blur">
+          <div className="absolute overflow-hidden py-1 px-2 rounded-full top-1 left-1 bg-white/50 flex items-center backdrop-blur">
             <Broadcast.StatusIndicator
               matcher="live"
               className="flex gap-2 items-center"
             >
               <div className="bg-red-500 animate-pulse h-1.5 w-1.5 rounded-full" />
-              <span className="text-xs select-none">LIVE</span>
+              <span className="text-xs text-white select-none">LIVE</span>
             </Broadcast.StatusIndicator>
 
             <Broadcast.StatusIndicator
