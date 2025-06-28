@@ -11,44 +11,44 @@ import { ApiStrings } from '@/lib/apiStrings';
 export function ReplaySection() {
       // Accept array of objects for srcList
       const [srcList, setSrcList] = useState<any[]>([]);
-  const replayStreams = [
-    {
-      title: "Ernie's 24/7br Livestream",
-      streamer: "Exile", 
-      viewers: "500",
-      thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-    },
-    {
-      title: "Ernie's 24/7br Livestream",
-      streamer: "Exile",
-      viewers: "823", 
-      thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-    },
-    {
-      title: "Ernie's 24/7br Livestream",
-      streamer: "Exile",
-      viewers: "1.1k",
-      thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-    },
-    {
-      title: "Ernie's 24/7br Livestream", 
-      streamer: "Exile",
-      viewers: "967",
-      thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-    },
-    {
-      title: "Ernie's 24/7br Livestream",
-      streamer: "Exile", 
-      viewers: "445",
-      thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-    },
-    {
-      title: "Ernie's 24/7br Livestream",
-      streamer: "Exile",
-      viewers: "712",
-      thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-    }
-  ];
+  // const replayStreams = [
+  //   {
+  //     title: "Ernie's 24/7br Livestream",
+  //     streamer: "Exile", 
+  //     viewers: "500",
+  //     thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
+  //   },
+  //   {
+  //     title: "Ernie's 24/7br Livestream",
+  //     streamer: "Exile",
+  //     viewers: "823", 
+  //     thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
+  //   },
+  //   {
+  //     title: "Ernie's 24/7br Livestream",
+  //     streamer: "Exile",
+  //     viewers: "1.1k",
+  //     thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
+  //   },
+  //   {
+  //     title: "Ernie's 24/7br Livestream", 
+  //     streamer: "Exile",
+  //     viewers: "967",
+  //     thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
+  //   },
+  //   {
+  //     title: "Ernie's 24/7br Livestream",
+  //     streamer: "Exile", 
+  //     viewers: "445",
+  //     thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
+  //   },
+  //   {
+  //     title: "Ernie's 24/7br Livestream",
+  //     streamer: "Exile",
+  //     viewers: "712",
+  //     thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
+  //   }
+  // ];
 
   //add effect to call https://e5bb-102-89-75-69.ngrok-free.app/v1.0/livepeer/playbacks get the list of playbackIds
   // then pass each response to playback.get
