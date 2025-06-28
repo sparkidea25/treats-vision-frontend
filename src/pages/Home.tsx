@@ -31,9 +31,11 @@ function Home() {
         </div>
 
         {/* Replay section with border */}
-        <div className="border-b border-gray-800">
+        <div className="border-b border-gray-800 pb-12">
           <ReplaySection />
         </div>
+
+        {/* <br /> */}
 
         <Footer />
       </div>

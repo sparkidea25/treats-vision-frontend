@@ -33,7 +33,7 @@ const StreamingPage = () => {
   useEffect(() => {
     const fetchStream = async () => {
       const streamDetails = await LiveStream(form);
-      console.log(streamDetails.data.stream.streamKey, 'stream Details already')
+      console.log(streamDetails.data, 'stream Details already')
       // if (streamDetails && streamDetails.data && streamDetails.data.id) {
         setStreamId(streamDetails.data.stream.streamKey);
       // }
