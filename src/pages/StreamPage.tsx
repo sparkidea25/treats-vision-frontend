@@ -57,8 +57,6 @@ const LiveStream = async (form: any) => {
         tvChat: form.tvChat,
         tokenAccess: form.tokenAccess,
         publicAccess: form.publicAccess,
-
-
       }),
     });
 

@@ -1,17 +1,12 @@
 import { useEffect, useState } from 'react';
-// import { StreamCard } from './StreamCard';
-// import { Livepeer } from 'livepeer';
-// import { getSrc } from '@livepeer/react/external';
-import * as Player from "@livepeer/react/player";
-import { PauseIcon, PlayIcon } from '@livepeer/react/assets';
-// import { Src } from "@livepeer/react";
+// import * as Player from "@livepeer/react/player";
+// import { PauseIcon, PlayIcon } from '@livepeer/react/assets';
 import { getSrc } from '@livepeer/react/external';
 import { ApiStrings } from '@/lib/apiStrings';
+import { StreamCard } from './StreamCard';
 
 export function ReplaySection() {
-      // Accept array of objects for srcList
       const [srcList, setSrcList] = useState<any[]>([]);
-  // const replayStreams = [
   //   {
   //     title: "Ernie's 24/7br Livestream",
   //     streamer: "Exile", 
@@ -59,6 +54,9 @@ useEffect(() => {
       const res = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/playbacks`);
       const data = await res.json();
       const playbackIds = Array.isArray(data) ? data.map(item => item.streamPlaybackId) : [];
+      const title = Array.isArray(data) ? data.map(item => item.name) : [];
+      const description = Array.isArray(data) ? data.map(item => item.description) : [];
+      console.log(title, description, 'title and descriptions')
       if (playbackIds.length === 0) return;
 
       // Fetch all playback info in parallel
@@ -66,6 +64,7 @@ useEffect(() => {
         playbackIds.map(async (id) => {
           const playbackInfoRes = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/${id}`);
           const playbackInfo = await playbackInfoRes.json();
+          console.log(playbackInfo, 'check for title and description')
           // getSrc returns an array of objects (hls, webrtc, image, etc)
           const srcArr = getSrc(playbackInfo.playbackInfo);
           return srcArr;
@@ -91,33 +90,28 @@ console.log(srcList, 'src List')
           <h2 className="text-gray-800 text-6xl font-light">replay</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {/* {replayStreams.map((stream, index) => (
-            <StreamCard
-              key={index}
-              {...stream}
-              isLive={true}
-            />
-          ))} */}
-           <Player.Root src={srcList}>
-      <Player.Container>
-        {/* Use the first image type in srcList as the poster thumbnail, if available */}
-        <Player.Video
-          title="Live stream"
-          poster={Array.isArray(srcList) ? (srcList.find((item) => item && item.type === 'image')?.src) : undefined}
-        />
-
-        <Player.Controls className="flex items-center justify-center">
-          <Player.PlayPauseTrigger className="w-10 h-10">
-            <Player.PlayingIndicator asChild matcher={false}>
-              <PlayIcon />
-            </Player.PlayingIndicator>
-            <Player.PlayingIndicator asChild>
-              <PauseIcon />
-            </Player.PlayingIndicator>
-          </Player.PlayPauseTrigger>
-        </Player.Controls>
-      </Player.Container>
-    </Player.Root>
+          {srcList
+            .filter((src) => src.type === 'hls' || src.type === 'webrtc')
+            .map((src, idx) => {
+              // Find the image thumbnail for this stream, if available
+              const image = srcList.find((item) => item.type === 'image' && item.playbackId === src.playbackId);
+              // You may want to store more metadata per stream in the backend for real use
+              return (
+                <StreamCard
+                  key={src.playbackId || idx}
+                  title={`Replay #${idx + 1}`}
+                  streamer={src.playbackId || ''}
+                  viewers={''}
+                  thumbnail={image ? image.src : ''}
+                  onClick={() => {
+                    window.location.href = `/stream/${src.playbackId}`;
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {/* Optionally, you can show a preview player here, or just the thumbnail */}
+                </StreamCard>
+              );
+            })}
         </div>
       </div>
     </section>
