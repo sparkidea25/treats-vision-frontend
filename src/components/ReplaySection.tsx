@@ -28,7 +28,7 @@ useEffect(() => {
           const srcArr = getSrc(playbackInfo.playbackInfo);
           console.log(srcArr, 'srcArr')
           // Only return the 'image' type object(s)
-          return srcArr.filter(src => src.type === 'image');
+          return (srcArr ?? []).filter(src => src.type === 'image');
         })
       );
       // Flatten the array of arrays into a single array
@@ -58,19 +58,22 @@ console.log(srcList, 'src List')
               const image = srcList.find((item) => item.type === 'image' && item.playbackId === src.playbackId);
               // You may want to store more metadata per stream in the backend for real use
               return (
-                <StreamCard
+                <div
                   key={src.playbackId || idx}
-                  title={`Replay #${idx + 1}`}
-                  streamer={src.playbackId || ''}
-                  viewers={''}
-                  thumbnail={image ? image.src : ''}
                   onClick={() => {
                     window.location.href = `/stream/${src.playbackId}`;
                   }}
                   style={{ cursor: 'pointer' }}
                 >
-                  {/* Optionally, you can show a preview player here, or just the thumbnail */}
-                </StreamCard>
+                  <StreamCard
+                    title={`Replay #${idx + 1}`}
+                    streamer={src.playbackId || ''}
+                    viewers={''}
+                    thumbnail={image ? image.src : ''}
+                  >
+                    {/* Optionally, you can show a preview player here, or just the thumbnail */}
+                  </StreamCard>
+                </div>
               );
             })}
         </div>
