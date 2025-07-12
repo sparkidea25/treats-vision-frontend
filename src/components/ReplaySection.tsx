@@ -7,47 +7,6 @@ import { StreamCard } from './StreamCard';
 
 export function ReplaySection() {
       const [srcList, setSrcList] = useState<any[]>([]);
-  //   {
-  //     title: "Ernie's 24/7br Livestream",
-  //     streamer: "Exile", 
-  //     viewers: "500",
-  //     thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-  //   },
-  //   {
-  //     title: "Ernie's 24/7br Livestream",
-  //     streamer: "Exile",
-  //     viewers: "823", 
-  //     thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-  //   },
-  //   {
-  //     title: "Ernie's 24/7br Livestream",
-  //     streamer: "Exile",
-  //     viewers: "1.1k",
-  //     thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-  //   },
-  //   {
-  //     title: "Ernie's 24/7br Livestream", 
-  //     streamer: "Exile",
-  //     viewers: "967",
-  //     thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-  //   },
-  //   {
-  //     title: "Ernie's 24/7br Livestream",
-  //     streamer: "Exile", 
-  //     viewers: "445",
-  //     thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-  //   },
-  //   {
-  //     title: "Ernie's 24/7br Livestream",
-  //     streamer: "Exile",
-  //     viewers: "712",
-  //     thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-  //   }
-  // ];
-
-  //add effect to call https://e5bb-102-89-75-69.ngrok-free.app/v1.0/livepeer/playbacks get the list of playbackIds
-  // then pass each response to playback.get
-  // then set src to setSrc, it should be a string
 useEffect(() => {
   async function fetchPlaybacks() {
     try {
@@ -59,21 +18,23 @@ useEffect(() => {
       console.log(title, description, 'title and descriptions')
       if (playbackIds.length === 0) return;
 
-      // Fetch all playback info in parallel
-      const playbackInfos = await Promise.all(
+      // Fetch all playback info in parallel, but only keep 'image' type from getSrc
+      const playbackImages = await Promise.all(
         playbackIds.map(async (id) => {
           const playbackInfoRes = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/${id}`);
           const playbackInfo = await playbackInfoRes.json();
-          console.log(playbackInfo, 'check for title and description')
+          console.log(playbackInfo, 'check for title and description');
           // getSrc returns an array of objects (hls, webrtc, image, etc)
           const srcArr = getSrc(playbackInfo.playbackInfo);
-          return srcArr;
+          console.log(srcArr, 'srcArr')
+          // Only return the 'image' type object(s)
+          return srcArr.filter(src => src.type === 'image');
         })
       );
       // Flatten the array of arrays into a single array
-      const flatSrcList = playbackInfos.flat();
-      console.log(flatSrcList, 'check playback infoes');
-      setSrcList(flatSrcList);
+      const flatImageList = playbackImages.flat();
+      console.log(flatImageList, 'check playback images');
+      setSrcList(flatImageList);
     } catch (err) {
       console.error('Failed to fetch playbacks', err);
     }
@@ -91,7 +52,7 @@ console.log(srcList, 'src List')
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {srcList
-            .filter((src) => src.type === 'hls' || src.type === 'webrtc')
+            .filter((src) => src.type === 'image')
             .map((src, idx) => {
               // Find the image thumbnail for this stream, if available
               const image = srcList.find((item) => item.type === 'image' && item.playbackId === src.playbackId);
