@@ -4,32 +4,32 @@ import { io } from "socket.io-client";
 const socket = io('http://localhost:3000');
 
 function ChatRoom() {
-    const [chatMessages] = useState([
-    // { id: 1, user: 'adriana clouart', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-    // { id: 2, user: 'steph pine', message: 'A bunch of words bla filling the chat here with soe wordsthe chat here with soe wordsthe chat here with soe wordsthe chat here with soe words', avatar: '👤' },
-    // { id: 3, user: 'claus gusman', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-    // { id: 4, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-    // { id: 5, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-    // { id: 6, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-    // { id: 7, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-    // { id: 8, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-  ]);
-  const [newMessage, setNewMessage] = useState('');
+  //   const [chatMessages] = useState([
+  //   // { id: 1, user: 'adriana clouart', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
+  //   // { id: 2, user: 'steph pine', message: 'A bunch of words bla filling the chat here with soe wordsthe chat here with soe wordsthe chat here with soe wordsthe chat here with soe words', avatar: '👤' },
+  //   // { id: 3, user: 'claus gusman', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
+  //   // { id: 4, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
+  //   // { id: 5, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
+  //   // { id: 6, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
+  //   // { id: 7, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
+  //   // { id: 8, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
+  // ]);
+  // const [newMessage, setNewMessage] = useState('');
   // const [messages, setMessages] = useState([]);
   // const [messageText, setMessageText] = useState('');
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
 
   // Join a chat room
-  const joinChatRoom = (userDetails) => {
-    setUser(userDetails);
-    socket.emit('join', userDetails);
-  };
+  // const joinChatRoom = (userDetails) => {
+  //   setUser(userDetails);
+  //   socket.emit('join', userDetails);
+  // };
 
   // Leave a chat room
-  const leaveChatRoom = () => {
-    socket.emit('leave', user);
-    setUser(null);
-  };
+  // const leaveChatRoom = () => {
+  //   socket.emit('leave', user);
+  //   setUser(null);
+  // };
 
   // More code will go here
 
