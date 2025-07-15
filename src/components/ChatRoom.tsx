@@ -1,7 +1,8 @@
-// import { useState } from 'react';
-// import { io } from "socket.io-client";
+import { usePrivy } from "@privy-io/react-auth";
+import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 
-// const socket = io('http://localhost:3000');
+const socket = io(process.env.VITE_API_LINK)
 
 function ChatRoom() {
   //   const [chatMessages] = useState([
@@ -14,24 +15,36 @@ function ChatRoom() {
   //   // { id: 7, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
   //   // { id: 8, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
   // ]);
-  // const [newMessage, setNewMessage] = useState('');
-  // const [messages, setMessages] = useState([]);
-  // const [messageText, setMessageText] = useState('');
-  // const [user, setUser] = useState(null);
+  const {authenticated, user} = usePrivy();
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState<any[]>([]);
 
-  // Join a chat room
-  // const joinChatRoom = (userDetails) => {
-  //   setUser(userDetails);
-  //   socket.emit('join', userDetails);
-  // };
 
-  // Leave a chat room
-  // const leaveChatRoom = () => {
-  //   socket.emit('leave', user);
-  //   setUser(null);
-  // };
 
-  // More code will go here
+  // add code to return current authenticated user in page
+  // useEffect(() => {
+  //   if (authenticated && user) {
+  //     socket.emit('createRoom', user.email);
+  //     console.log('User connected:', user.email);
+  //   }
+
+  console.log(message, 'messagess')
+
+      useEffect(() => {
+            socket.on('receiveMessage', (data) => {
+              console.log(data, 'received message');
+                setMessages((prevMessages) => [...prevMessages, data]);
+            });
+
+            return () => {
+                socket.off('receiveMessage');
+            };
+        }, []);
+
+        const sendMessage = () => {
+            socket.emit('sendMessage', message);
+            setMessage('');
+        };
 
   return (
     <div className="h-full w-80 bg-green-50 border-l border-gray-200 flex flex-col">
@@ -48,19 +61,39 @@ function ChatRoom() {
         </button>
       </div>
 
-      {/* Fill all space with 'no chat' and input at the bottom */}
+      {/* Fill all space with chat messages or 'no chat' and input at the bottom */}
       <div className="flex-1 flex flex-col justify-between bg-green-50">
-        <div className="flex-1 flex items-center justify-center">
-          <span className="text-2xl text-gray-400 font-mono">no chat</span>
+        <div className="flex-1 flex flex-col items-center justify-center w-full px-4 py-2 overflow-y-auto">
+          {messages.length === 0 ? (
+            <span className="text-2xl text-gray-400 font-mono">no chat</span>
+          ) : (
+            messages.map((msg, index) => {
+              // Support both string and object message formats
+              if (typeof msg === 'string') {
+                return (
+                  <p key={index} className="w-full text-left text-base text-gray-800 mb-2 break-words">{msg}</p>
+                );
+              } else if (msg && typeof msg === 'object' && msg.text) {
+                return (
+                  <p key={index} className="w-full text-left text-base text-gray-800 mb-2 break-words">{msg.text}</p>
+                );
+              } else {
+                return null;
+              }
+            })
+          )}
         </div>
         <div className="w-full p-4">
           <input
             type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
             className="w-full text-2xl font-mono border border-black rounded-none bg-transparent placeholder-gray-400 px-4 py-6"
             placeholder="Type your message..."
             style={{ minHeight: '80px' }}
           />
         </div>
+        <button onClick={sendMessage}>Send</button>
       </div>
     </div>
   );

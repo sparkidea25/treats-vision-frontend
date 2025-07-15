@@ -7,11 +7,16 @@ import * as Broadcast from "@livepeer/react/broadcast";
 import { getIngest } from "@livepeer/react/external";
 import { useLocation } from 'react-router-dom';
 import ChatRoom from '@/components/ChatRoom';
+import { usePrivy } from '@privy-io/react-auth';
+import { io } from 'socket.io-client';
 
-
+const socket = io(process.env.VITE_API_LINK)
 const StreamingPage = () => {
+  const { user, authenticated } = usePrivy();
+  console.log(user, 'user in streaming page');
     const [streamId, setStreamId] = useState(null);
     const [streamName, setStreamName]= useState('null')
+        const [userId, setUserId]= useState('null')
       const location = useLocation();
   const form = location.state;
 
@@ -27,6 +32,44 @@ const StreamingPage = () => {
     }
      fetchStream();
   }, []);
+
+  const getUserUserId = async (privyId: string) => {
+    const fetchUser = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream/${privyId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const userData = await fetchUser.json();
+    return userData;
+  }
+
+  useEffect(() => {
+    if (authenticated && user) {
+
+      const getId =  getUserUserId(user.id)
+
+      setUserId(getId.id);
+      console.log('User authenticated:', user.id);
+    } else {
+      console.log('User not authenticated');
+    }
+}, [user]);
+
+  console.log(userId, 'current user id here')
+
+  // socket.emit("joinRoom", { roomId: streamId, user: userId });
+   useEffect(() => {
+    if (!userId || !streamId) return;
+    socket.emit('joinRoom', { roomId: streamId, user: userId });
+  }, [userId, streamId]);
+
+  // console.log(user.id, 'user id here')
+
+            // socket.emit('joinRoom', { streamId, user.id });
+
+  //step one, get privyId, check with internal api if id a user and return user data
+
 
 const LiveStream = async (form: any) => {
   try {
@@ -44,6 +87,7 @@ const LiveStream = async (form: any) => {
         tvChat: form.tvChat,
         tokenAccess: form.tokenAccess,
         publicAccess: form.publicAccess,
+        privy_id: user.id || null, // Ensure privy_id is passed correctly
       }),
     });
 
