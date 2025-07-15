@@ -67,20 +67,9 @@ function ChatRoom() {
           {messages.length === 0 ? (
             <span className="text-2xl text-gray-400 font-mono">no chat</span>
           ) : (
-            messages.map((msg, index) => {
-              // Support both string and object message formats
-              if (typeof msg === 'string') {
-                return (
-                  <p key={index} className="w-full text-left text-base text-gray-800 mb-2 break-words">{msg}</p>
-                );
-              } else if (msg && typeof msg === 'object' && msg.text) {
-                return (
-                  <p key={index} className="w-full text-left text-base text-gray-800 mb-2 break-words">{msg.text}</p>
-                );
-              } else {
-                return null;
-              }
-            })
+            messages.map((msg, index) => (
+              <p key={index} className="w-full text-left text-base text-gray-800 mb-2 break-words">{msg}</p>
+            ))
           )}
         </div>
         <div className="w-full p-4">

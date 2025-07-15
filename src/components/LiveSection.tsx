@@ -1,20 +1,37 @@
+import { useEffect, useState } from 'react';
 import { StreamCard } from './StreamCard';
+import { ApiStrings } from '@/lib/apiStrings';
+
+// type LiveStream = {
+//   title: string;
+//   streamer: string;
+//   viewers: string;
+//   thumbnail: string;
+// };
 
 export function LiveSection() {
-  const liveStreams = [
-    {
-      title: "Ernie's 24/7br Livestream",
-      streamer: "Exile",
-      viewers: "892",
-      thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
-    },
-    {
-      title: "Ernie's 24/7br Livestream", 
-      streamer: "Exile",
-      viewers: "1.2k",
-      thumbnail: "https://images.pexels.com/photos/7688374/pexels-photo-7688374.jpeg?auto=compress&cs=tinysrgb&w=400",
+  const [liveStreams, setLiveStreams] = useState<any[]>([]);
+
+
+
+  const fetchIhrStreams = async () => {
+    try {
+      const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/1hr-playback`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setLiveStreams(data);
+      console.log(data, 'Fetched 1hr playback streams');
+    } catch (error) {
+      console.error('Error fetching 1hr playback streams:', error);
     }
-  ];
+  }
+
+  useEffect(() => {
+    fetchIhrStreams();
+    
+  })
 
   return (
     <section className="bg-green-50 p-6">
@@ -24,11 +41,13 @@ export function LiveSection() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {liveStreams.map((stream, index) => (
-            <StreamCard
-              key={index}
-              {...stream}
-              isLive={true}
-            />
+            <div key={index}>
+              <StreamCard
+                {...stream}
+                title={stream.name || stream.title}
+                isLive={true}
+              />
+            </div>
           ))}
         </div>
       </div>
