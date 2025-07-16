@@ -20,6 +20,7 @@ const StreamingPage = () => {
       const location = useLocation();
   const form = location.state;
 
+
   useEffect(() => {
     const fetchStream = async () => {
       console.log(form, 'check form data');
@@ -169,8 +170,8 @@ const LiveStream = async (form: any) => {
 
             {/* Stream title overlay */}
             <div className="absolute bottom-8 left-8 text-blue">
-              <h1 className="text-3xl text-black font-bold mb-2">{form.title}</h1>
-              <p className="text-black">{form.description}</p>
+              {/* <h1 className="text-3xl text-black font-bold mb-2">{form.name}</h1> */}
+              {/* <p className="text-black">{form.description}</p> */}
             </div>
 
           {/* Chat Sidebar */}

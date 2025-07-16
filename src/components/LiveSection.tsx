@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { StreamCard } from './StreamCard';
 import { ApiStrings } from '@/lib/apiStrings';
+import { useNavigate } from 'react-router-dom';
 
 // type LiveStream = {
 //   title: string;
@@ -10,7 +11,10 @@ import { ApiStrings } from '@/lib/apiStrings';
 // };
 
 export function LiveSection() {
+    const navigate = useNavigate();
   const [liveStreams, setLiveStreams] = useState<any[]>([]);
+  const [fetchError, setFetchError] = useState(false);
+
 
 
 
@@ -22,16 +26,19 @@ export function LiveSection() {
       }
       const data = await response.json();
       setLiveStreams(data);
+      setFetchError(false);
       console.log(data, 'Fetched 1hr playback streams');
     } catch (error) {
+      setFetchError(true);
+      setLiveStreams([]);
       console.error('Error fetching 1hr playback streams:', error);
     }
   }
 
   useEffect(() => {
     fetchIhrStreams();
-    
-  })
+    // Only run once on mount
+  }, []);
 
   return (
     <section className="bg-green-50 p-6">
@@ -39,17 +46,21 @@ export function LiveSection() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-gray-800 text-6xl font-light">live</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {liveStreams.map((stream, index) => (
-            <div key={index}>
-              <StreamCard
-                {...stream}
-                title={stream.name || stream.title}
-                isLive={true}
-              />
-            </div>
-          ))}
-        </div>
+        {fetchError || liveStreams.length === 0 ? (
+          <div className="text-center text-gray-500 text-xl py-12">No live available</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {liveStreams.map((stream, index) => (
+              <div key={stream} onClick={() => navigate(`/stream/${stream.streamPlaybackId}`)}>
+                <StreamCard
+                  {...stream}
+                  title={stream.name || stream.title}
+                  isLive={true}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

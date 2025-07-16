@@ -11,6 +11,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/stream" element={<StreamingPage />} />
+        <Route path="/stream/:playbackId" element={<StreamingPage />} />
+         {/* pass the playback ID to the StreamPage, you can do so via props or route params. */}
         {/* Add more routes here as needed */}
       </Routes>
     </Router>
