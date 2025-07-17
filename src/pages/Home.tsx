@@ -37,7 +37,11 @@ function Home() {
 
         {/* <br /> */}
 
-        <Footer />
+        {/* <div className="relative"> */}
+          {/* <div className="absolute inset-y-0 left-6 w-px bg-black z-10"></div> */}
+          {/* <div className="absolute inset-y-0 right-6 w-px bg-black z-10"></div> */}
+          <Footer />
+        {/* </div> */}
       </div>
     </div>
   );
