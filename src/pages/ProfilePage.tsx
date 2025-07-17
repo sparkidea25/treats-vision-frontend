@@ -121,8 +121,8 @@ const statusColors: Record<UserStatus, string> = {
   // console.log(user, 'user details');
 
           return (
-            <div className="min-h-screen bg-green-50 overflow-hidden border-l border-r border-black relative z-20">
-              <div className="relative z-20 min-h-screen bg-green-50 overflow-hidden border-l border-r border-black">
+            <div className="flex flex-col min-h-screen bg-green-50 overflow-hidden border-l border-r border-black relative z-20">
+              <div className="flex flex-col min-h-screen bg-green-50 overflow-hidden border-l border-r border-black relative z-20">
                 <div className="absolute inset-y-0 left-6 w-px bg-black z-10"></div>
                 <div className="absolute inset-y-0 right-6 w-px bg-black z-10"></div>
               <Header />
@@ -130,8 +130,8 @@ const statusColors: Record<UserStatus, string> = {
                 <div className="grid grid-row-1 lg:grid-row-3 gap-8">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
           <h1
-            className="text-xl font-bold text-gray-900 mb-8 sm:mb-0"
-            style={{ fontFamily: 'Redaction', fontWeight: 400, fontSize: 20 }}
+            className="ms-2 text-7xl font-normal text-gray-900 mb-8 sm:mb-0 font-Redaction"
+            // style={{ fontFamily: 'Redaction', fontWeight: 400, fontSize: 20 }}
           >
             account
           </h1>
@@ -240,14 +240,13 @@ const statusColors: Record<UserStatus, string> = {
                         )}
                 </div>
                 <br />
-                <div className="relative">
-                {/* <div className="custom-footer-border"></div> */}
-                {/* <Footer /> */}              
-                </div>
               </div>
-              <div className="w-screen border-t border-gray-800"></div>
-          <Footer />
-          </div>
+              </div>
+             {/* <div className="w-screen border-t border-gray-800"></div> */}
+            <Footer/>
+
+                    <div className="absolute inset-y-0 left-6 w-px bg-black z-10"></div>
+        <div className="absolute inset-y-0 right-6 w-px bg-black z-10"></div>
             </div>
           )
 }

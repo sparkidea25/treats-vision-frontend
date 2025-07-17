@@ -65,6 +65,11 @@
   }
 }
 
+@font-face {
+  font-family: 'Redaction';
+  src: url('../public/fonts/redaction/Redaction20Bold-2ODWX.otf') format('truetype');
+}
+
 @layer base {
   * {
     @apply border-border;

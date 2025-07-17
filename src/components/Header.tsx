@@ -167,7 +167,7 @@ export function Header() {
                 className="w-4 h-4 mr-1"
               />
               Connect Wallet
-            </Button> 
+            </Button>
           )}
         </nav>
       </div>
