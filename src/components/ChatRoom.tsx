@@ -1,3 +1,4 @@
+import { ApiStrings } from "@/lib/apiStrings";
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
@@ -17,10 +18,13 @@ function ChatRoom() {
   //   // { id: 8, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
   // ]);
   const {authenticated, user} = usePrivy();
+  const [username, setUsername] = useState('');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<any[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
 
-    const handleKeyPress = (e) => {
+    const handleKeyPress = (e: any) => {
     if (e.key === 'Enter') {
       sendMessage();
     }
@@ -35,7 +39,50 @@ function ChatRoom() {
   //     console.log('User connected:', user.email);
   //   }
 
+  // add function to use username from getUserUserId
+  const fetchUsername = async (privyId: any) => {
+    try {
+      const res = await fetch(`${ApiStrings.API_BASE_URL}/auth/${privyId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await res.json();
+      console.log(data, 'fetch username')
+      return data.name;
+    } catch (e) {
+      console.log(e);
+      return '';
+    }
+  };
+
+  useEffect(() => {
+    if (authenticated && user && user.id) {
+      fetchUsername(user.id).then((uname) => {
+        setUsername(uname);
+      });
+    }
+  }, [authenticated, user]);
+
   console.log(message, 'messagess')
+
+      useEffect(() => {
+        socket.on('userTyping', (data) => {
+          setTypingUsers(prev => {
+            if (data.isTyping && !prev.includes(data.username)) {
+              return [...prev, data.username];
+            } else if (!data.isTyping && prev.includes(data.username)) {
+              return prev.filter(u => u !== data.username);
+            }
+            return prev;
+          });
+        });
+
+        return () => {
+          socket.off('userTyping');
+        };
+      }, []);
 
       useEffect(() => {
             socket.on('receiveMessage', (data) => {
@@ -49,9 +96,29 @@ function ChatRoom() {
         }, []);
 
         const sendMessage = () => {
-            socket.emit('sendMessage', message);
+            if (!message.trim()) return;
+            // Send message with user info
+            const msgObj = user ? { user: username || user.email || 'Anonymous', message } : { message };
+            socket.emit('sendMessage', msgObj);
+            setMessages((prevMessages) => [...prevMessages, msgObj]); // Add to local state immediately
             setMessage('');
+            // Clear typing state and notify others
+            if (isTyping) {
+              setIsTyping(false);
+              socket.emit('typing', { username: username || (user && user.email) || 'Anonymous', isTyping: false });
+            }
         };
+
+          const handleInputChange = (e: any) => {
+        setMessage(e.target.value);
+        if (e.target.value.length > 0 && !isTyping) {
+          setIsTyping(true);
+          socket.emit('typing', { username: username || (user && user.email) || 'Anonymous', isTyping: true });
+        } else if (e.target.value.length === 0 && isTyping) {
+          setIsTyping(false);
+          socket.emit('typing', { username: username || (user && user.email) || 'Anonymous', isTyping: false });
+        }
+      };
 
   return (
     <>
@@ -116,42 +183,53 @@ function ChatRoom() {
             </button>
           </div>
 
-          {/* Chat messages area */}
-          <div className="flex-1 flex flex-col justify-between bg-green-50">
-            <div className="flex-1 flex flex-col items-center justify-center w-full px-4 py-2 overflow-y-auto">
-              {messages.length === 0 ? (
-                <span className="text-2xl text-gray-400 font-mono">no chat</span>
-              ) : (
-                <div className="w-full">
-                  {messages.map((msg, index) => (
-                    <p key={index} className="w-full text-left text-base text-gray-800 mb-2 break-words bg-white p-2 rounded border border-gray-300">
-                      {msg}
-                    </p>
-                  ))}
+      {/* Chat messages area */}
+      <div className="flex-1 flex flex-col">
+        <div className={`flex-1 flex flex-col w-full px-4 py-2 overflow-y-auto ${messages.length === 0 ? 'items-center justify-center' : 'items-start justify-start'}`}> 
+          {messages.length === 0 ? (
+            <span className="text-2xl text-gray-400 font-mono">no chat</span>
+          ) : (
+            <div className="w-full">
+              {messages.map((msg, index) => (
+                <div key={index} className="w-full flex items-center mb-2 p-2">
+                  <img
+                    src="/assets/Icons.png"
+                    alt="User Icon"
+                    className="w-8 h-8 rounded-full object-cover mr-2 border border-gray-300"
+                  />
+                  <p className="text-left text-base text-gray-800 break-words">
+                    <span className="font-bold">{msg.user ? msg.user : "Anonymous"}: </span>
+                    {msg.message ? msg.message : msg}
+                  </p>
                 </div>
-              )}
+              ))}
             </div>
-            
-            {/* Input area */}
-            <div className="w-full p-4 border-t border-black">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="flex-1 text-base font-mono border border-black bg-white placeholder-gray-400 px-3 py-2"
-                  placeholder="Type your message..."
-                />
-                <button 
-                  onClick={sendMessage}
-                  className="px-4 py-2 bg-gray-800 text-white border border-black hover:bg-gray-700 transition-colors"
-                >
-                  Send
-                </button>
-              </div>
-            </div>
-          </div>
+          )}
+        </div>
+        {/* Typing indicator just above input */}
+        {typingUsers.length > 0 && (
+          <p className="px-4 pb-1 text-sm text-gray-600">{typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...</p>
+        )}
+      </div>
+      {/* Input area fixed at bottom */}
+      <div className="w-full p-4 border-t border-black bg-green-50">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={message}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+            className="flex-1 text-base font-mono border border-black bg-white placeholder-gray-400 px-3 py-2"
+            placeholder="Type your message..."
+          />
+          <button 
+            onClick={sendMessage}
+            className="px-4 py-2 bg-gray-800 text-white border border-black hover:bg-gray-700 transition-colors"
+          >
+            Send
+          </button>
+        </div>
+      </div>
         </div>
       )}
     </>

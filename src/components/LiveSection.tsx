@@ -50,7 +50,7 @@ export function LiveSection() {
           <div className="text-center text-gray-500 text-xl py-12">No live available</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {liveStreams.map((stream, index) => (
+            {liveStreams.map((stream) => (
               <div key={stream} onClick={() => navigate(`/stream/${stream.streamPlaybackId}`)}>
                 <StreamCard
                   {...stream}

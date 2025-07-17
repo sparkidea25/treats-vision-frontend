@@ -9,6 +9,7 @@ import { useLocation } from 'react-router-dom';
 import ChatRoom from '@/components/ChatRoom';
 import { usePrivy } from '@privy-io/react-auth';
 import { io } from 'socket.io-client';
+import { getUserUserId } from '@/lib/utils';
 
 const socket = io(process.env.VITE_API_LINK)
 const StreamingPage = () => {
@@ -34,27 +35,19 @@ const StreamingPage = () => {
      fetchStream();
   }, []);
 
-  const getUserUserId = async (privyId: string) => {
-    const fetchUser = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream/${privyId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    const userData = await fetchUser.json();
-    return userData;
-  }
 
-  useEffect(() => {
+
+useEffect(() => {
+  const fetchUserId = async () => {
     if (authenticated && user) {
-
-      const getId =  getUserUserId(user.id)
-
+      const getId = await getUserUserId(user.id);
       setUserId(getId.id);
       console.log('User authenticated:', user.id);
     } else {
       console.log('User not authenticated');
     }
+  };
+  fetchUserId();
 }, [user]);
 
   console.log(userId, 'current user id here')
@@ -88,7 +81,7 @@ const LiveStream = async (form: any) => {
         tvChat: form.tvChat,
         tokenAccess: form.tokenAccess,
         publicAccess: form.publicAccess,
-        privy_id: user.id || null, // Ensure privy_id is passed correctly
+        privy_id: userId || null, // Ensure privy_id is passed correctly
       }),
     });
 
