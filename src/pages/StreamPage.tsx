@@ -119,12 +119,36 @@ const LiveStream = async (form: any) => {
           {/* <BroadcastWithControls streamKey={streamId} /> */}
               <Broadcast.Root ingestUrl={getIngest(streamId)}>
       <Broadcast.Container className="h-full w-full bg-gray-950">
-        <Broadcast.Video title={streamName} className="h-full w-full" />
+        <Broadcast.Video title={streamName} className="h-full w-full"  style={{
+          height: "100%",
+          width: "100%",
+          objectFit: "contain",
+        }} />
 
         <Broadcast.Controls className="flex items-center justify-center">
-          <Broadcast.EnabledTrigger className="w-10 h-10 hover:scale-105 flex-shrink-0">
+          <Broadcast.EnabledTrigger className="w-10 h-10 hover:scale-105 flex-shrink-0 border-2 border-purple-500 rounded-full transition-transform duration-200">
             <Broadcast.EnabledIndicator asChild matcher={false}>
-              <EnableVideoIcon className="w-full h-full" />
+              <EnableVideoIcon
+                className="w-full h-full"
+                style={{
+                  background: '#fff',
+                  // border: '2px solid #a855f7', // purple-500
+                  transition: 'background 0.2s, color 0.2s',
+                  // color: '#a855f7',
+                  boxSizing: 'border-box',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = '#000';
+                  e.currentTarget.style.color = '#000';
+                  e.currentTarget.style.border = '2px solid #a855f7'; // purple-500
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = '#000';
+                  e.currentTarget.style.color = '#fff';
+                  e.currentTarget.style.border = '2px solid #a855f7'; // purple-500
+                }}
+              />
             </Broadcast.EnabledIndicator>
             <Broadcast.EnabledIndicator asChild>
               <StopIcon className="w-full h-full" />
