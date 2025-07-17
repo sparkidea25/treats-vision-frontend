@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 // import * as Player from "@livepeer/react/player";
 // import { PauseIcon, PlayIcon } from '@livepeer/react/assets';
-import { getSrc } from '@livepeer/react/external';
+// import { getSrc } from '@livepeer/react/external';
 import { ApiStrings } from '@/lib/apiStrings';
 import { StreamCard } from './StreamCard';
 
