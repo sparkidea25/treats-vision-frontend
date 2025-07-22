@@ -44,6 +44,7 @@ export function LiveSection() {
     <section className="bg-lime-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
+          <img src="../public/assets/live.png" />
           <h2 className="text-gray-800 text-8xl font-normal font-Redaction">live</h2>
         </div>
         {fetchError || liveStreams.length === 0 ? (
