@@ -124,7 +124,13 @@ const statusColors: Record<UserStatus, string> = {
             <div className="flex flex-col min-h-screen bg-lime-50 overflow-hidden border-l border-r border-black relative z-20">
               <div className="absolute inset-y-0 left-6 w-px bg-black z-10"></div>
               <div className="absolute inset-y-0 right-6 w-px bg-black z-10"></div>
-              <Header />
+               <div className="mx-6 border-b border-gray-800">
+                  {/* Content container with padding inside the border */}
+                  <div className="px-4">
+                    <Header />
+                  </div>
+                </div>
+              {/* < /> */}
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
                 <div className="grid grid-row-1 lg:grid-row-3 gap-8">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">

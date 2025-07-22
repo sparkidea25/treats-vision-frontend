@@ -8,7 +8,7 @@ import { getIngest } from "@livepeer/react/external";
 import { useLocation } from 'react-router-dom';
 import ChatRoom from '@/components/ChatRoom';
 import { io } from 'socket.io-client';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 
 const socket = io(process.env.VITE_API_LINK)
 const StreamingPage = () => {

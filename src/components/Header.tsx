@@ -3,7 +3,9 @@ import { Button } from '@/components/ui/button';
 import { usePrivy } from "@privy-io/react-auth";
 import { Menu } from '@headlessui/react';
 import { ApiStrings } from '@/lib/apiStrings';
-import Dialog from './Dialog';
+import { Dialog } from './Dialog';
+import { useLocation, useNavigate } from 'react-router-dom';
+// import Dialog from './Dialog';
 // import Dialog from './Dialog';
 // import { Camera } from 'lucide-react';
 // import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -12,6 +14,9 @@ import Dialog from './Dialog';
 export function Header() {
   const { ready, authenticated, user, login, logout } = usePrivy();
     const [dialogOpen, setDialogOpen] = useState(false);
+     const location = useLocation();
+  const navigate = useNavigate();
+  const isOnStreamingPage = location.pathname === '/streaming' || location.pathname.includes('/stream');
 
 
   // Move this function above useEffect
@@ -37,6 +42,13 @@ export function Header() {
     } catch (error) {
       console.error('Error connecting wallet:', error);
     }
+  };
+
+  const handleEndStream = () => {
+    // Navigate back to home or dashboard
+    navigate('/');
+    // You might want to add additional cleanup logic here
+    // such as stopping the stream, disconnecting from socket, etc.
   };
 
   useEffect(() => {
@@ -66,13 +78,7 @@ export function Header() {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   }
 
-
-
-
-
-
   return (
-
     //  <Button onClick={onGoLive}>go live</Button>
     <header className="w-full  px-6 py-3 bg-lime-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -89,13 +95,36 @@ export function Header() {
           </div>
         </div>
         <nav className="flex items-center space-x-6">
-                 {/* <Button onClick={onGoLive}>go live</Button> */}
-       <button onClick={() => setDialogOpen(true)}>go live</button>
           <Dialog
-            open={dialogOpen}
-            onClose={() => setDialogOpen(false)}
-            // ...other props if needed
-          />
+  open={dialogOpen}
+  onClose={() => setDialogOpen(false)}
+/>
+{/* <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} /> */}
+                 {/* <Button onClick={onGoLive}>go live</Button> */}
+              {/* <button
+              onClick={() => setDialogOpen(true)}
+              className="flex items-center gap-2 px-4 py-2"
+            >
+              <img src="/assets/live.png" alt="live icon" className="w-5 h-5 object-contain" />
+              go live
+            </button> */}
+             {isOnStreamingPage ? (
+            <button
+              onClick={handleEndStream}
+              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+            >
+              <img src="/assets/live.png" alt="stop icon" className="w-5 h-5 object-contain" />
+              end stream
+            </button>
+          ) : (
+            <button
+              onClick={() => setDialogOpen(true)}
+              className="flex items-center gap-2 px-4 py-2"
+            >
+              <img src="/assets/live.png" alt="live icon" className="w-5 h-5 object-contain" />
+              go live
+            </button>
+          )}
           {ready && authenticated && (
             <Button 
               variant="ghost" 
