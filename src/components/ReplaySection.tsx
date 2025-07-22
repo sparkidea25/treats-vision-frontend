@@ -117,10 +117,10 @@ useEffect(() => {
 console.log(srcList, 'src List')
 
   return (
-    <section className="bg-green-50 p-6">
+    <section className="bg-lime-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-gray-800 text-6xl font-light">replay</h2>
+          <h2 className="text-gray-800 text-8xl font-Redaction">replay</h2>
         </div>
         {srcList.length === 0 ? (
           <div className="text-center text-gray-500 text-xl py-12">No replay available</div>

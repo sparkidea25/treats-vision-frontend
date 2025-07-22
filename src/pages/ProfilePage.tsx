@@ -101,8 +101,8 @@ const users: { name: string; status: UserStatus }[] = [
 
 const statusColors: Record<UserStatus, string> = {
   banned: "bg-red-400 text-white",
-  active: "bg-lime-200 text-black",
-  "access requested": "bg-yellow-100 text-black",
+  active: "bg-lime-50 text-black",
+  "access requested": "bg-lime-50 text-black",
 };
 
 
@@ -121,7 +121,7 @@ const statusColors: Record<UserStatus, string> = {
   // console.log(user, 'user details');
 
           return (
-            <div className="flex flex-col min-h-screen bg-green-50 overflow-hidden border-l border-r border-black relative z-20">
+            <div className="flex flex-col min-h-screen bg-lime-50 overflow-hidden border-l border-r border-black relative z-20">
               <div className="absolute inset-y-0 left-6 w-px bg-black z-10"></div>
               <div className="absolute inset-y-0 right-6 w-px bg-black z-10"></div>
               <Header />

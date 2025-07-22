@@ -52,7 +52,7 @@ export function Header() {
   // Wait until the Privy client is ready before rendering
   // if (!ready) {
   //   return (
-  //     <header className="w-full border-b border-black px-6 py-3 bg-green-50">
+  //     <header className="w-full border-b border-black px-6 py-3 bg-lime-50">
   //       <div className="max-w-7xl mx-auto flex items-center justify-between">
   //         <div>Loading header...</div>
   //       </div>
@@ -74,7 +74,7 @@ export function Header() {
   return (
 
     //  <Button onClick={onGoLive}>go live</Button>
-    <header className="w-full border-b border-black px-6 py-3 bg-green-50">
+    <header className="w-full  px-6 py-3 bg-lime-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <div className="flex items-center space-x-2">

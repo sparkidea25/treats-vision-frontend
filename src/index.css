@@ -70,6 +70,11 @@
   src: url('../public/fonts/redaction/Redaction20Bold-2ODWX.otf') format('truetype');
 }
 
+@font-face {
+  font-family: 'FiraMono';
+  src: url('../public/fonts/Fira_Mono/FiraMono-Bold.ttf') format('truetype');
+}
+
 @layer base {
   * {
     @apply border-border;

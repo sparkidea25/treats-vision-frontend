@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 
 export function HeroSection() {
   return (
-    <section className="bg-green-50 p-6">
+    <section className="bg-lime-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* <Link to="/stream" className="block group" tabIndex={-1}> */}
           <div className="relative rounded-lg overflow-hidden bg-black aspect-video border border-gray-800 cursor-pointer transition ring-rose-400/40 group-hover:ring-4">

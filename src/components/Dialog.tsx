@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Dialog as HeadlessDialog, DialogPanel, Listbox } from '@headlessui/react';
 import { X, Camera } from 'react-feather';
 import { useNavigate } from 'react-router-dom';
+import { usePrivy } from '@privy-io/react-auth';
+import { getUserUserId } from '@/lib/utils';
 
 interface DialogProps {
   open: boolean;
@@ -10,7 +12,9 @@ interface DialogProps {
 }
 
 const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
+  const { user, authenticated } = usePrivy();
   const [step, setStep] = useState(1);
+  const [userId, setUserId]= useState("")
   const [cameraError, setCameraError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
@@ -23,12 +27,27 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
     tvChat: true,
     tokenAccess: true,
     publicAccess: true,
+    privy_id: userId,
   });
 
   const sources = [
     { name: 'Logitech Webcam', icon: <Camera className="w-4 h-4 mr-2 inline" /> },
     { name: 'Screen Share', icon: null },
   ];
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      if (authenticated && user) {
+        console.log(user, 'user in dialog');
+        const getId = await getUserUserId(user.id);
+        setUserId(getId.id);
+        console.log('User authenticated:', user.id);
+      } else {
+        console.log('User not authenticated');
+      }
+    };
+    fetchUserId();
+  }, [user]);
 
   useEffect(() => {
     if (step === 2 && form.source === 'Logitech Webcam') {
@@ -65,6 +84,7 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
         tvChat: true,
          tokenAccess: true,
     publicAccess: true,
+    privy_id: userId, // Ensure privy_id is set correctly 
       });
     }
   }, [open]);
@@ -116,7 +136,7 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
               <input
                 id="tv-chat"
                 type="checkbox"
-                className="mr-2 bg-green-50"
+                className="mr-2 bg-lime-50"
                     checked={form.tvChat}
     onChange={e => setForm({ ...form, tvChat: e.target.checked })}
               />
@@ -128,7 +148,7 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
               <input
                 id="token-access"
                 type="checkbox"
-                className="mr-2 accent-black bg-green-50"
+                className="mr-2 accent-black bg-lime-50"
                 defaultChecked
               />
               <label htmlFor="token-access" className="font-medium text-gray-800 mr-4">token access</label>
@@ -186,13 +206,13 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
           <div>
             <h2 className="text-lg font-bold mb-2">Token Access</h2>
             <input
-              className="border p-2 mb-2 w-full bg-green-50"
+              className="border p-2 mb-2 w-full bg-lime-50"
               placeholder="Token Address"
               value={form.tokenAddress}
               onChange={e => setForm({ ...form, tokenAddress: e.target.value })}
             />
             <input
-              className="border p-2 mb-2 w-full bg-green-50"
+              className="border p-2 mb-2 w-full bg-lime-50"
               placeholder="Number of Tokens Required"
               type="number"
               value={form.tokenAmount}
@@ -225,8 +245,8 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
       static
     >
       <div className="flex items-center justify-center min-h-screen relative">
-        <div className="fixed inset-0 bg-lime-100 border-2 border-lime-400 opacity-30" aria-hidden="true" />
-        <DialogPanel className="border-r-4 border-lime-400 shadow-[0_0_16px_4px_rgba(163,230,53,0.15)] bg-lime-100 border-6 border-gray-950 p-0 w-full max-w-md rounded-lg relative z-10">
+        <div className="fixed inset-0 bg-lime-50 border-2 border-lime-400 opacity-30" aria-hidden="true" />
+        <DialogPanel className="border-r-4 border-lime-400 shadow-[0_0_16px_4px_rgba(163,230,53,0.15)] bg-lime-50 border-6 border-gray-950 p-0 w-full max-w-md rounded-lg relative z-10">
           <div className="flex items-center justify-between p-4 border-b border-lime-300">
             {/* <h2 className="text-lg font-semibold text-gray-800">Step-by-Step Process</h2> */}
             <div className="flex flex-col gap-2 w-full">

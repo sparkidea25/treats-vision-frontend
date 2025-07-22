@@ -41,10 +41,10 @@ export function LiveSection() {
   }, []);
 
   return (
-    <section className="bg-green-50 p-6">
+    <section className="bg-lime-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-gray-800 text-6xl font-light">live</h2>
+          <h2 className="text-gray-800 text-8xl font-normal font-Redaction">live</h2>
         </div>
         {fetchError || liveStreams.length === 0 ? (
           <div className="text-center text-gray-500 text-xl py-12">No live available</div>

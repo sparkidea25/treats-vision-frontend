@@ -80,7 +80,7 @@ export default {
       },
     },
     fontFamily: {
-      Redaction: ['Redaction', 'sans-serif'],
+      Redaction: ['Redaction', 'FiraMono', 'sans-serif'],
     }
   },
   plugins: [require('tailwindcss-animate')],

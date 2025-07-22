@@ -7,64 +7,48 @@ import * as Broadcast from "@livepeer/react/broadcast";
 import { getIngest } from "@livepeer/react/external";
 import { useLocation } from 'react-router-dom';
 import ChatRoom from '@/components/ChatRoom';
-import { usePrivy } from '@privy-io/react-auth';
 import { io } from 'socket.io-client';
-import { getUserUserId } from '@/lib/utils';
+import { ToastContainer, toast } from 'react-toastify';
 
 const socket = io(process.env.VITE_API_LINK)
 const StreamingPage = () => {
-  const { user, authenticated } = usePrivy();
-  console.log(user, 'user in streaming page');
-    const [streamId, setStreamId] = useState(null);
-    const [streamName, setStreamName]= useState('null')
-        const [userId, setUserId]= useState('null')
+    const [streamId, setStreamId] = useState("");
+    const [streamName, setStreamName]= useState("")
       const location = useLocation();
   const form = location.state;
-
-
-  useEffect(() => {
-    const fetchStream = async () => {
-      console.log(form, 'check form data');
-      const streamDetails = await LiveStream(form);
-      console.log(streamDetails.data, 'stream Details already')
-      // if (streamDetails && streamDetails.data && streamDetails.data.id) {
-        setStreamId(streamDetails.data.streamKey);
-        setStreamName(streamDetails.data.name)
-      // }
-    }
-     fetchStream();
-  }, []);
-
+  console.log(form, 'form data from location state');
 
 
 useEffect(() => {
-  const fetchUserId = async () => {
-    if (authenticated && user) {
-      const getId = await getUserUserId(user.id);
-      setUserId(getId.id);
-      console.log('User authenticated:', user.id);
+  const fetchStream = async () => {
+    console.log(form, 'check form data');
+    const streamDetails = await LiveStream(form);
+    if (streamDetails && streamDetails.data) {
+      setStreamId(streamDetails.data.streamKey);
+      setStreamName(streamDetails.data.name);
     } else {
-      console.log('User not authenticated');
+      // toast.error('Failed to create stream or get stream details. Redirecting to home...');
+      // setTimeout(() => {
+      //   window.location.href = '/';
+      // }, 2500);
+      console.error('Failed to create stream or get stream details');
     }
   };
-  fetchUserId();
-}, [user]);
+  fetchStream();
+}, []);
 
-  console.log(userId, 'current user id here')
+
+
+
+
+  // console.log(userId, 'current user id here')
 
   // socket.emit("joinRoom", { roomId: streamId, user: userId });
    useEffect(() => {
-    if (!userId || !streamId) return;
-    socket.emit('joinRoom', { roomId: streamId, user: userId });
-  }, [userId, streamId]);
-
-  // console.log(user.id, 'user id here')
-
-            // socket.emit('joinRoom', { streamId, user.id });
-
+    if (!form.userId || !streamId) return;
+    socket.emit('joinRoom', { roomId: streamId, user: form.userId });
+  }, [form.userId, streamId]);
   //step one, get privyId, check with internal api if id a user and return user data
-
-
 const LiveStream = async (form: any) => {
   try {
     const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream`, {
@@ -81,7 +65,7 @@ const LiveStream = async (form: any) => {
         tvChat: form.tvChat,
         tokenAccess: form.tokenAccess,
         publicAccess: form.publicAccess,
-        privy_id: userId || null, // Ensure privy_id is passed correctly
+        privy_id: form.userId, // Ensure privy_id is passed correctly
       }),
     });
 
@@ -101,98 +85,95 @@ const LiveStream = async (form: any) => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      <ToastContainer />
       {/* Updated Header - Now fully clickable as button */}
       <Header />
 
       {/* Main Content */}
       <div className="flex h-screen">
         {/* Video Stream Area */}
-        <div className="flex-1 bg-green-50 relative">
+        <div className="flex-1 bg-lime-50 relative">
           {/* Video placeholder with futuristic overlay https://gist.github.com/sparkidea25/03209b2d179be4886737d79f45029a58 */}
           {/* <BroadcastWithControls streamKey={streamId} /> */}
-              <Broadcast.Root ingestUrl={getIngest(streamId)}>
-      <Broadcast.Container className="h-full w-full bg-gray-950">
-        <Broadcast.Video title={streamName} className="h-full w-full"  style={{
-          height: "100%",
-          width: "100%",
-          objectFit: "contain",
-        }} />
+          <Broadcast.Root ingestUrl={getIngest(streamId)}>
+            <Broadcast.Container className="h-full w-full bg-gray-950">
+              <Broadcast.Video title={streamName} className="h-full w-full"  style={{
+                height: "100%",
+                width: "100%",
+                objectFit: "contain",
+              }} />
 
-        <Broadcast.Controls className="flex items-center justify-center">
-          <Broadcast.EnabledTrigger className="w-10 h-10 hover:scale-105 flex-shrink-0 border-2 border-purple-500 rounded-full transition-transform duration-200">
-            <Broadcast.EnabledIndicator asChild matcher={false}>
-              <EnableVideoIcon
-                className="w-full h-full"
-                style={{
-                  background: '#fff',
-                  // border: '2px solid #a855f7', // purple-500
-                  transition: 'background 0.2s, color 0.2s',
-                  // color: '#a855f7',
-                  boxSizing: 'border-box',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = '#000';
-                  e.currentTarget.style.color = '#000';
-                  e.currentTarget.style.border = '2px solid #a855f7'; // purple-500
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = '#000';
-                  e.currentTarget.style.color = '#fff';
-                  e.currentTarget.style.border = '2px solid #a855f7'; // purple-500
-                }}
-              />
-            </Broadcast.EnabledIndicator>
-            <Broadcast.EnabledIndicator asChild>
-              <StopIcon className="w-full h-full" />
-            </Broadcast.EnabledIndicator>
-          </Broadcast.EnabledTrigger>
-        </Broadcast.Controls>
+              <Broadcast.Controls className="flex items-center justify-center">
+                <Broadcast.EnabledTrigger className="w-10 h-10 hover:scale-105 flex-shrink-0 border-2 border-purple-500 rounded-full transition-transform duration-200">
+                  <Broadcast.EnabledIndicator asChild matcher={false}>
+                    <EnableVideoIcon
+                      className="w-full h-full"
+                      style={{
+                        background: '#fff',
+                        // border: '2px solid #a855f7', // purple-500
+                        transition: 'background 0.2s, color 0.2s',
+                        // color: '#a855f7',
+                        boxSizing: 'border-box',
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = '#000';
+                        e.currentTarget.style.color = '#000';
+                        e.currentTarget.style.border = '2px solid #a855f7'; // purple-500
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = '#000';
+                        e.currentTarget.style.color = '#fff';
+                        e.currentTarget.style.border = '2px solid #a855f7'; // purple-500
+                      }}
+                    />
+                  </Broadcast.EnabledIndicator>
+                  <Broadcast.EnabledIndicator asChild>
+                    <StopIcon className="w-full h-full" />
+                  </Broadcast.EnabledIndicator>
+                </Broadcast.EnabledTrigger>
+              </Broadcast.Controls>
 
-        <Broadcast.LoadingIndicator asChild matcher={false}>
-          <div className="absolute overflow-hidden py-1 px-2 rounded-full top-1 left-1 bg-white/50 flex items-center backdrop-blur">
-            <Broadcast.StatusIndicator
-              matcher="live"
-              className="flex gap-2 items-center"
-            >
-              <div className="bg-red-500 animate-pulse h-1.5 w-1.5 rounded-full" />
-              <span className="text-xs text-white select-none">LIVE</span>
-            </Broadcast.StatusIndicator>
+              <Broadcast.LoadingIndicator asChild matcher={false}>
+                <div className="absolute overflow-hidden py-1 px-2 rounded-full top-1 left-1 bg-white/50 flex items-center backdrop-blur">
+                  <Broadcast.StatusIndicator
+                    matcher="live"
+                    className="flex gap-2 items-center"
+                  >
+                    <div className="bg-red-500 animate-pulse h-1.5 w-1.5 rounded-full" />
+                    <span className="text-xs text-white select-none">LIVE</span>
+                  </Broadcast.StatusIndicator>
 
-            <Broadcast.StatusIndicator
-              className="flex gap-2 items-center"
-              matcher="pending"
-            >
-              <div className="bg-white/80 h-1.5 w-1.5 rounded-full animate-pulse" />
-              <span className="text-xs select-none">LOADING</span>
-            </Broadcast.StatusIndicator>
+                  <Broadcast.StatusIndicator
+                    className="flex gap-2 items-center"
+                    matcher="pending"
+                  >
+                    <div className="bg-white/80 h-1.5 w-1.5 rounded-full animate-pulse" />
+                    <span className="text-xs select-none">LOADING</span>
+                  </Broadcast.StatusIndicator>
 
-            <Broadcast.StatusIndicator
-              className="flex gap-2 items-center"
-              matcher="idle"
-            >
-              <div className="bg-white/80 h-1.5 w-1.5 rounded-full" />
-              <span className="text-xs select-none">IDLE</span>
-            </Broadcast.StatusIndicator>
+                  <Broadcast.StatusIndicator
+                    className="flex gap-2 items-center"
+                    matcher="idle"
+                  >
+                    <div className="bg-white/80 h-1.5 w-1.5 rounded-full" />
+                    <span className="text-xs select-none">IDLE</span>
+                  </Broadcast.StatusIndicator>
+                </div>
+              </Broadcast.LoadingIndicator>
+            </Broadcast.Container>
+          </Broadcast.Root>
+          <br/>
+          <div className="flex flex-col justify-center items-center absolute bottom-4 left-0 right-0">
+            <button className="bg-pink-50 rounded-full font-semibold backdrop-blur-sm border-2 border-gray-800 px-6 py-2 transition-all shadow-sm">
+    tip
+  </button>
+          <h1 className="text-black text-3xl font-FiraMono text-center">{form.title}</h1>
+                    <p className="text-black text-center">{form.description}</p>
           </div>
-        </Broadcast.LoadingIndicator>
-      </Broadcast.Container>
-    </Broadcast.Root>
-              </div>
-              <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
-              <button className="bg-green-50 rounded-full font-semibold backdrop-blur-sm border border-white border-opacity-30 transition-all">
-                tip
-              </button>
-            </div>
 
-            {/* Stream title overlay */}
-            <div className="absolute bottom-8 left-8 text-blue">
-              {/* <h1 className="text-3xl text-black font-bold mb-2">{form.name}</h1> */}
-              {/* <p className="text-black">{form.description}</p> */}
-            </div>
-
-          {/* Chat Sidebar */}
-          <ChatRoom />
+        </div>
+        <ChatRoom streamId={streamId} />
 
       </div>
       <div className="w-screen border-t border-gray-800"></div>

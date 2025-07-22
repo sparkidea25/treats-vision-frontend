@@ -3,20 +3,14 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-const socket = io(process.env.VITE_API_LINK)
+const socket = io(process.env.VITE_API_LINK);
 
-function ChatRoom() {
+interface ChatRoomProps {
+  streamId: string;
+}
+
+function ChatRoom({ streamId }: ChatRoomProps) {
   const [isOpen, setIsOpen] = useState(true);
-  //   const [chatMessages] = useState([
-  //   // { id: 1, user: 'adriana clouart', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-  //   // { id: 2, user: 'steph pine', message: 'A bunch of words bla filling the chat here with soe wordsthe chat here with soe wordsthe chat here with soe wordsthe chat here with soe words', avatar: '👤' },
-  //   // { id: 3, user: 'claus gusman', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-  //   // { id: 4, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-  //   // { id: 5, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-  //   // { id: 6, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-  //   // { id: 7, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-  //   // { id: 8, user: 'james winfred', message: 'A bunch of words bla filling the chat here with soe words', avatar: '👤' },
-  // ]);
   const {authenticated, user} = usePrivy();
   const [username, setUsername] = useState('');
   const [message, setMessage] = useState('');
@@ -69,6 +63,7 @@ function ChatRoom() {
 
       useEffect(() => {
         socket.on('userTyping', (data) => {
+          if (data.streamId !== streamId) return;
           setTypingUsers(prev => {
             if (data.isTyping && !prev.includes(data.username)) {
               return [...prev, data.username];
@@ -82,10 +77,11 @@ function ChatRoom() {
         return () => {
           socket.off('userTyping');
         };
-      }, []);
+      }, [streamId]);
 
       useEffect(() => {
             socket.on('receiveMessage', (data) => {
+              if (data.streamId !== streamId) return;
               console.log(data, 'received message');
                 setMessages((prevMessages) => [...prevMessages, data]);
             });
@@ -93,37 +89,37 @@ function ChatRoom() {
             return () => {
                 socket.off('receiveMessage');
             };
-        }, []);
+        }, [streamId]);
 
         const sendMessage = () => {
             if (!message.trim()) return;
-            // Send message with user info
-            const msgObj = user ? { user: username || user.email || 'Anonymous', message } : { message };
+            // Send message with user info and streamId
+            const msgObj = user ? { user: username || user.email || 'Anonymous', message, streamId } : { message, streamId };
             socket.emit('sendMessage', msgObj);
             setMessages((prevMessages) => [...prevMessages, msgObj]); // Add to local state immediately
             setMessage('');
             // Clear typing state and notify others
             if (isTyping) {
               setIsTyping(false);
-              socket.emit('typing', { username: username || (user && user.email) || 'Anonymous', isTyping: false });
+              socket.emit('typing', { username: username || (user && user.email) || 'Anonymous', isTyping: false, streamId });
             }
         };
 
-          const handleInputChange = (e: any) => {
+      const handleInputChange = (e: any) => {
         setMessage(e.target.value);
         if (e.target.value.length > 0 && !isTyping) {
           setIsTyping(true);
-          socket.emit('typing', { username: username || (user && user.email) || 'Anonymous', isTyping: true });
+          socket.emit('typing', { username: username || (user && user.email) || 'Anonymous', isTyping: true, streamId });
         } else if (e.target.value.length === 0 && isTyping) {
           setIsTyping(false);
-          socket.emit('typing', { username: username || (user && user.email) || 'Anonymous', isTyping: false });
+          socket.emit('typing', { username: username || (user && user.email) || 'Anonymous', isTyping: false, streamId });
         }
       };
 
   return (
     <>
     {!isOpen && (
-        <div className="h-full w-16 bg-green-50 border-l-2 border-black flex flex-col">
+        <div className="h-full w-16 bg-lime-50 border-l-2 border-black flex flex-col">
           {/* Top section */}
           {/* <div className="flex-1 flex flex-col items-center justify-start pt-4">
             <div className="w-8 h-8 bg-purple-600 rounded-full mb-2"></div>
@@ -166,7 +162,7 @@ function ChatRoom() {
 
       {/* Chat panel when open */}
       {isOpen && (
-        <div className="h-full w-80 bg-green-50 border-l-2 border-black flex flex-col z-40">
+        <div className="h-full w-80 bg-lime-50 border-l-2 border-black flex flex-col z-40">
           {/* Chat header */}
           <div className="p-4 border-b border-black flex items-center justify-between">
             <div className="flex items-center">
@@ -212,7 +208,7 @@ function ChatRoom() {
         )}
       </div>
       {/* Input area fixed at bottom */}
-      <div className="w-full p-4 border-t border-black bg-green-50">
+      <div className="w-full p-4 border-t border-black bg-lime-50">
         <div className="flex gap-2">
           <input
             type="text"
