@@ -89,10 +89,13 @@ const LiveStream = async (form: any) => {
       {/* Updated Header - Now fully clickable as button */}
       <Header />
 
+
+
       {/* Main Content */}
       <div className="flex h-screen">
         {/* Video Stream Area */}
         <div className="flex-1 bg-lime-50 relative">
+                <div className="absolute inset-y-0 left-6 w-px bg-black z-10"></div>
           {/* Video placeholder with futuristic overlay https://gist.github.com/sparkidea25/03209b2d179be4886737d79f45029a58 */}
           {/* <BroadcastWithControls streamKey={streamId} /> */}
           <Broadcast.Root ingestUrl={getIngest(streamId)}>
