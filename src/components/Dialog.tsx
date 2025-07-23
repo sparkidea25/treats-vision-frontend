@@ -82,7 +82,7 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
     if (open) {
       setStep(1);
       setCameraError(null);
-      setForm(prev => ({
+      setForm(() => ({
         title: '',
         description: '',
         source: 'Logitech Webcam',

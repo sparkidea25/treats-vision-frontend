@@ -1,13 +1,21 @@
 // import React, { useState } from 'react';
 import { Eye, } from 'lucide-react';
 
-export const LiveStreamCard = ({ 
-  title, 
-  streamer, 
-  viewers,  
-  isLive, 
-  onClick 
-}) => {
+interface LiveStreamCardProps {
+  title: string;
+  streamer: string;
+  viewers: number;
+  isLive: boolean;
+  onClick: () => void;
+}
+
+export const LiveStreamCard = ({
+  title,
+  streamer,
+  viewers,
+  isLive,
+  onClick,
+}: LiveStreamCardProps) => {
   return (
     <div 
       className="relative cursor-pointer group overflow-hidden"

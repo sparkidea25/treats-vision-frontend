@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 interface ListboxProps {
-  value: string;
+  value: any;
   onChange: (value: string) => void;
   children: React.ReactNode;
 }
@@ -30,23 +30,26 @@ interface ListboxOptionProps {
 }
 
 
-export const Listbox = ({ value, onChange, children }) => {
+export const Listbox = ({ value, onChange, children }: ListboxProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   return (
     <div className="relative">
-      {React.Children.map(children, child => 
-        React.cloneElement(child, { 
-          value, 
-          onChange, 
-          isOpen, 
-          setIsOpen,
-            currentValue: value
-        })
+      {React.Children.map(children, child =>
+        React.isValidElement(child)
+          ? React.cloneElement(child, {
+              value,
+              onChange,
+              isOpen,
+              setIsOpen,
+              currentValue: value,
+            })
+          : child // return child as-is if it's not a valid ReactElement
       )}
     </div>
   );
 };
+
 
 export const ListboxButton: React.FC<ListboxButtonProps> = ({ 
   children, 

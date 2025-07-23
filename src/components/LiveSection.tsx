@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { StreamCard } from './StreamCard';
 import { ApiStrings } from '@/lib/apiStrings';
 import { useNavigate } from 'react-router-dom';
 import { LiveStreamCard } from './LiveStream';
