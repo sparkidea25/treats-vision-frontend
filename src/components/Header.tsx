@@ -80,10 +80,11 @@ export function Header() {
 
   return (
     //  <Button onClick={onGoLive}>go live</Button>
-    <header className="w-full  px-6 py-3 bg-lime-50">
+    // w-full  px-6 py-3
+    <header className="w-full pt-6 bg-lime-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-8">
-          <div className="flex items-center space-x-2">
+        {/* <div className="flex space-x-8"> */}
+          <div className="flex-1 bg-lime-50 relative pl-10 pb-8">
             <a href="/">
               <img
                 src="/assets/logo.png"
@@ -92,115 +93,105 @@ export function Header() {
                 style={{ cursor: 'pointer' }}
               />
             </a>
-          </div>
+          {/* </div> */}
         </div>
-        <nav className="flex items-center space-x-6">
-          <Dialog
-  open={dialogOpen}
-  onClose={() => setDialogOpen(false)}
-/>
-{/* <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} /> */}
-                 {/* <Button onClick={onGoLive}>go live</Button> */}
-              {/* <button
-              onClick={() => setDialogOpen(true)}
-              className="flex items-center gap-2 px-4 py-2"
-            >
-              <img src="/assets/live.png" alt="live icon" className="w-5 h-5 object-contain" />
-              go live
-            </button> */}
-             {isOnStreamingPage ? (
+        <nav className="flex space-x-6 ml-8 mr-80">
+  <Dialog
+    open={dialogOpen}
+    onClose={() => setDialogOpen(false)}
+  />
+  {isOnStreamingPage ? (
+    <button
+      onClick={handleEndStream}
+      className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+    >
+      <img src="/assets/live.png" alt="stop icon" className="w-5 h-5 object-contain" />
+      end stream
+    </button>
+  ) : (
+    <button
+      onClick={() => setDialogOpen(true)}
+      className="flex items-center gap-2 px-4 py-2"
+    >
+      <img src="/assets/live.png" alt="live icon" className="w-5 h-5 object-contain" />
+      go live
+    </button>
+  )}
+  {ready && authenticated && (
+    <Button 
+      variant="ghost" 
+      className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+    >
+      <img
+        src="/assets/rewards.png"
+        alt="Featured livestream"
+        className="w-full h-full"
+      />
+      rewards
+    </Button>
+  )}
+  {ready && authenticated ? (
+    <Menu as="div" className="relative">
+      <Menu.Button as={Button}
+        variant="ghost"
+        className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+      >
+        <img 
+          src="/assets/account.png"
+          alt="Login icon"
+          className="w-4 h-4 mr-1"
+        />
+        Profile
+      </Menu.Button>
+      
+      <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-cyan-100 border border-gray-200 rounded-md shadow-lg focus:outline-none z-50">
+        <div className="px-4 py-3 border-b border-gray-100">
+          <p className="text-sm font-medium text-gray-900">{shortenAddress(user?.wallet?.address) ?? 'User'}</p>
+        </div>
+        <Menu.Item>
+          {({ active }) => (
             <button
-              onClick={handleEndStream}
-              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+              className={`${
+                active ? 'bg-gray-100' : ''
+              } w-full text-left px-4 py-2 text-sm text-gray-700`}
+              onClick={() => window.location.href = '/profile'}
             >
-              <img src="/assets/live.png" alt="stop icon" className="w-5 h-5 object-contain" />
-              end stream
-            </button>
-          ) : (
-            <button
-              onClick={() => setDialogOpen(true)}
-              className="flex items-center gap-2 px-4 py-2"
-            >
-              <img src="/assets/live.png" alt="live icon" className="w-5 h-5 object-contain" />
-              go live
+              Go to Profile
             </button>
           )}
-          {ready && authenticated && (
-            <Button 
-              variant="ghost" 
-              className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
-            >
-              <img
-                src="/assets/rewards.png"
-                alt="Featured livestream"
-                className="w-full h-full"
-              />
-              rewards
-            </Button>
-          )}
-          {ready && authenticated ? (
-            <Menu as="div" className="relative">
-              <Menu.Button as={Button}
-                variant="ghost"
-                className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+        </Menu.Item>
+        <div className="py-1">
+          <Menu.Item>
+            {({ active }) => (
+              <button
+                className={`${
+                  active ? 'bg-gray-100' : ''
+                } w-full text-left px-4 py-2 text-sm text-gray-700`}
+                onClick={logout}
               >
-                <img 
-                  src="/assets/account.png"
-                  alt="Login icon"
-                  className="w-4 h-4 mr-1"
-                />
-                Profile
-              </Menu.Button>
-              
-              <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg focus:outline-none z-50">
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900">{shortenAddress(user?.wallet?.address) ?? 'User'}</p>
-                </div>
-                <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        className={`${
-                          active ? 'bg-gray-100' : ''
-                        } w-full text-left px-4 py-2 text-sm text-gray-700`}
-                        onClick={() => window.location.href = '/profile'}
-                      >
-                        Go to Profile
-                      </button>
-                    )}
-                  </Menu.Item>
-                <div className="py-1">
-                  <Menu.Item>
-                    {({ active }) => (
-                      <button
-                        className={`${
-                          active ? 'bg-gray-100' : ''
-                        } w-full text-left px-4 py-2 text-sm text-gray-700`}
-                        onClick={logout}
-                      >
-                        Log Out
-                      </button>
-                    )}
-                  </Menu.Item>
-                </div>
-              </Menu.Items>
-            </Menu>
-          ) : (
-            <Button onClick={login}
-              variant="ghost" 
-              className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
-              disabled={!ready}
-            >
-              <img 
-                src="/assets/account.png"
-                alt="Login icon"
-                className="w-4 h-4 mr-1"
-              />
-              Connect Wallet
-            </Button>
-          )}
-        </nav>
+                Log Out
+              </button>
+            )}
+          </Menu.Item>
+        </div>
+      </Menu.Items>
+    </Menu>
+  ) : (
+    <Button onClick={login}
+      variant="ghost" 
+      className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+      disabled={!ready}
+    >
+      <img 
+        src="/assets/account.png"
+        alt="Login icon"
+        className="w-4 h-4 mr-1"
+      />
+      Connect Wallet
+    </Button>
+  )}
+</nav>
       </div>
-       {/* <Button onClick={onGoLive}>go live</Button> */}
     </header>
   );
 }

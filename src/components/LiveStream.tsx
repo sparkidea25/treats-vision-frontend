@@ -89,7 +89,7 @@ export const LiveStreamCard = ({
       </div>
       
       {/* Stream Info */}
-      <div className="p-4 bg-white border border-gray-200">
+      <div className="p-4 bg-lime-50 border border-gray-200">
         <h3 className="font-medium text-gray-900 text-sm mb-1 text-center">
           {title}
         </h3>

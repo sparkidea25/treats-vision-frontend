@@ -7,33 +7,29 @@ const socket = io(process.env.VITE_API_LINK);
 
 interface ChatRoomProps {
   streamId: string;
+  onChatToggle?: (isOpen: boolean) => void;
 }
 
-function ChatRoom({ streamId }: ChatRoomProps) {
+function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const {authenticated, user} = usePrivy();
+  const { authenticated, user } = usePrivy();
   const [username, setUsername] = useState('');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
 
-    const handleKeyPress = (e: any) => {
+  // Notify parent component when chat state changes
+  useEffect(() => {
+    onChatToggle?.(isOpen);
+  }, [isOpen, onChatToggle]);
+
+  const handleKeyPress = (e: any) => {
     if (e.key === 'Enter') {
       sendMessage();
     }
   };
 
-
-
-  // add code to return current authenticated user in page
-  // useEffect(() => {
-  //   if (authenticated && user) {
-  //     socket.emit('createRoom', user.email);
-  //     console.log('User connected:', user.email);
-  //   }
-
-  // add function to use username from getUserUserId
   const fetchUsername = async (privyId: any) => {
     try {
       const res = await fetch(`${ApiStrings.API_BASE_URL}/auth/${privyId}`, {
@@ -59,79 +55,90 @@ function ChatRoom({ streamId }: ChatRoomProps) {
     }
   }, [authenticated, user]);
 
-  console.log(message, 'messagess')
-
-      useEffect(() => {
-        socket.on('userTyping', (data) => {
-          if (data.streamId !== streamId) return;
-          setTypingUsers(prev => {
-            if (data.isTyping && !prev.includes(data.username)) {
-              return [...prev, data.username];
-            } else if (!data.isTyping && prev.includes(data.username)) {
-              return prev.filter(u => u !== data.username);
-            }
-            return prev;
-          });
-        });
-
-        return () => {
-          socket.off('userTyping');
-        };
-      }, [streamId]);
-
-      useEffect(() => {
-            socket.on('receiveMessage', (data) => {
-              if (data.streamId !== streamId) return;
-              console.log(data, 'received message');
-                setMessages((prevMessages) => [...prevMessages, data]);
-            });
-
-            return () => {
-                socket.off('receiveMessage');
-            };
-        }, [streamId]);
-
-        const sendMessage = () => {
-            if (!message.trim()) return;
-            // Send message with user info and streamId
-            const msgObj = user ? { user: username || user.email || 'Anonymous', message, streamId } : { message, streamId };
-            socket.emit('sendMessage', msgObj);
-            setMessages((prevMessages) => [...prevMessages, msgObj]); // Add to local state immediately
-            setMessage('');
-            // Clear typing state and notify others
-            if (isTyping) {
-              setIsTyping(false);
-              socket.emit('typing', { username: username || (user && user.email) || 'Anonymous', isTyping: false, streamId });
-            }
-        };
-
-      const handleInputChange = (e: any) => {
-        setMessage(e.target.value);
-        if (e.target.value.length > 0 && !isTyping) {
-          setIsTyping(true);
-          socket.emit('typing', { username: username || (user && user.email) || 'Anonymous', isTyping: true, streamId });
-        } else if (e.target.value.length === 0 && isTyping) {
-          setIsTyping(false);
-          socket.emit('typing', { username: username || (user && user.email) || 'Anonymous', isTyping: false, streamId });
+  useEffect(() => {
+    socket.on('userTyping', (data) => {
+      if (data.streamId !== streamId) return;
+      setTypingUsers(prev => {
+        if (data.isTyping && !prev.includes(data.username)) {
+          return [...prev, data.username];
+        } else if (!data.isTyping && prev.includes(data.username)) {
+          return prev.filter(u => u !== data.username);
         }
-      };
+        return prev;
+      });
+    });
+
+    return () => {
+      socket.off('userTyping');
+    };
+  }, [streamId]);
+
+  useEffect(() => {
+    socket.on('receiveMessage', (data) => {
+      if (data.streamId !== streamId) return;
+      console.log(data, 'received message');
+      setMessages((prevMessages) => [...prevMessages, data]);
+    });
+
+    return () => {
+      socket.off('receiveMessage');
+    };
+  }, [streamId]);
+
+  const sendMessage = () => {
+    if (!message.trim()) return;
+    const msgObj = user ? { 
+      user: username || user.email || 'Anonymous', 
+      message, 
+      streamId 
+    } : { 
+      message, 
+      streamId 
+    };
+    socket.emit('sendMessage', msgObj);
+    setMessages((prevMessages) => [...prevMessages, msgObj]);
+    setMessage('');
+    
+    if (isTyping) {
+      setIsTyping(false);
+      socket.emit('typing', { 
+        username: username || (user && user.email) || 'Anonymous', 
+        isTyping: false, 
+        streamId 
+      });
+    }
+  };
+
+  const handleInputChange = (e: any) => {
+    setMessage(e.target.value);
+    if (e.target.value.length > 0 && !isTyping) {
+      setIsTyping(true);
+      socket.emit('typing', { 
+        username: username || (user && user.email) || 'Anonymous', 
+        isTyping: true, 
+        streamId 
+      });
+    } else if (e.target.value.length === 0 && isTyping) {
+      setIsTyping(false);
+      socket.emit('typing', { 
+        username: username || (user && user.email) || 'Anonymous', 
+        isTyping: false, 
+        streamId 
+      });
+    }
+  };
 
   return (
-    <>
-    {!isOpen && (
-        <div className="h-full w-16 bg-lime-50 border-l-2 border-black flex flex-col">
-          {/* Top section */}
-          {/* <div className="flex-1 flex flex-col items-center justify-start pt-4">
-            <div className="w-8 h-8 bg-purple-600 rounded-full mb-2"></div>
-            <span className="text-xs text-gray-800">account</span>
-          </div> */}
-           <div className="flex-1 flex flex-col items-center">
-            <div className="flex items-center">
-              <span className="text-lg">👁️</span>
+    <div className="h-screen flex">
+      {/* Collapsed chat */}
+      {!isOpen && (
+        <div className="w-16 bg-lime-50 border-l border-black flex flex-col">
+          <div className="flex-1 flex flex-col items-center pt-4">
+            <div className="flex items-center mb-2">
+              <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
               <span className="text-lg font-bold ml-1">100</span>
             </div>
             <span className="text-sm text-gray-800 mb-4">tv chat</span>
-                                  {/* <div className="flex-1 flex flex-col"> */}
             <button
               className="w-8 h-8 bg-transparent border border-black rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
               onClick={() => setIsOpen(true)}
@@ -139,39 +146,23 @@ function ChatRoom({ streamId }: ChatRoomProps) {
             >
               <span className="text-sm">←</span>
             </button>
-          {/* </div> */}
             <div className="border-t border-black w-full my-4"></div>
-
-
           </div>
-          
-          {/* Middle section with eyes and 100 */}
-          {/* <div className="flex-1 flex flex-col items-center justify-center">
-            <div className="flex items-center justify-center mb-2">
-              <span className="text-lg">👁️</span>
-              <span className="text-lg font-bold ml-1">100</span>
-            </div>
-            <div className="border-t border-black w-full my-4"></div>
-            <span className="text-sm text-gray-800 mb-4">tv chat</span>
-          </div> */}
-          
-          {/* Bottom section with arrow button */}
-
         </div>
       )}
 
-      {/* Chat panel when open */}
+      {/* Expanded chat */}
       {isOpen && (
-        <div className="h-full w-80 bg-lime-50 border-l-2 border-black flex flex-col z-40">
+        <div className="w-80 bg-lime-50 border-l border-black flex flex-col">
           {/* Chat header */}
           <div className="p-4 border-b border-black flex items-center justify-between">
             <div className="flex items-center">
-              <span className="text-lg mr-2">👁️</span>
-              <span className="text-lg font-bold mr-4">100</span>
+              <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
+              <span className="text-lg font-bold ml-2">100</span>
             </div>
             <span className="font-semibold text-lg flex-1 text-center">tv chat</span>
             <button
-              className="w-8 h-8 bg-transparent border border-black rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors ml-4"
+              className="w-8 h-8 bg-transparent border border-black rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
               onClick={() => setIsOpen(false)}
               aria-label="Close chat"
             >
@@ -179,58 +170,65 @@ function ChatRoom({ streamId }: ChatRoomProps) {
             </button>
           </div>
 
-      {/* Chat messages area */}
-      <div className="flex-1 flex flex-col">
-        <div className={`flex-1 flex flex-col w-full px-4 py-2 overflow-y-auto ${messages.length === 0 ? 'items-center justify-center' : 'items-start justify-start'}`}> 
-          {messages.length === 0 ? (
-            <span className="text-2xl text-gray-400 font-mono">no chat</span>
-          ) : (
-            <div className="w-full">
-              {messages.map((msg, index) => (
-                <div key={index} className="w-full flex items-center mb-2 p-2">
-                  <img
-                    src="/assets/Icons.png"
-                    alt="User Icon"
-                    className="w-8 h-8 rounded-full object-cover mr-2 border border-gray-300"
-                  />
-                  <p className="text-left text-base text-gray-800 break-words">
-                    <span className="font-bold">{msg.user ? msg.user : "Anonymous"}: </span>
-                    {msg.message ? msg.message : msg}
-                  </p>
+          {/* Chat messages area */}
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className={`flex-1 flex flex-col w-full px-4 py-2 overflow-y-auto ${messages.length === 0 ? 'items-center justify-center' : 'items-start justify-start'}`}>
+              {messages.length === 0 ? (
+                <span className="text-2xl text-gray-400 font-mono">no chat</span>
+              ) : (
+                <div className="w-full space-y-2">
+                  {messages.map((msg, index) => (
+                    <div key={index} className="w-full flex items-start p-2">
+                      <img
+                        src="/assets/Icons.png"
+                        alt="User Icon"
+                        className="w-8 h-8 rounded-full object-cover mr-2 border border-gray-300 flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-left text-base text-gray-800 break-words">
+                          <span className="font-bold">{msg.user ? msg.user : "Anonymous"}: </span>
+                          <span>{msg.message ? msg.message : msg}</span>
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          )}
-        </div>
-        {/* Typing indicator just above input */}
-        {typingUsers.length > 0 && (
-          <p className="px-4 pb-1 text-sm text-gray-600">{typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...</p>
-        )}
-      </div>
-      {/* Input area fixed at bottom */}
-      <div className="w-full p-4 border-t border-black bg-lime-50">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={message}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            className="flex-1 text-base font-mono border border-black bg-white placeholder-gray-400 px-3 py-2"
-            placeholder="Type your message..."
-          />
-          <button 
-            onClick={sendMessage}
-            className="px-4 py-2 bg-gray-800 text-white border border-black hover:bg-gray-700 transition-colors"
-          >
-            Send
-          </button>
-        </div>
-      </div>
+            
+            {/* Typing indicator */}
+            {typingUsers.length > 0 && (
+              <div className="px-4 pb-1">
+                <p className="text-sm text-gray-600">
+                  {typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Input area */}
+          <div className="p-4 border-t border-black bg-lime-50">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={message}
+                onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
+                className="flex-1 text-base font-mono border border-black bg-white placeholder-gray-400 px-3 py-2 rounded-none"
+                placeholder="Type your message..."
+              />
+              <button
+                onClick={sendMessage}
+                className="px-4 py-2 bg-gray-800 text-white border border-black hover:bg-gray-700 transition-colors"
+              >
+                Send
+              </button>
+            </div>
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
 export default ChatRoom;
-
