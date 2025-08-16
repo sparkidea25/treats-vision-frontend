@@ -14,7 +14,7 @@ function Home() {
   {/* Header */}
   <div className="mx-6 border-b border-gray-800">
     <div className="px-4">
-      <Header />
+      <Header navVariant="/" />
     </div>
   </div>
 

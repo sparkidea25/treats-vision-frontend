@@ -18,11 +18,9 @@ const StreamingPage = () => {
     const [isChatOpen, setIsChatOpen] = useState(true);
     const location = useLocation();
     const form = location.state;
-    console.log(form, 'form data from location state');
 
     useEffect(() => {
         const fetchStream = async () => {
-            console.log(form, 'check form data');
             const streamDetails = await LiveStream(form);
             if (streamDetails && streamDetails.data) {
                 setStreamId(streamDetails.data.streamKey);
@@ -51,7 +49,7 @@ const StreamingPage = () => {
                     description: form.description,
                     source: form.source,
                     tokenAddress: form.tokenAddress,
-                    requiredTokens: form.tokenAmount, 
+                    requiredTokens: form.tokenAmount,
                     tvChat: form.tvChat,
                     tokenAccess: form.tokenAccess,
                     publicAccess: form.publicAccess,

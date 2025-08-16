@@ -155,7 +155,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       {isOpen && (
         <div className="w-80 bg-lime-50 border-l border-black flex flex-col">
           {/* Chat header */}
-          <div className="p-4 border-b border-black flex items-center justify-between">
+          <div className="p-6 border-b border-black flex items-center justify-between">
             <div className="flex items-center">
               <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
               <span className="text-lg font-bold ml-2">100</span>
