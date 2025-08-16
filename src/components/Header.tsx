@@ -61,7 +61,7 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   }
 
-  const isNavUi = navVariant === '/';
+  // const isNavUi = navVariant === '/';
 
   return (
     //  <Button onClick={onGoLive}>go live</Button>
