@@ -19,7 +19,7 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
   const handlePrivyLogin = async () => {
     if (!user) return;
     try {
-      const response = await fetch(`${ApiStrings.API_BASE_URL}/${ApiStrings.signUp}`, {
+      const response = await fetch(`${process.env.VITE_API_LINK}/v1.0/${ApiStrings.signUp}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
