@@ -6,6 +6,7 @@ import { Menu } from '@headlessui/react';
 // import { ApiStrings } from '@/lib/apiStrings';
 import { Dialog } from './Dialog';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ApiStrings } from '@/lib/apiStrings';
 
 
 export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
@@ -21,7 +22,7 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
     if (!user) return;
     try {
       const response = await axios.post(
-        `${process.env.VITE_API_LINK}/v1.0/auth/connect-wallet`,
+        `${ApiStrings.API_BASE_URL}/auth/connect-wallet`,
         {
           email: user.email,
           privy_id: user.id,
