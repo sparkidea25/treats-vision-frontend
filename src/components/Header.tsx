@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { usePrivy } from "@privy-io/react-auth";
 import { Menu } from '@headlessui/react';
-import { ApiStrings } from '@/lib/apiStrings';
+// import { ApiStrings } from '@/lib/apiStrings';
 import { Dialog } from './Dialog';
 import { useLocation, useNavigate } from 'react-router-dom';
 
