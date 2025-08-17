@@ -10,7 +10,7 @@ import ChatRoom from '@/components/ChatRoom';
 import { io } from 'socket.io-client';
 import { ToastContainer } from 'react-toastify';
 
-const socket = io(process.env.VITE_API_LINK)
+const socket = io(`${import.meta.env.VITE_API_LINK}/3001`);
 
 const StreamingPage = () => {
     const [streamId, setStreamId] = useState("");
