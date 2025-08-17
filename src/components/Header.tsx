@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { usePrivy } from "@privy-io/react-auth";
 import { Menu } from '@headlessui/react';
@@ -19,22 +20,20 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
   const handlePrivyLogin = async () => {
     if (!user) return;
     try {
-      const response = await fetch(`${process.env.VITE_API_LINK}/v1.0/${ApiStrings.signUp}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const response = await axios.post(
+        `${process.env.VITE_API_LINK}/v1.0/auth/connect-wallet`,
+        {
           email: user.email,
           privy_id: user.id,
           wallet_address: user.wallet?.address,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to connect wallet');
-      }
-      const data = await response.json();
-      console.log('User connected:', data);
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log('User connected:', response.data);
     } catch (error) {
       console.error('Error connecting wallet:', error);
     }
