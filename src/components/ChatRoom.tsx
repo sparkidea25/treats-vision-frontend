@@ -1,9 +1,11 @@
 import { ApiStrings } from "@/lib/apiStrings";
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
+
 import { io } from "socket.io-client";
 
-const socket = io(process.env.VITE_API_LINK);
+const socket = io(`${import.meta.env.VITE_API_LINK}/3001`);
+
 
 interface ChatRoomProps {
   streamId: string;
