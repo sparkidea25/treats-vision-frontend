@@ -13,6 +13,7 @@ import { ToastContainer } from 'react-toastify';
 // const socket = io(`${import.meta.env.VITE_API_LINK}/3001`);
 const socket = io("wss://api.treats.vision", {
   path: "/socket.io/",
+  transports: ["websocket"],
 });
 
 

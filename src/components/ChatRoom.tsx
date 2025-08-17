@@ -8,6 +8,7 @@ import { io } from "socket.io-client";
 
 const socket = io("wss://api.treats.vision", {
   path: "/socket.io/",
+  transports: ["websocket"],
 });
 
 
