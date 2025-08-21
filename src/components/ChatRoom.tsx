@@ -6,10 +6,11 @@ import { io } from "socket.io-client";
 
 // const socket = io(`${import.meta.env.VITE_API_LINK}/3001`);
 
-const socket = io("https://api.treats.vision", {
-  path: "/socket.io/",
-  transports: ["websocket"],
-});
+// https://api.treats.vision
+const socket = io("ws://localhost:5173"
+  // path: "/socket.io/",
+  // transports: ["websocket"],
+);
 
 
 

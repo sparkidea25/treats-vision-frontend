@@ -1,6 +1,7 @@
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { useEffect, useState } from 'react';
+import TipModal from '@/components/TipModal';
 import { ApiStrings } from '@/lib/apiStrings';
 import { EnableVideoIcon, StopIcon } from "@livepeer/react/assets";
 import * as Broadcast from "@livepeer/react/broadcast";
@@ -11,17 +12,18 @@ import { io } from 'socket.io-client';
 import { ToastContainer } from 'react-toastify';
 
 // const socket = io(`${import.meta.env.VITE_API_LINK}/3001`);
-const socket = io("https://api.treats.vision", {
-  path: "/socket.io/",
-  transports: ["websocket"],
-  withCredentials: true,
-});
+// https://api.treats.vision
+const socket = io("ws://localhost:5173"
+//   path: "/socket.io/",
+//   withCredentials: true,
+);
 
 
 const StreamingPage = () => {
     const [streamId, setStreamId] = useState("");
-    const [streamName, setStreamName] = useState("")
+    const [streamName, setStreamName] = useState("");
     const [isChatOpen, setIsChatOpen] = useState(true);
+    const [tipModalOpen, setTipModalOpen] = useState(false);
     const location = useLocation();
     const form = location.state;
 
@@ -164,12 +166,24 @@ const StreamingPage = () => {
                         </div>
                         {/* Stream Info Overlay - now always below video */}
                         <div className="flex flex-col justify-center items-center py-4">
-                            <button className="bg-pink-50 rounded-full font-semibold backdrop-blur-sm border-2 border-gray-800 px-6 py-2 transition-all shadow-sm">
+                            {/* <button
+                                className="bg-pink-50 rounded-full font-semibold backdrop-blur-sm border-2 border-gray-800 px-6 py-2 transition-all shadow-sm"
+                                onClick={() => setTipModalOpen(true)}
+                            >
                                 tip
-                            </button>
+                            </button> */}
+                            <button className="group bg-pink-50 hover:bg-black text-black hover:text-white rounded-full font-semibold border-2 border-black hover:border-pink-500 px-2 py-2 text-lg shadow-[4px_6px_0_0_#000] hover:scale-105 transition-all mt-2"
+                            onClick={() => setTipModalOpen(true)}
+                            style={{ minWidth: '100px' }}
+                        >
+                            <span className="font-sans">tip</span>
+                            {/* <span className="font-(sans-serif, 'Work_Sans')">tip</span> */}
+                        </button>
                             <h1 className="text-black text-3xl font-FiraMono text-center">{form?.title}</h1>
                             <p className="text-black text-center">{form?.description}</p>
                         </div>
+                        {/* Tip Modal Overlay */}
+                        <TipModal open={tipModalOpen} onClose={() => setTipModalOpen(false)} />
                     </div>
                     
                     {/* Chat Room Component */}
