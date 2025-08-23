@@ -8,15 +8,14 @@ import * as Broadcast from "@livepeer/react/broadcast";
 import { getIngest } from "@livepeer/react/external";
 import { useLocation } from 'react-router-dom';
 import ChatRoom from '@/components/ChatRoom';
-import { io } from 'socket.io-client';
 import { ToastContainer } from 'react-toastify';
 
 // const socket = io(`${import.meta.env.VITE_API_LINK}/3001`);
 // https://api.treats.vision
-const socket = io("ws://localhost:5173"
-//   path: "/socket.io/",
-//   withCredentials: true,
-);
+// const socket = io('https://d1a4f5678717.ngrok-free.app'
+// //   path: "/socket.io/",
+// //   withCredentials: true,
+// );
 
 
 const StreamingPage = () => {
@@ -40,10 +39,11 @@ const StreamingPage = () => {
         fetchStream();
     }, []);
 
-    useEffect(() => {
-        if (!form.userId || !streamId) return;
-        socket.emit('joinRoom', { roomId: streamId, user: form.userId });
-    }, [form.userId, streamId]);
+
+
+
+
+
 
     const LiveStream = async (form: any) => {
         try {

@@ -9,7 +9,7 @@ export function ReplaySection() {
       const [srcList, setSrcList] = useState<any[]>([]);
       const fetchReplays = async () => {
     try {
-      const response = await fetch(`${process.env.VITE_API_LINK}/v1.0/livepeer/playbacks`);
+      const response = await fetch(`${import.meta.env.VITE_API_LINK}/v1.0/livepeer/playbacks`);
       if (!response.ok) {
         throw new Error('Network response was not ok'); 
       }

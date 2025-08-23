@@ -1,18 +1,7 @@
+import { useEffect, useState } from "react";
 import { ApiStrings } from "@/lib/apiStrings";
 import { usePrivy } from "@privy-io/react-auth";
-import { useEffect, useState } from "react";
-
-import { io } from "socket.io-client";
-
-// const socket = io(`${import.meta.env.VITE_API_LINK}/3001`);
-
-// https://api.treats.vision
-const socket = io("ws://localhost:5173"
-  // path: "/socket.io/",
-  // transports: ["websocket"],
-);
-
-
+import { io, Socket } from "socket.io-client";
 
 interface ChatRoomProps {
   streamId: string;
@@ -22,37 +11,26 @@ interface ChatRoomProps {
 function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
   const [isOpen, setIsOpen] = useState(true);
   const { authenticated, user } = usePrivy();
-  const [username, setUsername] = useState('');
-  const [message, setMessage] = useState('');
+  const [username, setUsername] = useState("");
+  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   // Notify parent component when chat state changes
   useEffect(() => {
     onChatToggle?.(isOpen);
   }, [isOpen, onChatToggle]);
 
-  const handleKeyPress = (e: any) => {
-    if (e.key === 'Enter') {
-      sendMessage();
-    }
-  };
-
   const fetchUsername = async (privyId: any) => {
     try {
-      const res = await fetch(`${ApiStrings.API_BASE_URL}/auth/${privyId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const res = await fetch(`${ApiStrings.API_BASE_URL}/auth/${privyId}`);
       const data = await res.json();
-      console.log(data, 'fetch username')
       return data.name;
     } catch (e) {
-      console.log(e);
-      return '';
+      console.error(e);
+      return "";
     }
   };
 
@@ -64,76 +42,118 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     }
   }, [authenticated, user]);
 
+  // Initialize socket inside useEffect
   useEffect(() => {
-    socket.on('userTyping', (data) => {
+    const newSocket = io("https://d1a4f5678717.ngrok-free.app", {
+      path: "/socket.io/",
+      transports: ["websocket"],
+    });
+
+    setSocket(newSocket);
+
+    newSocket.on("connect", () => {
+      console.log("Connected with ID:", newSocket.id);
+      
+      // Join the room when connected
+      const currentUserId = username || user?.email || user?.id || "Anonymous";
+      newSocket.emit("joinRoom", {
+        roomId: streamId,
+        userId: currentUserId
+      });
+    });
+
+    // Handle when a user joins the room
+    newSocket.on("userJoined", (userId: string) => {
+      const joinMessage = {
+        user: "System",
+        message: `${userId} joined chat`,
+        streamId,
+        timestamp: Date.now(),
+        isSystemMessage: true
+      };
+      setMessages((prev) => [...prev, joinMessage]);
+    });
+
+    newSocket.on("user-join", (data: { message: string; clientId: string }) => {
+      setMessages((prev) => [...prev, { text: data.message, clientId: data.clientId }]);
+    });
+
+    newSocket.on("userTyping", (data) => {
       if (data.streamId !== streamId) return;
-      setTypingUsers(prev => {
+      setTypingUsers((prev) => {
         if (data.isTyping && !prev.includes(data.username)) {
           return [...prev, data.username];
         } else if (!data.isTyping && prev.includes(data.username)) {
-          return prev.filter(u => u !== data.username);
+          return prev.filter((u) => u !== data.username);
         }
         return prev;
       });
     });
 
-    return () => {
-      socket.off('userTyping');
-    };
-  }, [streamId]);
-
-  useEffect(() => {
-    socket.on('receiveMessage', (data) => {
+    newSocket.on("receiveMessage", (data) => {
       if (data.streamId !== streamId) return;
-      console.log(data, 'received message');
-      setMessages((prevMessages) => [...prevMessages, data]);
+      setMessages((prev) => [...prev, data]);
     });
 
     return () => {
-      socket.off('receiveMessage');
+      newSocket.disconnect();
     };
-  }, [streamId]);
+  }, [streamId, username, user]);
 
   const sendMessage = () => {
-    if (!message.trim()) return;
-    const msgObj = user ? { 
-      user: username || user.email || 'Anonymous', 
-      message, 
-      streamId 
-    } : { 
-      message, 
-      streamId 
-    };
-    socket.emit('sendMessage', msgObj);
-    setMessages((prevMessages) => [...prevMessages, msgObj]);
-    setMessage('');
+    if (!message.trim() || !socket || !socket.connected) return;
     
+    const msgObj = {
+      user: username || user?.email || "Anonymous",
+      message: message.trim(),
+      streamId,
+      timestamp: Date.now()
+    };
+    
+    socket.emit("sendMessage", msgObj);
+    setMessages((prev) => [...prev, msgObj]);
+    setMessage("");
+
+    // Clear typing indicator after sending
     if (isTyping) {
       setIsTyping(false);
-      socket.emit('typing', { 
-        username: username || (user && user.email) || 'Anonymous', 
-        isTyping: false, 
-        streamId 
+      socket.emit("typing", {
+        username: username || user?.email || "Anonymous",
+        isTyping: false,
+        streamId,
       });
     }
   };
 
-  const handleInputChange = (e: any) => {
-    setMessage(e.target.value);
-    if (e.target.value.length > 0 && !isTyping) {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMessage(value);
+
+    if (!socket || !socket.connected) return;
+
+    const currentUsername = username || user?.email || "Anonymous";
+
+    if (value.length > 0 && !isTyping) {
       setIsTyping(true);
-      socket.emit('typing', { 
-        username: username || (user && user.email) || 'Anonymous', 
-        isTyping: true, 
-        streamId 
+      socket.emit("typing", {
+        username: currentUsername,
+        isTyping: true,
+        streamId,
       });
-    } else if (e.target.value.length === 0 && isTyping) {
+    } else if (value.length === 0 && isTyping) {
       setIsTyping(false);
-      socket.emit('typing', { 
-        username: username || (user && user.email) || 'Anonymous', 
-        isTyping: false, 
-        streamId 
+      socket.emit("typing", {
+        username: currentUsername,
+        isTyping: false,
+        streamId,
       });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendMessage();
     }
   };
 
@@ -149,13 +169,11 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
             </div>
             <span className="text-sm text-gray-800 mb-4">tv chat</span>
             <button
-              className="w-8 h-8 bg-transparent border border-black rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+              className="w-8 h-8 border border-black rounded-full"
               onClick={() => setIsOpen(true)}
-              aria-label="Open chat"
             >
-              <span className="text-sm">←</span>
+              ←
             </button>
-            <div className="border-t border-black w-full my-4"></div>
           </div>
         </div>
       )}
@@ -165,70 +183,61 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
         <div className="w-80 bg-lime-50 border-l border-black flex flex-col">
           {/* Chat header */}
           <div className="p-6 border-b border-black flex items-center justify-between">
-            <div className="flex items-center">
-              <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
-              <span className="text-lg font-bold ml-2">100</span>
-            </div>
             <span className="font-semibold text-lg flex-1 text-center">tv chat</span>
             <button
-              className="w-8 h-8 bg-transparent border border-black rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+              className="w-8 h-8 border border-black rounded-full"
               onClick={() => setIsOpen(false)}
-              aria-label="Close chat"
             >
-              <span className="text-sm">→</span>
+              →
             </button>
           </div>
 
-          {/* Chat messages area */}
-          <div className="flex-1 flex flex-col min-h-0">
-            <div className={`flex-1 flex flex-col w-full px-4 py-2 overflow-y-auto ${messages.length === 0 ? 'items-center justify-center' : 'items-start justify-start'}`}>
-              {messages.length === 0 ? (
-                <span className="text-2xl text-gray-400 font-mono">no chat</span>
-              ) : (
-                <div className="w-full space-y-2">
-                  {messages.map((msg, index) => (
-                    <div key={index} className="w-full flex items-start p-2">
-                      <img
-                        src="/assets/Icons.png"
-                        alt="User Icon"
-                        className="w-8 h-8 rounded-full object-cover mr-2 border border-gray-300 flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-left text-base text-gray-800 break-words">
-                          <span className="font-bold">{msg.user ? msg.user : "Anonymous"}: </span>
-                          <span>{msg.message ? msg.message : msg}</span>
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            {/* Typing indicator */}
-            {typingUsers.length > 0 && (
-              <div className="px-4 pb-1">
-                <p className="text-sm text-gray-600">
-                  {typingUsers.join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...
-                </p>
+          {/* Chat messages */}
+          <div className="flex-1 overflow-y-auto px-4 py-2">
+            {messages.length === 0 ? (
+              <span className="text-2xl text-gray-400 font-mono">no chat</span>
+            ) : (
+              <div className="space-y-2">
+                {messages.map((msg, index) => (
+                  <div key={`${msg.timestamp || index}-${index}`} className="flex items-start p-2">
+                    <img
+                      src="/assets/Icons.png"
+                      alt="User"
+                      className="w-8 h-8 rounded-full mr-2"
+                    />
+                    <p className={`text-left text-base break-words ${msg.isSystemMessage ? 'text-gray-500 italic' : 'text-gray-800'}`}>
+                      <span className="font-bold">{msg.user || "Anonymous"}: </span>
+                      <span>{msg.message || msg.text || msg}</span>
+                    </p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Input area */}
+          {/* Typing indicator */}
+          {typingUsers.length > 0 && (
+            <div className="px-4 pb-1 text-sm text-gray-600">
+              {typingUsers.join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
+            </div>
+          )}
+
+          {/* Input */}
           <div className="p-4 border-t border-black bg-lime-50">
             <div className="flex gap-2">
-              <input
-                type="text"
-                value={message}
-                onChange={handleInputChange}
-                onKeyPress={handleKeyPress}
-                className="flex-1 text-base font-mono border border-black bg-white placeholder-gray-400 px-3 py-2 rounded-none"
+              <input 
+                type="text" 
+                value={message} 
+                onChange={handleInputChange} 
+                onKeyDown={handleKeyDown} 
+                className="flex-1 text-base font-mono border border-black bg-white placeholder-gray-400 px-3 py-2 rounded-none" 
                 placeholder="Type your message..."
+                disabled={!socket || !socket.connected}
               />
               <button
                 onClick={sendMessage}
-                className="px-4 py-2 bg-gray-800 text-white border border-black hover:bg-gray-700 transition-colors"
+                disabled={!message.trim() || !socket || !socket.connected}
+                className="px-4 py-2 bg-gray-800 text-white border border-black hover:bg-gray-700"
               >
                 Send
               </button>
