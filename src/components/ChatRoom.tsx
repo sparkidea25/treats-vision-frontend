@@ -44,7 +44,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
 
   // Initialize socket inside useEffect
   useEffect(() => {
-    const newSocket = io("https://d1a4f5678717.ngrok-free.app", {
+    const newSocket = io("https://api.treats.vision", {
       path: "/socket.io/",
       transports: ["websocket"],
     });
