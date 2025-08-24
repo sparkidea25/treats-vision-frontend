@@ -29,6 +29,7 @@ const StreamingPage = () => {
     useEffect(() => {
         const fetchStream = async () => {
             const streamDetails = await LiveStream(form);
+            console.log(streamDetails.data.streamKey, 'stream key details')
             if (streamDetails && streamDetails.data) {
                 setStreamId(streamDetails.data.streamKey);
                 setStreamName(streamDetails.data.name);
