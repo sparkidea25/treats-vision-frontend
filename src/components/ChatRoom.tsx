@@ -202,34 +202,34 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
   };
 
   // FIX 4: Simplified input change handler
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    console.log("Input changed:", value);
-    setMessage(value);
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.value;
+  //   console.log("Input changed:", value);
+  //   setMessage(value);
 
-    // Only send typing indicator if socket is ready
-    if (socket && socket.connected) {
-      const currentUsername = username || user?.email || "Anonymous";
+  //   // Only send typing indicator if socket is ready
+  //   if (socket && socket.connected) {
+  //     const currentUsername = username || user?.email || "Anonymous";
 
-      if (value.length > 0 && !isTyping) {
-        console.log("Starting typing indicator");
-        setIsTyping(true);
-        socket.emit("typing", {
-          username: currentUsername,
-          isTyping: true,
-          streamId,
-        });
-      } else if (value.length === 0 && isTyping) {
-        console.log("Stopping typing indicator");
-        setIsTyping(false);
-        socket.emit("typing", {
-          username: currentUsername,
-          isTyping: false,
-          streamId,
-        });
-      }
-    }
-  };
+  //     if (value.length > 0 && !isTyping) {
+  //       console.log("Starting typing indicator");
+  //       setIsTyping(true);
+  //       socket.emit("typing", {
+  //         username: currentUsername,
+  //         isTyping: true,
+  //         streamId,
+  //       });
+  //     } else if (value.length === 0 && isTyping) {
+  //       console.log("Stopping typing indicator");
+  //       setIsTyping(false);
+  //       socket.emit("typing", {
+  //         username: currentUsername,
+  //         isTyping: false,
+  //         streamId,
+  //       });
+  //     }
+  //   }
+  // };
 
   // FIX 5: Simplified input click handler
   const handleInputClick = () => {
