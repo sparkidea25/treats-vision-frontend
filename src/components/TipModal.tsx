@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { ApiStrings } from "@/lib/apiStrings";
-import {
-  EIP1193Provider,
-  usePrivy,
-  useSendTransaction,
-  useWallets,
-} from "@privy-io/react-auth";
-import { ethers } from "ethers";
+// import {
+//   EIP1193Provider,
+//   usePrivy,
+//   useSendTransaction,
+//   useWallets,
+// } from "@privy-io/react-auth";
+// import { ethers } from "ethers";
 
 interface TipModalProps {
   open: boolean;
@@ -16,19 +16,19 @@ interface TipModalProps {
 const presetTips = [{ usd: 5 }, { usd: 10 }, { usd: 20 }];
 
 // Replace with your RPC URL
-const RPC_URL = "https://mainnet.base.org"; 
+// const RPC_URL = "https://mainnet.base.org"; 
 
 const TipModal: React.FC<TipModalProps> = ({ open, onClose }) => {
   const [customPol, setCustomPol] = useState<string>("");
   const [ethPrice, setEthPrice] = useState<number | null>(null);
-  const [receiverAddress, setReceiverAddress] = useState<string | null>(null);
+  const [receiverAddress] = useState<string | null>(null);
   // const [setBalance] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // const { sendTransaction } = useSendTransaction();
   // const { wallets: privyWallets } = useWallets();
-  const { user } = usePrivy();
+  // const { user } = usePrivy();
 
   // Fetch ETH price + receiver wallet
   useEffect(() => {
@@ -41,18 +41,18 @@ const TipModal: React.FC<TipModalProps> = ({ open, onClose }) => {
         setEthPrice(null);
       }
 
-      if (user?.id) {
-        try {
-          const res = await fetch(`${ApiStrings.API_BASE_URL}/auth/${user.id}`);
-          const data = await res.json();
-          setReceiverAddress(data?.wallet_address || null);
-        } catch {
-          setReceiverAddress(null);
-        }
-      }
+      // if (user?.id) {
+      //   try {
+      //     const res = await fetch(`${ApiStrings.API_BASE_URL}/auth/${user.id}`);
+      //     const data = await res.json();
+      //     setReceiverAddress(data?.wallet_address || null);
+      //   } catch {
+      //     setReceiverAddress(null);
+      //   }
+      // }
     }
     fetchData();
-  }, [user?.id]);
+  }, []);
 
   /** ============== Wallet Helpers ============== */
   // const sendFromPrivyEmbeddedWallet = async (
@@ -151,7 +151,7 @@ const TipModal: React.FC<TipModalProps> = ({ open, onClose }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: ethAmount,
-          sender: user?.wallet?.address,
+          // sender: user?.wallet?.address,
           receiver: receiverAddress,
         }),
       });
