@@ -237,13 +237,13 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     // logDebugInfo("Input Clicked");
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    console.log("Key pressed:", e.key);
-    if (e.key === "Enter") {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
+  // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   console.log("Key pressed:", e.key);
+  //   if (e.key === "Enter") {
+  //     e.preventDefault();
+  //     sendMessage();
+  //   }
+  // };
 
   // const reconnectSocket = () => {
   //   console.log("Manual reconnection triggered");
@@ -348,7 +348,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
                     />
                     <p className={`text-left text-base break-words ${msg.isSystemMessage ? 'text-gray-500 italic' : 'text-gray-800'}`}>
                       <span className="font-bold">{msg.user || "Anonymous"}: </span>
-                      <span>{msg.message || msg.text || msg}</span>
+                      <span>{msg.message}</span>
                     </p>
                   </div>
                 ))}

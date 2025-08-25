@@ -15,8 +15,8 @@ importers:
         specifier: ^3.9.0
         version: 3.10.0(react-hook-form@7.57.0(react@18.3.1))
       '@livepeer/react':
-        specifier: ^4.3.5
-        version: 4.3.5(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^4.3.6
+        version: 4.3.6(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@nestjs/websockets':
         specifier: ^11.1.3
         version: 11.1.3(@nestjs/common@11.1.3(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -707,14 +707,14 @@ packages:
     peerDependencies:
       react: '>=17.0.0'
 
-  '@livepeer/core-web@5.2.5':
-    resolution: {integrity: sha512-GFM+3uE5n4G3DSUpWJv60xfam0w+o6w4xtZoz5nzqZMbYdjkDguiRzQeIiC2y0GN45gRJqIOinJP5yKCoqNWZA==}
+  '@livepeer/core-web@5.2.6':
+    resolution: {integrity: sha512-MXwnVDE7/cyQxnvDyLOy9hNQiS4lGlTQgtffX202VuLAf+HvZzborIxHRxqotvFAtub7DlHu9D5968WlZq5kxQ==}
 
   '@livepeer/core@3.3.1':
     resolution: {integrity: sha512-hFLG92GjiwDGw48Ou0hhYkX25GcbNRCTAySHm1e4fQ+55eorq0nCN4fknH/J3MjP3JVlYZvIlI/gvpn/2IRi3g==}
 
-  '@livepeer/react@4.3.5':
-    resolution: {integrity: sha512-OXx4jACNOUDUPbwQmdXtRzIOcTYDgXKqr0+5LZ93q2Oa8p1Dww+Zb5OTe85fT5WKHv8IH502do7WNWRr9xoJJA==}
+  '@livepeer/react@4.3.6':
+    resolution: {integrity: sha512-dHcLbXp7WQKfZ7iCn3e2MiXJQ//STaqNFzUcmhm2bzhQQBPFYOyHeqGZLSr77S+FYjmMlGJWyA/DmVO0Wmhv5A==}
     peerDependencies:
       react: '>=17.0.0'
       react-dom: '>=17.0.0'
@@ -2906,8 +2906,8 @@ packages:
   hey-listen@1.0.8:
     resolution: {integrity: sha512-COpmrF2NOg4TBWUJ5UVyaCU2A88wEMkUPK4hNqyCkqHbxT92BbvfjoSozkAIIm6XhicGlJHhFdullInrdhwU8Q==}
 
-  hls.js@1.6.5:
-    resolution: {integrity: sha512-KMn5n7JBK+olC342740hDPHnGWfE8FiHtGMOdJPfUjRdARTWj9OB+8c13fnsf9sk1VtpuU2fKSgUjHvg4rNbzQ==}
+  hls.js@1.6.10:
+    resolution: {integrity: sha512-16XHorwFNh+hYazYxDNXBLEm5aRoU+oxMX6qVnkbGH3hJil4xLav3/M6NH92VkD1qSOGKXeSm+5unuawPXK6OQ==}
 
   hmac-drbg@1.0.1:
     resolution: {integrity: sha512-Tti3gMqLdZfhOQY1Mzf/AanLiqh1WTiJgEj26ZuYQ9fbkLomzGchCws4FyrSd4VkpBfiNhaE1On+lOz894jvXg==}
@@ -3199,8 +3199,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  multiformats@13.3.7:
-    resolution: {integrity: sha512-meL9DERHj+fFVWoOX9fXqfcYcSpUfSYJPcFvDPKrxitICbwAoWR+Ut4j5NO9zAT917HUHLQmqzQbAsGNHlDcxQ==}
+  multiformats@13.4.0:
+    resolution: {integrity: sha512-Mkb/QcclrJxKC+vrcIFl297h52QcKh2Az/9A5vbWytbQt4225UWWWmIuSsKksdww9NkIeYcA7DkfftyLuC/JSg==}
 
   multiformats@9.9.0:
     resolution: {integrity: sha512-HoMUjhH9T8DDBNT+6xzkrd9ga/XiBI4xLr58LJACwK6G3HTOPeMz4nB4KJs33L2BelrIJa7P0VuNaVF3hMYfjg==}
@@ -4858,10 +4858,10 @@ snapshots:
       - '@types/react'
       - immer
 
-  '@livepeer/core-web@5.2.5(@types/react@18.3.23)(react@18.3.1)':
+  '@livepeer/core-web@5.2.6(@types/react@18.3.23)(react@18.3.1)':
     dependencies:
       '@livepeer/core': 3.3.1(@types/react@18.3.23)(react@18.3.1)
-      hls.js: 1.6.5
+      hls.js: 1.6.10
       zustand: 4.5.7(@types/react@18.3.23)(react@18.3.1)
     transitivePeerDependencies:
       - '@types/react'
@@ -4870,7 +4870,7 @@ snapshots:
 
   '@livepeer/core@3.3.1(@types/react@18.3.23)(react@18.3.1)':
     dependencies:
-      multiformats: 13.3.7
+      multiformats: 13.4.0
       nanoid: 5.1.5
       zustand: 4.5.7(@types/react@18.3.23)(react@18.3.1)
     transitivePeerDependencies:
@@ -4878,11 +4878,11 @@ snapshots:
       - immer
       - react
 
-  '@livepeer/react@4.3.5(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@livepeer/react@4.3.6(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@livepeer/core': 3.3.1(@types/react@18.3.23)(react@18.3.1)
       '@livepeer/core-react': 3.2.10(@types/react@18.3.23)(react@18.3.1)
-      '@livepeer/core-web': 5.2.5(@types/react@18.3.23)(react@18.3.1)
+      '@livepeer/core-web': 5.2.6(@types/react@18.3.23)(react@18.3.1)
       '@radix-ui/primitive': 1.1.2
       '@radix-ui/react-aspect-ratio': 1.1.7(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-compose-refs': 1.1.2(@types/react@18.3.23)(react@18.3.1)
@@ -7986,7 +7986,7 @@ snapshots:
 
   hey-listen@1.0.8: {}
 
-  hls.js@1.6.5: {}
+  hls.js@1.6.10: {}
 
   hmac-drbg@1.0.1:
     dependencies:
@@ -8251,7 +8251,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  multiformats@13.3.7: {}
+  multiformats@13.4.0: {}
 
   multiformats@9.9.0: {}
 
