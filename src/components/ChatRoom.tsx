@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ApiStrings } from "@/lib/apiStrings";
 import { usePrivy } from "@privy-io/react-auth";
 import { io, Socket } from "socket.io-client";
@@ -17,9 +17,43 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [newMsgCount, setNewMsgCount] = useState(0);
   
   // Enhanced debug states
   const [socketConnected, setSocketConnected] = useState(false);
+
+    const isScrolledToBottom = () => {
+    const el = chatContainerRef.current;
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 10;
+  };
+
+  // Scroll to bottom
+  const scrollToBottom = () => {
+    const el = chatContainerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+    setNewMsgCount(0);
+  };
+
+    useEffect(() => {
+    const el = chatContainerRef.current;
+    if (!el) return;
+    if (isScrolledToBottom()) {
+      scrollToBottom();
+    } else {
+      setNewMsgCount((c) => c + 1);
+    }
+    // eslint-disable-next-line
+  }, [messages]);
+
+   const handleScroll = () => {
+    if (isScrolledToBottom()) setNewMsgCount(0);
+  };
+
+  
+
+
 
   // Notify parent component when chat state changes
   useEffect(() => {
@@ -266,25 +300,24 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       {/* Expanded chat */}
       {isOpen && (
         <div className="w-80 bg-lime-50 border-l border-black flex flex-col h-full max-h-screen">
-          {/* Chat header with debug info */}
-          <div className="p-6 border-b border-black flex items-center justify-between">
-            <div className="flex items-center">
-             <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
-              <span className="text-lg font-bold ml-1">100</span>
-            </div>
-            <span className="font-semibold text-lg block">tv chat</span>
-            <div className="flex gap-1">
-              <button
-                className="w-8 h-8 border border-black rounded-full"
-                onClick={() => setIsOpen(false)}
-              >
-                →
-              </button>
-            </div>
-          </div>
-
+          {/* ...existing code... */}
           {/* Chat messages */}
-          <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
+          <div
+            className="flex-1 min-h-0 overflow-y-auto px-4 py-2 relative"
+            ref={chatContainerRef}
+            onScroll={handleScroll}
+          >
+            {/* New messages notification */}
+            {newMsgCount > 0 && (
+              <div
+                className="absolute left-1/2 -translate-x-1/2 top-2 z-10 bg-blue-600 text-white px-3 py-1 rounded-full shadow cursor-pointer text-xs font-semibold"
+                onClick={scrollToBottom}
+                style={{ userSelect: "none" }}
+              >
+                {newMsgCount} new message{newMsgCount > 1 ? "s" : ""}
+              </div>
+            )}
+            {/* ...existing code for messages... */}
             {messages.length === 0 ? (
               <span className="text-2xl text-gray-400 font-mono">no chat</span>
             ) : (
@@ -305,16 +338,13 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
               </div>
             )}
           </div>
-
-          {/* Typing indicator */}
-          {typingUsers.length > 0 && (
+                     {typingUsers.length > 0 && (
             <div className="px-4 pb-1 text-sm text-gray-600">
               {typingUsers.join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
             </div>
           )}
-
-          {/* FIX 7: Enhanced input section with proper onChange handler */}
-          <div className="p-4 border-t border-black bg-lime-50">
+       
+               <div className="p-4 border-t border-black bg-lime-50">
             <div className="flex gap-2">
               <textarea
                 value={message}
@@ -349,6 +379,55 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
             </div>
           </div>
         </div>
+
+
+
+      //     {/* Typing indicator */}
+      //     {typingUsers.length > 0 && (
+      //       <div className="px-4 pb-1 text-sm text-gray-600">
+      //         {typingUsers.join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
+      //       </div>
+      //     )}
+
+      //     {/* FIX 7: Enhanced input section with proper onChange handler */}
+      //     <div className="p-4 border-t border-black bg-lime-50">
+      //       <div className="flex gap-2">
+      //         <textarea
+      //           value={message}
+      //           onChange={handleInputChange}
+      //           onKeyDown={handleKeyDown}
+      //           onClick={handleInputClick}
+      //           className={"flex-1 text-base font-mono border border-black bg-white placeholder-gray-400 px-3 py-2 rounded-none focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto max-h-32 min-h-[40px]"}
+      //           placeholder={
+      //             !streamId ? "No stream ID" :
+      //             !username && !user?.email && !user?.id ? "Loading user..." :
+      //             !socketConnected ? "Type message (will send when connected)" :
+      //             "Type your message..."
+      //           }
+      //           autoComplete="off"
+      //           rows={2}
+      //         />
+      //         <button
+      //           onClick={sendMessage}
+      //           disabled={!message.trim()}
+      //           className={`px-4 py-2 border border-black ${
+      //             !message.trim()
+      //               ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+      //               : 'bg-gray-800 text-white hover:bg-gray-700'
+      //           }`}
+      //         >
+      //           Send
+      //         </button>
+      //       </div>
+      //       {/* Status indicator */}
+      //       <div className="text-xs mt-1 text-gray-600">
+      //         {!socketConnected && "Messages will be stored locally until connected"}
+      //       </div>
+      //     </div>
+      //   </div>
+      // )}
+    // </div>
+
       )}
     </div>
   );

@@ -7,14 +7,17 @@ import { Dialog } from './Dialog';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiStrings } from '@/lib/apiStrings';
 
+interface HeaderProps {
+  navVariant?: 'default' | '/';
+  currentStreamId?: string; // Add this prop
+}
 
-export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
+export function Header({ navVariant, currentStreamId }: HeaderProps) {
   const { ready, authenticated, user, login, logout } = usePrivy();
-    const [dialogOpen, setDialogOpen] = useState(false);
-     const location = useLocation();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
-  const isOnStreamingPage = location.pathname === '/streaming' || location.pathname.includes('/stream');
-
+  const isOnStreamingPage = location.pathname === '/stream' || location.pathname.includes('/stream');
 
   // Move this function above useEffect
   const handlePrivyLogin = async () => {
@@ -40,7 +43,26 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
     }
   };
 
-  const handleEndStream = () => {
+  const handleEndStream = async () => {
+    // Terminate the stream if streamId is available
+    if (currentStreamId) {
+      try {
+        const response = await axios.post(
+          `${ApiStrings.API_BASE_URL}/livepeer/terminate-stream/${currentStreamId}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              "ngrok-skip-browser-warning": 'true'
+            },
+          }
+        );
+        console.log('Stream terminated:', response.data);
+      } catch (error) {
+        console.error('Error terminating stream:', error);
+      }
+    }
+
     // Navigate back to home or dashboard
     navigate('/');
     // You might want to add additional cleanup logic here
@@ -53,7 +75,6 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
     }
     // Only run when authenticated or user changes
   }, [authenticated, user]);
-
 
   return (
     <header className="w-full pt-6 bg-lime-50">
@@ -166,4 +187,3 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
     </header>
   );
 }
-// ...existing code...

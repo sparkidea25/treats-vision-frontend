@@ -9,7 +9,12 @@ export function ReplaySection() {
       const [srcList, setSrcList] = useState<any[]>([]);
       const fetchReplays = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_LINK}/v1.0/livepeer/playbacks`);
+      const response = await fetch(`${import.meta.env.VITE_API_LINK}/v1.0/livepeer/playbacks`, {
+        headers: {
+          contentType: 'application/json',
+          "ngrok-skip-browser-warning": 'true'
+        }
+      });
       if (!response.ok) {
         throw new Error('Network response was not ok'); 
       }
@@ -25,9 +30,13 @@ export function ReplaySection() {
  const syncThumbnail = async(streamPlaybackId: string) => {
   try {
     /* 1️⃣  Grab the current thumbnail for this playback */
-    const metaRes = await fetch(
-      `${ApiStrings.API_BASE_URL}/livepeer/${streamPlaybackId}`,
-    );
+    const metaRes = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/${streamPlaybackId}`, {
+      method: 'GET',
+              headers: {
+          contentType: 'application/json',
+          "ngrok-skip-browser-warning": 'true'
+        }
+    });
     if (!metaRes.ok) throw new Error('Could not fetch thumbnail metadata');
 
     // Expected shape: { streamPlaybackId: string; thumbnailUrl: string; … }
@@ -39,7 +48,7 @@ export function ReplaySection() {
     const saveRes = await fetch(
       `${ApiStrings.API_BASE_URL}/livepeer/update-thumbnail/`,
       {
-        method: 'POST',
+        method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ streamPlaybackId, thumbnailUrl }),
       },
