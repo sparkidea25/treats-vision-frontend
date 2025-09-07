@@ -21,7 +21,13 @@ export default function ProfilePage() {
   const fetchUserName = async () => {
     if (!user) return;
     try {
-      const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/${user.id}`);
+      const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/${user.id}`, {
+        method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                "ngrok-skip-browser-warning": 'true',
+            }
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch user name');
       }
@@ -40,6 +46,7 @@ export default function ProfilePage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          "ngrok-skip-browser-warning": 'true'
         },
         body: JSON.stringify({ name: newName }),
       });

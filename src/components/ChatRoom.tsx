@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ApiStrings } from "@/lib/apiStrings";
 import { usePrivy } from "@privy-io/react-auth";
 import { io, Socket } from "socket.io-client";
@@ -17,19 +17,43 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [newMsgCount, setNewMsgCount] = useState(0);
   
   // Enhanced debug states
   const [socketConnected, setSocketConnected] = useState(false);
-  // const [debugInfo, setDebugInfo] = useState("");
-  // const [inputReady, setInputReady] = useState(false); // NEW: Track input readiness
-  // const inputRef = useRef<HTMLInputElement>(null);
 
-  // Debug function to log current state
-  // const logDebugInfo = (action: string) => {
-  //   const info = `${action} - Socket: ${socket?.connected ? 'Connected' : 'Disconnected'}, Auth: ${authenticated}, User: ${!!user}, Username: ${username}`;
-  //   console.log(info);
-  //   setDebugInfo(info);
-  // };
+    const isScrolledToBottom = () => {
+    const el = chatContainerRef.current;
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 10;
+  };
+
+  // Scroll to bottom
+  const scrollToBottom = () => {
+    const el = chatContainerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+    setNewMsgCount(0);
+  };
+
+    useEffect(() => {
+    const el = chatContainerRef.current;
+    if (!el) return;
+    if (isScrolledToBottom()) {
+      scrollToBottom();
+    } else {
+      setNewMsgCount((c) => c + 1);
+    }
+    // eslint-disable-next-line
+  }, [messages]);
+
+   const handleScroll = () => {
+    if (isScrolledToBottom()) setNewMsgCount(0);
+  };
+
+  
+
+
 
   // Notify parent component when chat state changes
   useEffect(() => {
@@ -39,7 +63,13 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
   const fetchUsername = async (privyId: any) => {
     try {
       console.log("Fetching username for:", privyId);
-      const res = await fetch(`${ApiStrings.API_BASE_URL}/auth/${privyId}`);
+      const res = await fetch(`${ApiStrings.API_BASE_URL}/auth/${privyId}`, {
+        method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "ngrok-skip-browser-warning": 'true',
+                }
+      });
       const data = await res.json();
       console.log("Username fetched:", data.name);
       return data.name;
@@ -70,7 +100,6 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       userId: user?.id,
       hasBasicRequirements
     });
-    // setInputReady(hasBasicRequirements);
   }, [streamId, username, user?.email, user?.id]);
 
   // Socket connection effect
@@ -81,8 +110,8 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     }
 
     console.log("Initializing socket for streamId:", streamId, "with username:", username);
-    
-    const newSocket = io("https://d1a4f5678717.ngrok-free.app", {
+    // https://arguably-darling-caribou.ngrok-free.app
+    const newSocket = io("https://api.treats.vision", {
       path: "/socket.io/",
       transports: ["websocket"],
       timeout: 20000,
@@ -94,7 +123,6 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     newSocket.on("connect", () => {
       console.log("Socket connected with ID:", newSocket.id);
       setSocketConnected(true);
-      // logDebugInfo("Socket Connected");
 
       newSocket.emit("joinRoom", {
         roomId: streamId,
@@ -105,13 +133,11 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     newSocket.on("disconnect", (reason) => {
       console.log("Socket disconnected:", reason);
       setSocketConnected(false);
-      // logDebugInfo(`Socket Disconnected: ${reason}`);
     });
 
     newSocket.on("connect_error", (error) => {
       console.error("Socket connection error:", error);
       setSocketConnected(false);
-      // logDebugInfo(`Connection Error: ${error.message}`);
     });
 
     newSocket.on("userJoined", (userId: string) => {
@@ -126,11 +152,11 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       setMessages((prev) => [...prev, joinMessage]);
     });
 
-    // newSocket.on("receiveMessage", (data) => {
-    //   if (data.streamId !== streamId) return;
-    //   console.log("Message received:", data);
-    //   setMessages((prev) => [...prev, data]);
-    // });
+    newSocket.on("receiveMessage", (data) => {
+      if (data.streamId !== streamId) return;
+      console.log("Message received:", data);
+      setMessages((prev) => [...prev, data]);
+    });
 
     // FIX 2: Add typing event handlers
     newSocket.on("userTyping", (data) => {
@@ -182,10 +208,8 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     // Try to send via socket if connected
     if (socket && socket.connected) {
       socket.emit("sendMessage", msgObj);
-      // logDebugInfo("Message Sent via Socket");
     } else {
       console.log("Socket not connected, message stored locally");
-      // logDebugInfo("Message Stored Locally");
     }
 
     // Clear typing indicator after sending
@@ -201,67 +225,54 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     }
   };
 
-  // FIX 4: Simplified input change handler
-  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = e.target.value;
-  //   console.log("Input changed:", value);
-  //   setMessage(value);
+  // FIX 4: Added missing onChange handler
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    console.log("Input changed:", value);
+    setMessage(value);
 
-  //   // Only send typing indicator if socket is ready
-  //   if (socket && socket.connected) {
-  //     const currentUsername = username || user?.email || "Anonymous";
+    // Only send typing indicator if socket is ready
+    if (socket && socket.connected) {
+      const currentUsername = username || user?.email || "Anonymous";
 
-  //     if (value.length > 0 && !isTyping) {
-  //       console.log("Starting typing indicator");
-  //       setIsTyping(true);
-  //       socket.emit("typing", {
-  //         username: currentUsername,
-  //         isTyping: true,
-  //         streamId,
-  //       });
-  //     } else if (value.length === 0 && isTyping) {
-  //       console.log("Stopping typing indicator");
-  //       setIsTyping(false);
-  //       socket.emit("typing", {
-  //         username: currentUsername,
-  //         isTyping: false,
-  //         streamId,
-  //       });
-  //     }
-  //   }
-  // };
+      if (value.length > 0 && !isTyping) {
+        console.log("Starting typing indicator");
+        setIsTyping(true);
+        socket.emit("typing", {
+          username: currentUsername,
+          isTyping: true,
+          streamId,
+        });
+      } else if (value.length === 0 && isTyping) {
+        console.log("Stopping typing indicator");
+        setIsTyping(false);
+        socket.emit("typing", {
+          username: currentUsername,
+          isTyping: false,
+          streamId,
+        });
+      }
+    }
+  };
 
   // FIX 5: Simplified input click handler
   const handleInputClick = () => {
     console.log("Input clicked");
-    // logDebugInfo("Input Clicked");
   };
 
-  // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  //   console.log("Key pressed:", e.key);
-  //   if (e.key === "Enter") {
-  //     e.preventDefault();
-  //     sendMessage();
-  //   }
-  // };
-
-  // const reconnectSocket = () => {
-  //   console.log("Manual reconnection triggered");
-  //   if (socket) {
-  //     socket.disconnect();
-  //     socket.connect();
-  //   }
-  // };
-
-  // FIX 6: Updated input disable logic - only disable if we don't have basic requirements
-  // const isInputDisabled = !inputReady;
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    console.log("Key pressed:", e.key);
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
   
   console.log("Input status check:", { 
-    // inputReady, 
-    // isInputDisabled, 
     socketConnected,
     username,
-    streamId
+    streamId,
+    messageLength: message.length
   });
 
   return (
@@ -289,52 +300,24 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       {/* Expanded chat */}
       {isOpen && (
         <div className="w-80 bg-lime-50 border-l border-black flex flex-col h-full max-h-screen">
-          {/* Chat header with debug info */}
-          <div className="p-6 border-b border-black flex items-center justify-between">
-            {/* <div className="flex-1 text-center"> */}
-                          <div className="flex items-center">
-             <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
-              <span className="text-lg font-bold ml-1">100</span>
-            </div>
-              <span className="font-semibold text-lg block">tv chat</span>
-              {/* Debug status */}
-              {/* <div className="text-xs mt-1">
-                <span className={`inline-block w-2 h-2 rounded-full mr-1 ${socketConnected ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                <span className={socketConnected ? 'text-green-600' : 'text-red-600'}>
-                  {socketConnected ? 'Connected' : 'Disconnected'}
-                </span>
-                <span className={`ml-2 inline-block w-2 h-2 rounded-full mr-1 ${inputReady ? 'bg-blue-500' : 'bg-orange-500'}`}></span>
-                <span className={inputReady ? 'text-blue-600' : 'text-orange-600'}>
-                  {inputReady ? 'Ready' : 'Not Ready'}
-                </span>
-              </div> */}
-            {/* </div> */}
-            <div className="flex gap-1">
-              {/* <button
-                className="w-6 h-6 border border-black rounded text-xs"
-                onClick={reconnectSocket}
-                title="Reconnect"
-              >
-                ↻
-              </button> */}
-              <button
-                className="w-8 h-8 border border-black rounded-full"
-                onClick={() => setIsOpen(false)}
-              >
-                →
-              </button>
-            </div>
-          </div>
-
-          {/* Enhanced debug info panel */}
-          {/* <div className="px-4 py-1 bg-yellow-100 border-b border-black text-xs">
-            <div>Auth: {authenticated ? '✓' : '✗'} | User: {user ? '✓' : '✗'} | Username: {username || 'None'}</div>
-            <div>Socket: {socket ? (socketConnected ? 'Connected' : 'Disconnected') : 'None'} | Input: {inputReady ? 'Ready' : 'Not Ready'}</div>
-            <div className="truncate" title={debugInfo}>Last: {debugInfo}</div>
-          </div> */}
-
+          {/* ...existing code... */}
           {/* Chat messages */}
-          <div className="flex-1 min-h-0 overflow-y-auto px-4 py-2">
+          <div
+            className="flex-1 min-h-0 overflow-y-auto px-4 py-2 relative"
+            ref={chatContainerRef}
+            onScroll={handleScroll}
+          >
+            {/* New messages notification */}
+            {newMsgCount > 0 && (
+              <div
+                className="absolute left-1/2 -translate-x-1/2 top-2 z-10 bg-blue-600 text-white px-3 py-1 rounded-full shadow cursor-pointer text-xs font-semibold"
+                onClick={scrollToBottom}
+                style={{ userSelect: "none" }}
+              >
+                {newMsgCount} new message{newMsgCount > 1 ? "s" : ""}
+              </div>
+            )}
+            {/* ...existing code for messages... */}
             {messages.length === 0 ? (
               <span className="text-2xl text-gray-400 font-mono">no chat</span>
             ) : (
@@ -355,19 +338,18 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
               </div>
             )}
           </div>
-
-          {/* Typing indicator */}
-          {typingUsers.length > 0 && (
+                     {typingUsers.length > 0 && (
             <div className="px-4 pb-1 text-sm text-gray-600">
               {typingUsers.join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
             </div>
           )}
-
-          {/* FIX 7: Enhanced input section */}
-          <div className="p-4 border-t border-black bg-lime-50">
+       
+               <div className="p-4 border-t border-black bg-lime-50">
             <div className="flex gap-2">
               <textarea
                 value={message}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
                 onClick={handleInputClick}
                 className={"flex-1 text-base font-mono border border-black bg-white placeholder-gray-400 px-3 py-2 rounded-none focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto max-h-32 min-h-[40px]"}
                 placeholder={
@@ -397,6 +379,55 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
             </div>
           </div>
         </div>
+
+
+
+      //     {/* Typing indicator */}
+      //     {typingUsers.length > 0 && (
+      //       <div className="px-4 pb-1 text-sm text-gray-600">
+      //         {typingUsers.join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
+      //       </div>
+      //     )}
+
+      //     {/* FIX 7: Enhanced input section with proper onChange handler */}
+      //     <div className="p-4 border-t border-black bg-lime-50">
+      //       <div className="flex gap-2">
+      //         <textarea
+      //           value={message}
+      //           onChange={handleInputChange}
+      //           onKeyDown={handleKeyDown}
+      //           onClick={handleInputClick}
+      //           className={"flex-1 text-base font-mono border border-black bg-white placeholder-gray-400 px-3 py-2 rounded-none focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto max-h-32 min-h-[40px]"}
+      //           placeholder={
+      //             !streamId ? "No stream ID" :
+      //             !username && !user?.email && !user?.id ? "Loading user..." :
+      //             !socketConnected ? "Type message (will send when connected)" :
+      //             "Type your message..."
+      //           }
+      //           autoComplete="off"
+      //           rows={2}
+      //         />
+      //         <button
+      //           onClick={sendMessage}
+      //           disabled={!message.trim()}
+      //           className={`px-4 py-2 border border-black ${
+      //             !message.trim()
+      //               ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+      //               : 'bg-gray-800 text-white hover:bg-gray-700'
+      //           }`}
+      //         >
+      //           Send
+      //         </button>
+      //       </div>
+      //       {/* Status indicator */}
+      //       <div className="text-xs mt-1 text-gray-600">
+      //         {!socketConnected && "Messages will be stored locally until connected"}
+      //       </div>
+      //     </div>
+      //   </div>
+      // )}
+    // </div>
+
       )}
     </div>
   );

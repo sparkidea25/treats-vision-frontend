@@ -26,7 +26,13 @@ export const LiveStreamCard = ({
   useEffect(() => {
     async function fetchSrc() {
       try {
-        const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/${playbackId}`);
+        const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/${playbackId}`,{
+        headers: {
+          contentType: 'application/json',
+          "ngrok-skip-browser-warning": 'true'
+        }
+      }
+        );
         if (!response.ok) throw new Error("Failed to fetch playback src");
         const data = await response.json();
         console.log(data.playbackInfo, 'playback src data');

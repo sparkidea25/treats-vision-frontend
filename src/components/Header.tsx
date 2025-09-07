@@ -7,14 +7,19 @@ import { Dialog } from './Dialog';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiStrings } from '@/lib/apiStrings';
 
+interface HeaderProps {
+  navVariant?: 'default' | '/';
+  currentStreamId?: string; // Add this prop
+}
 
-export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
+export function Header({ navVariant, currentStreamId }: HeaderProps) {
   const { ready, authenticated, user, login, logout } = usePrivy();
-    const [dialogOpen, setDialogOpen] = useState(false);
-     const location = useLocation();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmEndStreamOpen, setConfirmEndStreamOpen] = useState(false); // New state for confirmation dialog
+  const [isEndingStream, setIsEndingStream] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
-  const isOnStreamingPage = location.pathname === '/streaming' || location.pathname.includes('/stream');
-
+  const isOnStreamingPage = location.pathname === '/stream' || location.pathname.includes('/stream');
 
   // Move this function above useEffect
   const handlePrivyLogin = async () => {
@@ -30,6 +35,7 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
         {
           headers: {
             'Content-Type': 'application/json',
+            "ngrok-skip-browser-warning": 'true'
           },
         }
       );
@@ -39,11 +45,66 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
     }
   };
 
-  const handleEndStream = () => {
-    // Navigate back to home or dashboard
-    navigate('/');
-    // You might want to add additional cleanup logic here
-    // such as stopping the stream, disconnecting from socket, etc.
+  // New function to handle the initial end stream button click
+  const handleEndStreamClick = () => {
+    setConfirmEndStreamOpen(true);
+  };
+
+  // Modified function to actually end the stream (called after confirmation)
+  const handleConfirmEndStream = async () => {
+    console.log('handleConfirmEndStream called with streamId:', currentStreamId);
+    
+    // Close the confirmation dialog
+    setConfirmEndStreamOpen(false);
+    
+    // Prevent multiple clicks
+    if (isEndingStream) {
+      console.log('Already ending stream, ignoring click');
+      return;
+    }
+
+    setIsEndingStream(true);
+
+    try {
+      // Terminate the stream if streamId is available
+      if (currentStreamId) {
+        console.log('Attempting to terminate stream:', currentStreamId);
+        
+        const response = await fetch(
+          `${ApiStrings.API_BASE_URL}/livepeer/terminate-stream/`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              "ngrok-skip-browser-warning": 'true'
+            },
+            body: JSON.stringify({ streamId: currentStreamId })
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        console.log('Stream terminated successfully:', data);
+      } else {
+        console.log('No streamId provided, skipping stream termination');
+      }
+
+      // Navigate back to home or dashboard
+      console.log('Navigating to home page');
+      navigate('/');
+      
+    } catch (error) {
+      console.error('Error terminating stream:', error);
+      
+      // Still navigate even if termination fails
+      navigate('/');
+    } finally {
+      setIsEndingStream(false);
+    }
   };
 
   useEffect(() => {
@@ -52,7 +113,6 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
     }
     // Only run when authenticated or user changes
   }, [authenticated, user]);
-
 
   return (
     <header className="w-full pt-6 bg-lime-50">
@@ -75,13 +135,54 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
             open={dialogOpen}
             onClose={() => setDialogOpen(false)}
           />
+          
+          {/* Confirmation Dialog for End Stream */}
+          {confirmEndStreamOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-8 max-w-md mx-4 relative">
+                <div className="absolute top-0 right-0 w-4 h-full bg-lime-400"></div>
+                <h3 className="text-xl font-medium text-center mb-6">
+                  are you sure you want to<br />end this stream?
+                </h3>
+                <div className="flex justify-center space-x-4">
+                  <button
+                    onClick={handleConfirmEndStream}
+                    disabled={isEndingStream}
+                    className={`px-8 py-3 rounded-full border-2 border-black transition-colors ${
+                      isEndingStream 
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                        : 'bg-white text-black hover:bg-gray-50'
+                    }`}
+                  >
+                    {isEndingStream ? 'ending stream...' : 'yes, end stream'}
+                  </button>
+                  <button
+                    onClick={() => setConfirmEndStreamOpen(false)}
+                    className="px-8 py-3 rounded-full border-2 border-black bg-white text-black hover:bg-gray-50"
+                  >
+                    cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {isOnStreamingPage ? (
             <button
-              onClick={handleEndStream}
-              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+              onClick={handleEndStreamClick} // Changed to use the new click handler
+              disabled={isEndingStream}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                isEndingStream 
+                  ? 'text-gray-400 bg-gray-100 cursor-not-allowed' 
+                  : 'text-red-600 hover:text-red-800 hover:bg-red-50'
+              }`}
             >
-              <img src="/assets/live.png" alt="stop icon" className="w-5 h-5 object-contain" />
-              end stream
+              <img 
+                src="/assets/live.png" 
+                alt="stop icon" 
+                className={`w-5 h-5 object-contain ${isEndingStream ? 'opacity-50' : ''}`} 
+              />
+              {isEndingStream ? 'ending stream...' : 'end stream'}
             </button>
           ) : (
             <button
@@ -165,4 +266,3 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
     </header>
   );
 }
-// ...existing code...

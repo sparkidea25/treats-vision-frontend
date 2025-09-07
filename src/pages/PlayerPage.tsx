@@ -20,12 +20,44 @@ const PlayerPage = () => {
     isLive: true
   });
 
+
+
   // You may want to fetch actual stream info from API here
   useEffect(() => {
+    const resetStreamInfo = async() => {
+      try {
+        const resp = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream-by/${playbackId}`, {
+           method: 'GET',
+          headers: {
+                'Content-Type': 'application/json',
+                "ngrok-skip-browser-warning": 'true',
+            }
+      })
+        const data = await resp.json();
+        console.log(data, 'stream by playbackId data');
+        if(data) {
+          setStreamInfo({
+            title: data.title || `Live Stream: ${playbackId}`,
+            streamer: data.streamer || "Unknown Streamer",
+            description: data.description || "Live stream playback",
+            viewers: data.viewers || Math.floor(Math.random() * 100) + 1,
+            isLive: data.isLive !== undefined ? data.isLive : true
+          });
+        }
+      } catch(error) {
+        console.error('Error fetching stream info:', error);
+      }
+    }
     // TODO: Fetch actual stream details using playbackId
     const fetchStreamInfo = async () => {
       try {
-        const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/${playbackId}`);
+        const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/${playbackId}`, {
+           method: 'GET',
+          headers: {
+                'Content-Type': 'application/json',
+                "ngrok-skip-browser-warning": 'true',
+            }
+        });
         const data = await response.json();
         console.log(data, 'fetch data streams')
         setStreamInfo(data);
@@ -34,6 +66,7 @@ const PlayerPage = () => {
       }
     };
     fetchStreamInfo();
+    resetStreamInfo();
   }, [playbackId]);
 
   if (!playbackId) {
