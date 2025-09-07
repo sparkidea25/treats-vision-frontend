@@ -110,8 +110,8 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     }
 
     console.log("Initializing socket for streamId:", streamId, "with username:", username);
-    
-    const newSocket = io("https://arguably-darling-caribou.ngrok-free.app", {
+    // https://arguably-darling-caribou.ngrok-free.app
+    const newSocket = io("https://api.treats.vision", {
       path: "/socket.io/",
       transports: ["websocket"],
       timeout: 20000,
