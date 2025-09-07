@@ -7,11 +7,12 @@ import { Seek } from "@livepeer/react/player";
 import { getSrc } from "@livepeer/react/external";
 
 interface LiveStreamCardProps {
-  title: string;
+  title: string | React.ReactNode; // Allow ReactNode for JSX elements
   streamer: string;
   viewers: number;
   isLive: boolean;
   playbackId: string;
+  isEnded?: boolean;
 }
 
 export const LiveStreamCard = ({
@@ -19,7 +20,7 @@ export const LiveStreamCard = ({
   streamer,
   viewers,
   isLive,
-  playbackId,
+  playbackId
 }: LiveStreamCardProps) => {
   const [src, setSrc] = useState<string | null>(null);
 
@@ -29,7 +30,8 @@ export const LiveStreamCard = ({
         const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/${playbackId}`,{
         headers: {
           contentType: 'application/json',
-          "ngrok-skip-browser-warning": 'true'
+          "ngrok-skip-browser-warning": 'true',
+          "Access-Control-Allow-Origin": "*",
         }
       }
         );
@@ -208,10 +210,17 @@ export const LiveStreamCard = ({
           </div>
         )}
 
-        {/* Live indicator */}
+        {/* Live indicator - only show if actually live */}
         {isLive && (
           <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-sm">
             LIVE
+          </div>
+        )}
+
+        {/* Stream ended indicator - show if not live */}
+        {!isLive && (
+          <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-sm">
+            LIVE ENDED
           </div>
         )}
 
@@ -223,7 +232,7 @@ export const LiveStreamCard = ({
       </div>
 
       <div className="p-4 bg-lime-50 border border-gray-200">
-        <h3 className="font-medium text-gray-900 text-sm mb-1 text-center">
+        <h3 className="text-2xl font-bold text-center mb-2">
           {title}
         </h3>
         <p className="text-gray-600 text-sm text-center underline cursor-pointer hover:text-gray-800">

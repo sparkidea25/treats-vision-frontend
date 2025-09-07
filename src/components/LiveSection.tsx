@@ -14,8 +14,8 @@ interface StreamData {
   streamPlaybackId: string;
   playbackId: string;
   terminate?: boolean;
-  userPrivyId?: string; // comes from API
-  username?: string; // resolved username
+  userPrivyId?: string;
+  username?: string;
 }
 
 interface LiveSectionProps {
@@ -28,7 +28,6 @@ export function LiveSection({ navVariant, currentStreamId }: LiveSectionProps) {
   const [liveStreams, setLiveStreams] = useState<StreamData[]>([]);
   const [fetchError, setFetchError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  // const { authenticated, user } = usePrivy();
   console.log(currentStreamId, navVariant, 'currentStreamId in LiveSection');
 
   // Fetch streams
@@ -58,7 +57,6 @@ export function LiveSection({ navVariant, currentStreamId }: LiveSectionProps) {
     fetchIhrStreams();
   }, []);
 
-  // Fetch usernames for each stream after streams are loaded
   useEffect(() => {
     const enrichWithUsernames = async () => {
       if (!liveStreams.length) return;

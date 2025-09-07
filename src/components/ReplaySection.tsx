@@ -12,7 +12,8 @@ export function ReplaySection() {
       const response = await fetch(`${import.meta.env.VITE_API_LINK}/v1.0/livepeer/playbacks`, {
         headers: {
           contentType: 'application/json',
-          "ngrok-skip-browser-warning": 'true'
+          "ngrok-skip-browser-warning": 'true',
+          "Access-Control-Allow-Origin": "*",
         }
       });
       if (!response.ok) {
