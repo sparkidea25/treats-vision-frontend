@@ -35,7 +35,8 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
         {
           headers: {
             'Content-Type': 'application/json',
-            "ngrok-skip-browser-warning": 'true'
+            "ngrok-skip-browser-warning": 'true',
+            "Access-Control-Allow-Origin": "*",
           },
         }
       );
