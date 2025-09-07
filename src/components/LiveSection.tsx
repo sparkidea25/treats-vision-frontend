@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { ApiStrings } from '@/lib/apiStrings';
 import { useNavigate } from 'react-router-dom';
 import { LiveStreamCard } from './LiveStream';
-import { usePrivy } from '@privy-io/react-auth';
 import { fetchUsername } from '@/lib/utils';
 
 // Define the stream data structure

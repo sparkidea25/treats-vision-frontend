@@ -25,6 +25,9 @@ const StreamingPage = () => {
     
     // Ref to prevent multiple stream creation attempts
     const streamCreationAttempted = useRef(false);
+    console.log(displayName, 'displayName in StreamPage');
+    
+
 
     const fetchUserName = async () => {
         if (!user) return null;
@@ -49,7 +52,7 @@ const StreamingPage = () => {
         }
     };
 
-    const LiveStream = async (form: any, userName: string) => {
+    const LiveStream = async (form: any) => {
         if (!user) return null;
         
         // Prevent multiple simultaneous calls
@@ -116,7 +119,7 @@ const StreamingPage = () => {
                 
                 if (userName) {
                     // Then create the stream with the fetched user name
-                    const streamDetails = await LiveStream(form, userName);
+                    const streamDetails = await LiveStream(form);
                     console.log(streamDetails, 'stream key details')
                     
                     if (streamDetails && streamDetails.data) {
