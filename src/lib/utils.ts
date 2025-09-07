@@ -11,6 +11,8 @@ export function cn(...inputs: ClassValue[]) {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        "ngrok-skip-browser-warning": 'true'
+
       },
     });
     const userData = await fetchUser.json();

@@ -39,7 +39,13 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
   const fetchUsername = async (privyId: any) => {
     try {
       console.log("Fetching username for:", privyId);
-      const res = await fetch(`${ApiStrings.API_BASE_URL}/auth/${privyId}`);
+      const res = await fetch(`${ApiStrings.API_BASE_URL}/auth/${privyId}`, {
+        method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "ngrok-skip-browser-warning": 'true',
+                }
+      });
       const data = await res.json();
       console.log("Username fetched:", data.name);
       return data.name;
@@ -82,7 +88,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
 
     console.log("Initializing socket for streamId:", streamId, "with username:", username);
     
-    const newSocket = io("https://d1a4f5678717.ngrok-free.app", {
+    const newSocket = io("https://arguably-darling-caribou.ngrok-free.app", {
       path: "/socket.io/",
       transports: ["websocket"],
       timeout: 20000,

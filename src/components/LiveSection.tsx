@@ -23,7 +23,12 @@ export function LiveSection() {
   const fetchIhrStreams = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/1hr-playback`);
+      const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/1hr-playback`, {
+        headers: {
+          contentType: 'application/json',
+          "ngrok-skip-browser-warning": 'true'
+        }
+      });
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }

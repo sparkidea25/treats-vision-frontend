@@ -30,6 +30,7 @@ export function Header({ navVariant }: { navVariant?: 'default' | '/' }) {
         {
           headers: {
             'Content-Type': 'application/json',
+            "ngrok-skip-browser-warning": 'true'
           },
         }
       );

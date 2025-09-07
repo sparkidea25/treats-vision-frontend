@@ -6,6 +6,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { getUserUserId } from '@/lib/utils';
 import { Listbox } from './ui/Listbox';
 import { StreamPreviewButton } from './ui/streamPreviewButton';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 interface DialogProps {
   open: boolean;
@@ -42,18 +43,20 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
 
   useEffect(() => {
     const fetchUserId = async () => {
-      if (authenticated && user) {
-        console.log(user, 'user in dialog');
-        const getId = await getUserUserId(user.id);
-        setUserId(getId.id);
-        setForm(prev => ({ ...prev, privy_id: getId.id }));
-        console.log('User authenticated:', user.id);
-      } else {
-        console.log('User not authenticated');
-      }
+        if (authenticated && user) {
+            console.log(user, 'user in dialog');
+            const getId = await getUserUserId(user.id);
+            console.log(getId, 'setGetId');
+            
+            setUserId(getId.id);
+            setForm(prev => ({ ...prev, privy_id: getId.id }));
+            console.log('User authenticated:', user.id);
+        } else {
+            console.log('User not authenticated');
+        }
     };
     fetchUserId();
-  }, [user, authenticated]);
+}, [user, authenticated]);
 
   useEffect(() => {
     if (step === 2 && form.source === 'Logitech Webcam') {
@@ -211,7 +214,24 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
               </div>
             )}
             <StreamPreviewButton onClick={() => setStep(1)} title="go back" />
-            <StreamPreviewButton onClick={() => setStep(3)} title="go live" />
+            <StreamPreviewButton 
+              onClick={async () => {
+                // Check if user has a name before proceeding to go live
+                if (authenticated && user) {
+                  const getId = await getUserUserId(user.id);
+                  if (!getId.name) {
+                    Notify.warning('Please complete your profile setup to continue streaming', {
+                      timeout: 5000,
+                    });
+                    navigate('/profile?from=stream', { state: { from: 'stream' } });
+                    onClose();
+                    return;
+                  }
+                }
+                setStep(3);
+              }} 
+              title="go live" 
+            />
           </div>
         );
       

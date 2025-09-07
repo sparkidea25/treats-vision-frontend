@@ -9,41 +9,49 @@ import { getIngest } from "@livepeer/react/external";
 import { useLocation } from 'react-router-dom';
 import ChatRoom from '@/components/ChatRoom';
 import { ToastContainer } from 'react-toastify';
+import { usePrivy } from '@privy-io/react-auth';
 
 const StreamingPage = () => {
+    const { user } = usePrivy();
     const [streamId, setStreamId] = useState("");
     const [streamName, setStreamName] = useState("");
     const [isChatOpen, setIsChatOpen] = useState(true);
     const [tipModalOpen, setTipModalOpen] = useState(false);
+    const [displayName, setDisplayName] = useState('');
     const location = useLocation();
     const form = location.state;
 
-    useEffect(() => {
-        const fetchStream = async () => {
-            const streamDetails = await LiveStream(form);
-            console.log(streamDetails.data.streamKey, 'stream key details')
-            if (streamDetails && streamDetails.data) {
-                setStreamId(streamDetails.data.streamKey);
-                setStreamName(streamDetails.data.name);
-            } else {
-                console.error('Failed to create stream or get stream details');
+    const fetchUserName = async () => {
+        if (!user) return null;
+        try {
+            const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/${user.id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "ngrok-skip-browser-warning": 'true',
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch user name');
             }
-        };
-        fetchStream();
-    }, []);
+            const data = await response.json();
+            console.log(data.name, 'fetched user name');
+            setDisplayName(data.name);
+            return data.name;
+        } catch (error) {
+            console.error('Error fetching user name:', error);
+            return null;
+        }
+    };
 
-
-
-
-
-
-
-    const LiveStream = async (form: any) => {
+    const LiveStream = async (form: any, userName: string) => {
+        if (!user) return null;
         try {
             const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    "ngrok-skip-browser-warning": 'true'
                 },
                 body: JSON.stringify({ 
                     name: form.title || "stream - treatsvision ama",
@@ -54,7 +62,7 @@ const StreamingPage = () => {
                     tvChat: form.tvChat,
                     tokenAccess: form.tokenAccess,
                     publicAccess: form.publicAccess,
-                    privy_id: form.userId,
+                    privy_id: user.id,
                 }),
             });
 
@@ -69,6 +77,31 @@ const StreamingPage = () => {
             return null;
         }
     };
+
+    useEffect(() => {
+        const fetchStreamAndUserName = async () => {
+            // First fetch the user name
+            const userName = await fetchUserName();
+            
+            if (userName) {
+                // Then create the stream with the fetched user name
+                const streamDetails = await LiveStream(form, userName);
+                console.log(streamDetails, 'stream key details')
+                if (streamDetails && streamDetails.data) {
+                    setStreamId(streamDetails.data.streamKey);
+                    setStreamName(streamDetails.data.name);
+                } else {
+                    console.error('Failed to create stream or get stream details');
+                }
+            } else {
+                console.error('Failed to fetch user name, cannot create stream');
+            }
+        };
+
+        if (user) {
+            fetchStreamAndUserName();
+        }
+    }, [user]);
 
     return (
         <div className="min-h-screen bg-lime-50">
