@@ -62,7 +62,6 @@ export default function ProfilePage() {
   };
 
   // add function to check userrole to display admin section in ui
-  // ...existing code...
   const checkUserRole = async (role = "admin") => {
     if (!user) return false;
     try {
@@ -84,10 +83,6 @@ export default function ProfilePage() {
       return false;
     }
   };
-  // ...existing code...
-
-
-
   type UserStatus = "banned" | "active" | "access requested";
 
   const users: { name: string; status: UserStatus }[] = [
