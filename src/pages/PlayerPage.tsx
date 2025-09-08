@@ -26,6 +26,8 @@ const PlayerPage = () => {
 
   console.log(streamInfo, 'streamInfo state');
 
+  console.log(username, 'username state');
+
   useEffect(() => {
   if (!playbackId) return;
 
