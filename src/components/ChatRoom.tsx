@@ -17,13 +17,13 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
-    const chatContainerRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const [newMsgCount, setNewMsgCount] = useState(0);
   
   // Enhanced debug states
   const [socketConnected, setSocketConnected] = useState(false);
 
-    const isScrolledToBottom = () => {
+  const isScrolledToBottom = () => {
     const el = chatContainerRef.current;
     if (!el) return true;
     return el.scrollHeight - el.scrollTop - el.clientHeight < 10;
@@ -36,7 +36,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     setNewMsgCount(0);
   };
 
-    useEffect(() => {
+  useEffect(() => {
     const el = chatContainerRef.current;
     if (!el) return;
     if (isScrolledToBottom()) {
@@ -47,13 +47,9 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     // eslint-disable-next-line
   }, [messages]);
 
-   const handleScroll = () => {
+  const handleScroll = () => {
     if (isScrolledToBottom()) setNewMsgCount(0);
   };
-
-  
-
-
 
   // Notify parent component when chat state changes
   useEffect(() => {
@@ -65,10 +61,10 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       console.log("Fetching username for:", privyId);
       const res = await fetch(`${ApiStrings.API_BASE_URL}/auth/${privyId}`, {
         method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    "ngrok-skip-browser-warning": 'true',
-                }
+        headers: {
+          'Content-Type': 'application/json',
+          "ngrok-skip-browser-warning": 'true',
+        }
       });
       const data = await res.json();
       console.log("Username fetched:", data.name);
@@ -77,6 +73,11 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       console.error("Error fetching username:", e);
       return "";
     }
+  };
+
+  // Get effective username for display and socket communication
+  const getEffectiveUsername = () => {
+    return username || user?.email || `Anonymous_${user?.id?.slice(-4) || Math.random().toString(36).slice(-4)}`;
   };
 
   useEffect(() => {
@@ -89,28 +90,16 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     }
   }, [authenticated, user]);
 
-  // FIX 1: Separate input readiness from socket connection
+  // Socket connection effect - don't wait for username, connect immediately
   useEffect(() => {
-    // Set input as ready when we have basic requirements
-    const hasBasicRequirements = streamId && (username || user?.email || user?.id);
-    console.log("Checking input readiness:", { 
-      streamId,
-      username,
-      userEmail: user?.email,
-      userId: user?.id,
-      hasBasicRequirements
-    });
-  }, [streamId, username, user?.email, user?.id]);
-
-  // Socket connection effect
-  useEffect(() => {
-    if (!streamId || !username) {
-      console.log("Waiting for username before connecting socket...");
+    if (!streamId) {
+      console.log("Waiting for streamId before connecting socket...");
       return;
     }
 
-    console.log("Initializing socket for streamId:", streamId, "with username:", username);
-    // https://arguably-darling-caribou.ngrok-free.app
+    const effectiveUsername = getEffectiveUsername();
+    console.log("Initializing socket for streamId:", streamId, "with username:", effectiveUsername);
+    
     const newSocket = io("https://api.treats.vision", {
       path: "/socket.io/",
       transports: ["websocket"],
@@ -124,9 +113,10 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       console.log("Socket connected with ID:", newSocket.id);
       setSocketConnected(true);
 
+      // Join room immediately with effective username
       newSocket.emit("joinRoom", {
         roomId: streamId,
-        userId: username,
+        userId: effectiveUsername,
       });
     });
 
@@ -158,7 +148,6 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       setMessages((prev) => [...prev, data]);
     });
 
-    // FIX 2: Add typing event handlers
     newSocket.on("userTyping", (data) => {
       if (data.streamId !== streamId) return;
       console.log("User typing:", data);
@@ -177,7 +166,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       newSocket.disconnect();
       setSocketConnected(false);
     };
-  }, [streamId, username]);
+  }, [streamId, username, user?.email, user?.id]); // Include dependencies that affect username
 
   const sendMessage = () => {
     console.log("Attempting to send message:", { 
@@ -191,9 +180,9 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       return;
     }
     
-    // FIX 3: Allow sending even if socket is not connected (store locally)
+    const effectiveUsername = getEffectiveUsername();
     const msgObj = {
-      user: username || user?.email || "Anonymous",
+      user: effectiveUsername,
       message: message.trim(),
       streamId,
       timestamp: Date.now()
@@ -217,7 +206,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       setIsTyping(false);
       if (socket && socket.connected) {
         socket.emit("typing", {
-          username: username || user?.email || "Anonymous",
+          username: effectiveUsername,
           isTyping: false,
           streamId,
         });
@@ -225,7 +214,6 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     }
   };
 
-  // FIX 4: Added missing onChange handler
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     console.log("Input changed:", value);
@@ -233,13 +221,13 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
 
     // Only send typing indicator if socket is ready
     if (socket && socket.connected) {
-      const currentUsername = username || user?.email || "Anonymous";
+      const effectiveUsername = getEffectiveUsername();
 
       if (value.length > 0 && !isTyping) {
         console.log("Starting typing indicator");
         setIsTyping(true);
         socket.emit("typing", {
-          username: currentUsername,
+          username: effectiveUsername,
           isTyping: true,
           streamId,
         });
@@ -247,7 +235,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
         console.log("Stopping typing indicator");
         setIsTyping(false);
         socket.emit("typing", {
-          username: currentUsername,
+          username: effectiveUsername,
           isTyping: false,
           streamId,
         });
@@ -255,7 +243,6 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     }
   };
 
-  // FIX 5: Simplified input click handler
   const handleInputClick = () => {
     console.log("Input clicked");
   };
@@ -272,7 +259,8 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     socketConnected,
     username,
     streamId,
-    messageLength: message.length
+    messageLength: message.length,
+    effectiveUsername: getEffectiveUsername()
   });
 
   return (
@@ -300,7 +288,23 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       {/* Expanded chat */}
       {isOpen && (
         <div className="w-80 bg-lime-50 border-l border-black flex flex-col h-full max-h-screen">
-          {/* ...existing code... */}
+          {/* Chat header */}
+          <div className="p-4 border-b border-black bg-lime-50">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
+                <span className="text-lg font-bold ml-1">100</span>
+                <span className="text-sm text-gray-800 ml-2">tv chat</span>
+              </div>
+              <button
+                className="w-8 h-8 border border-black rounded-full"
+                onClick={() => setIsOpen(false)}
+              >
+                →
+              </button>
+            </div>
+          </div>
+
           {/* Chat messages */}
           <div
             className="flex-1 min-h-0 overflow-y-auto px-4 py-2 relative"
@@ -317,7 +321,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
                 {newMsgCount} new message{newMsgCount > 1 ? "s" : ""}
               </div>
             )}
-            {/* ...existing code for messages... */}
+            
             {messages.length === 0 ? (
               <span className="text-2xl text-gray-400 font-mono">no chat</span>
             ) : (
@@ -338,25 +342,27 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
               </div>
             )}
           </div>
-                     {typingUsers.length > 0 && (
+          
+          {/* Typing indicator */}
+          {typingUsers.length > 0 && (
             <div className="px-4 pb-1 text-sm text-gray-600">
               {typingUsers.join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
             </div>
           )}
        
-               <div className="p-4 border-t border-black bg-lime-50">
+          {/* Input section */}
+          <div className="p-4 border-t border-black bg-lime-50">
             <div className="flex gap-2">
               <textarea
                 value={message}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 onClick={handleInputClick}
-                className={"flex-1 text-base font-mono border border-black bg-white placeholder-gray-400 px-3 py-2 rounded-none focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto max-h-32 min-h-[40px]"}
+                className="flex-1 text-base font-mono border border-black bg-white placeholder-gray-400 px-3 py-2 rounded-none focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto max-h-32 min-h-[40px]"
                 placeholder={
                   !streamId ? "No stream ID" :
-                  !username && !user?.email && !user?.id ? "Loading user..." :
-                  !socketConnected ? "Type message (will send when connected)" :
-                  "Type your message..."
+                  !socketConnected ? "Connecting..." :
+                  `Type as ${getEffectiveUsername()}...`
                 }
                 autoComplete="off"
                 rows={2}
@@ -375,59 +381,10 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
             </div>
             {/* Status indicator */}
             <div className="text-xs mt-1 text-gray-600">
-              {!socketConnected && "Messages will be stored locally until connected"}
+              {!socketConnected ? "Connecting to chat..." : `Connected as ${getEffectiveUsername()}`}
             </div>
           </div>
         </div>
-
-
-
-      //     {/* Typing indicator */}
-      //     {typingUsers.length > 0 && (
-      //       <div className="px-4 pb-1 text-sm text-gray-600">
-      //         {typingUsers.join(", ")} {typingUsers.length === 1 ? "is" : "are"} typing...
-      //       </div>
-      //     )}
-
-      //     {/* FIX 7: Enhanced input section with proper onChange handler */}
-      //     <div className="p-4 border-t border-black bg-lime-50">
-      //       <div className="flex gap-2">
-      //         <textarea
-      //           value={message}
-      //           onChange={handleInputChange}
-      //           onKeyDown={handleKeyDown}
-      //           onClick={handleInputClick}
-      //           className={"flex-1 text-base font-mono border border-black bg-white placeholder-gray-400 px-3 py-2 rounded-none focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto max-h-32 min-h-[40px]"}
-      //           placeholder={
-      //             !streamId ? "No stream ID" :
-      //             !username && !user?.email && !user?.id ? "Loading user..." :
-      //             !socketConnected ? "Type message (will send when connected)" :
-      //             "Type your message..."
-      //           }
-      //           autoComplete="off"
-      //           rows={2}
-      //         />
-      //         <button
-      //           onClick={sendMessage}
-      //           disabled={!message.trim()}
-      //           className={`px-4 py-2 border border-black ${
-      //             !message.trim()
-      //               ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-      //               : 'bg-gray-800 text-white hover:bg-gray-700'
-      //           }`}
-      //         >
-      //           Send
-      //         </button>
-      //       </div>
-      //       {/* Status indicator */}
-      //       <div className="text-xs mt-1 text-gray-600">
-      //         {!socketConnected && "Messages will be stored locally until connected"}
-      //       </div>
-      //     </div>
-      //   </div>
-      // )}
-    // </div>
-
       )}
     </div>
   );

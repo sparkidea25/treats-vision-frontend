@@ -5,6 +5,8 @@ import { ApiStrings } from "@/lib/apiStrings";
 import { LoadingIcon, MuteIcon, UnmuteIcon } from "@livepeer/react/assets";
 import { Seek } from "@livepeer/react/player";
 import { getSrc } from "@livepeer/react/external";
+import { useLocation, matchPath } from "react-router-dom";
+
 
 interface LiveStreamCardProps {
   title: string | React.ReactNode;
@@ -23,6 +25,7 @@ export const LiveStreamCard = ({
   playbackId
 }: LiveStreamCardProps) => {
   const [src, setSrc] = useState<string | null>(null);
+  const location = useLocation();
   const [streamStatus, setStreamStatus] = useState<{
     isLive: boolean;
     isEnded: boolean;
@@ -32,6 +35,16 @@ export const LiveStreamCard = ({
     isEnded: false,
     loading: true
   });
+
+    // const showInfo =
+    // location.pathname === "/stream" ||
+    // !!matchPath("/player", location.pathname);
+    // ...existing code...
+  const showInfo =
+    location.pathname === "/" ||
+    location.pathname === "/stream" ||
+    !!matchPath("/player", location.pathname);
+// ...existing code...
 
   // Fetch stream source
   useEffect(() => {
@@ -299,14 +312,16 @@ const checkStreamStatus = async () => {
         </div>
       </div>
 
-      <div className="p-4 bg-lime-50 border border-gray-200">
-        <h3 className="text-2xl font-bold text-center mb-2">
-          {title}
-        </h3>
-        <p className="text-gray-600 text-sm text-center underline cursor-pointer hover:text-gray-800">
-          {streamer}
-        </p>
-      </div>
+     {showInfo && (
+        <div className="p-4 bg-lime-50 border border-gray-200">
+          <h3 className="text-2xl font-bold text-center mb-2">
+            {title}
+          </h3>
+          <p className="text-gray-600 text-sm text-center underline cursor-pointer hover:text-gray-800">
+            {streamer}
+          </p>
+        </div>
+      )}
     </div>
   );
 };
