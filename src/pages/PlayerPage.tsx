@@ -7,72 +7,192 @@ import { LiveStreamCard } from '@/components/LiveStream';
 import ChatRoom from '@/components/ChatRoom';
 import { ToastContainer } from 'react-toastify';
 import { ApiStrings } from '@/lib/apiStrings';
+import { fetchUsername } from '@/lib/utils';
+
 
 const PlayerPage = () => {
   const { playbackId } = useParams<{ playbackId: string }>();
   const [isChatOpen, setIsChatOpen] = useState(true);
+  const [username, setUsername] = useState("");
   const [tipModalOpen, setTipModalOpen] = useState(false);
   const [streamInfo, setStreamInfo] = useState({
-    title: `Live Stream: ${playbackId}`,
+    title: "title",
     streamer: "Unknown Streamer",
     description: "Live stream playback",
     viewers: Math.floor(Math.random() * 100) + 1,
-    isLive: true
+    isLive: false // Default to false to show "Stream Ended" initially
   });
+  const [loading, setLoading] = useState(true);
 
+  console.log(streamInfo, 'streamInfo state');
 
-
-  // You may want to fetch actual stream info from API here
   useEffect(() => {
-    const resetStreamInfo = async() => {
-      try {
-        const resp = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream-by/${playbackId}`, {
-           method: 'GET',
-          headers: {
-                'Content-Type': 'application/json',
-                "ngrok-skip-browser-warning": 'true',
-            }
-      })
-        const data = await resp.json();
-        console.log(data, 'stream by playbackId data');
-        if(data) {
-          setStreamInfo({
-            title: data.title || `Live Stream: ${playbackId}`,
-            streamer: data.streamer || "Unknown Streamer",
-            description: data.description || "Live stream playback",
-            viewers: data.viewers || Math.floor(Math.random() * 100) + 1,
-            isLive: data.isLive !== undefined ? data.isLive : true
-          });
+  if (!playbackId) return;
+
+  let intervalId: NodeJS.Timeout;
+
+  const fetchStreamInfo = async () => {
+    try {
+      // Fetch stream info
+      const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream-by/${playbackId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          "ngrok-skip-browser-warning": 'true',
         }
-      } catch(error) {
-        console.error('Error fetching stream info:', error);
+      });
+
+      let data: any = {};
+      let fetchedUsername = "";
+      if (response.ok) {
+        data = await response.json();
+        if (data.userPrivyId) {
+          try {
+            fetchedUsername = await fetchUsername(data.userPrivyId);
+            setUsername(fetchedUsername);
+          } catch (error) {
+            console.error("Error fetching username:", error);
+          }
+        }
+      } else {
+        console.warn('Failed to fetch stream info, using defaults');
       }
-    }
-    // TODO: Fetch actual stream details using playbackId
-    const fetchStreamInfo = async () => {
+
+      // Fetch viewers count
+      let viewers = 0;
       try {
-        const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/${playbackId}`, {
-           method: 'GET',
+        const viewersRes = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/viewers/${playbackId}`, {
+          method: 'GET',
           headers: {
-                'Content-Type': 'application/json',
-                "ngrok-skip-browser-warning": 'true',
-            }
+            'Content-Type': 'application/json',
+            "ngrok-skip-browser-warning": 'true',
+          }
         });
-        const data = await response.json();
-        console.log(data, 'fetch data streams')
-        setStreamInfo(data);
+        if (viewersRes.ok) {
+          const viewersData = await viewersRes.json();
+          viewers = viewersData.totalViews;
+        }
       } catch (error) {
-        console.error('Error fetching stream info:', error);
+        console.error('Error fetching viewers:', error);
       }
-    };
-    fetchStreamInfo();
-    resetStreamInfo();
-  }, [playbackId]);
+
+      // Properly determine if stream is live
+      const isStreamLive = !data.is_terminate;
+      setStreamInfo(prevInfo => ({
+        title: data.name || prevInfo.title,
+        streamer: fetchedUsername || data.streamName || prevInfo.streamer,
+        description: data.description || prevInfo.description,
+        viewers: viewers,
+        isLive: isStreamLive
+      }));
+    } catch (error) {
+      console.error('Error fetching stream info:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchStreamInfo();
+  intervalId = setInterval(fetchStreamInfo, 30000);
+
+  return () => {
+    if (intervalId) clearInterval(intervalId);
+  };
+}, [playbackId]);
+
+  // useEffect(() => {
+  //   if (!playbackId) return;
+
+  //   let intervalId: NodeJS.Timeout;
+
+  //   const fetchStreamInfo = async () => {
+  //     try {
+  //       // Fetch stream info
+  //       const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream-by/${playbackId}`, {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           "ngrok-skip-browser-warning": 'true',
+  //         }
+  //       });
+
+  //       let data: any = {};
+  //       if (response.ok) {
+  //         data = await response.json();
+  //         console.log('Stream data:', data); // Debug log to see the actual response
+          
+  //         // Fetch username from the API response userPrivyId
+  //         if (data.userPrivyId) {
+  //           try {
+  //             const fetchedUsername = await fetchUsername(data.userPrivyId);
+  //             setUsername(fetchedUsername);
+  //             console.log("Username set to:", fetchedUsername);
+  //           } catch (error) {
+  //             console.error("Error fetching username:", error);
+  //           }
+  //         }
+  //       } else {
+  //         console.warn('Failed to fetch stream info, using defaults');
+  //       }
+
+  //       // Fetch viewers count
+  //       let viewers = 0;
+  //       try {
+  //         const viewersRes = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/viewers/${playbackId}`, {
+  //           method: 'GET',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             "ngrok-skip-browser-warning": 'true',
+  //           }
+  //         });
+  //         if (viewersRes.ok) {
+  //           const viewersData = await viewersRes.json();
+  //           viewers = viewersData.totalViews;
+  //         }
+  //       } catch (error) {
+  //         console.error('Error fetching viewers:', error);
+  //       }
+
+  //       // Properly determine if stream is live
+  //       // If is_terminate is false or undefined/null, stream is LIVE
+  //       // If is_terminate is true, stream is ENDED
+  //       const isStreamLive = !data.is_terminate;
+  //       console.log('is_terminate:', data.is_terminate, 'isStreamLive:', isStreamLive); // Debug log
+
+  //       setStreamInfo(prevInfo => ({
+  //         title: data.name || prevInfo.title, // Use 'name' from API response
+  //         streamer: username || data.streamName || prevInfo.streamer, // Use 'streamName' from API response
+  //         description: data.description || prevInfo.description,
+  //         viewers: viewers, // Use viewers from the viewers endpoint
+  //         isLive: isStreamLive
+  //       }));
+  //     } catch (error) {
+  //       console.error('Error fetching stream info:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchStreamInfo();
+  //   intervalId = setInterval(fetchStreamInfo, 30000);
+
+  //   return () => {
+  //     if (intervalId) clearInterval(intervalId);
+  //   };
+  // }, [playbackId, username]);
 
   if (!playbackId) {
     return (
       <div className="min-h-screen bg-lime-50 flex items-center justify-center">
         <div className="text-center text-black text-xl">No playbackId provided.</div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-lime-50 flex items-center justify-center">
+        <div className="text-center text-black text-xl">Loading stream info...</div>
       </div>
     );
   }
@@ -87,7 +207,7 @@ const PlayerPage = () => {
       </div>
       
       {/* Main Content Container */}
-      <div className="pt-16"> {/* Add padding top to account for fixed header */}
+      <div className="pt-16">
         <div className="flex min-h-screen">
           {/* Video Stream Area */}
           <div className="flex-1 bg-lime-50 flex flex-col min-h-screen ml-8">
@@ -115,8 +235,10 @@ const PlayerPage = () => {
                 {streamInfo.title}
               </h1>
               <p className="text-black text-center">{streamInfo.description}</p>
+              {/* Fixed the display logic - show "Live" when isLive is true, "Stream Ended" when false */}
               <p className="text-black text-sm text-center mt-1">
                 Streamer: {streamInfo.streamer} • {streamInfo.viewers} viewers
+                {streamInfo.isLive ? ' • Live' : ' • Stream Ended'}
               </p>
             </div>
             
