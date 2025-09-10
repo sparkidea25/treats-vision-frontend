@@ -86,6 +86,19 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
   }, [authenticated, user]);
 
   useEffect(() => {
+  if (socket && socket.connected && streamId) {
+    const effectiveUsername = getEffectiveUsername();
+    console.log(`Username updated, rejoining room with: ${effectiveUsername}`);
+    
+    const joinData = {
+      roomId: streamId,
+      userId: effectiveUsername,
+    };
+    socket.emit("joinRoom", joinData);
+  }
+}, [username, socket, streamId]);
+
+  useEffect(() => {
     if (!streamId || !username) {
       console.log("Waiting for streamId before connecting socket...");
       return;
@@ -175,32 +188,39 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
 
     // Fixed: Better typing indicator handling
     newSocket.on("userTyping", (data) => {
-      console.log(`User typing event:`, data);
-      
-      if (data.streamId !== streamId) {
-        console.log(`Typing event streamId ${data.streamId} doesn't match current ${streamId}, ignoring`);
-        return;
+  console.log(`User typing event:`, data);
+  
+  if (data.streamId !== streamId) {
+    console.log(`Typing event streamId ${data.streamId} doesn't match current ${streamId}, ignoring`);
+    return;
+  }
+  
+  // Don't show our own typing indicator
+  const currentUsername = getEffectiveUsername();
+  if (data.username === currentUsername) {
+    console.log('Ignoring own typing indicator');
+    return;
+  }
+  
+  setTypingUsers((prev) => {
+    if (data.isTyping) {
+      // Add user to typing list if not already there
+      if (!prev.includes(data.username)) {
+        const newTyping = [...prev, data.username];
+        console.log(`Added ${data.username} to typing users:`, newTyping);
+        return newTyping;
       }
-      
-      // Don't show our own typing indicator
-      // if (data.username === effectiveUsername) {
-      //   console.log('Ignoring own typing indicator');
-      //   return;
-      // }
-      
-      setTypingUsers((prev) => {
-        if (data.isTyping && !prev.includes(data.username)) {
-          const newTyping = [...prev, data.username];
-          console.log(`Added ${data.username} to typing users:`, newTyping);
-          return newTyping;
-        } else if (!data.isTyping && prev.includes(data.username)) {
-          const newTyping = prev.filter((u) => u !== data.username);
-          console.log(`Removed ${data.username} from typing users:`, newTyping);
-          return newTyping;
-        }
-        return prev;
-      });
-    });
+    } else {
+      // Remove user from typing list if they're there
+      if (prev.includes(data.username)) {
+        const newTyping = prev.filter((u) => u !== data.username);
+        console.log(`Removed ${data.username} from typing users:`, newTyping);
+        return newTyping;
+      }
+    }
+    return prev;
+  });
+});
 
     // newSocket.on("joinedRoom", (data) => {
     //   console.log(`Joined room confirmation:`, data);
