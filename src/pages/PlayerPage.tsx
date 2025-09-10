@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import TipModal from '@/components/TipModal';
 import { LiveStreamCard } from '@/components/LiveStream';
 import ChatRoom from '@/components/ChatRoom';
@@ -9,11 +9,11 @@ import { ToastContainer } from 'react-toastify';
 import { ApiStrings } from '@/lib/apiStrings';
 import { fetchUsername } from '@/lib/utils';
 
-
 const PlayerPage = () => {
   const { playbackId } = useParams<{ playbackId: string }>();
   const [isChatOpen, setIsChatOpen] = useState(true);
   const [username, setUsername] = useState("");
+  const [streamKey, setStreamKey] = useState("");
   const [tipModalOpen, setTipModalOpen] = useState(false);
   const [streamInfo, setStreamInfo] = useState({
     title: "title",
@@ -23,165 +23,132 @@ const PlayerPage = () => {
     isLive: false // Default to false to show "Stream Ended" initially
   });
   const [loading, setLoading] = useState(true);
+  const [hasJoinedRoom, setHasJoinedRoom] = useState(false);
+  const chatRoomRef = useRef<{ sendSystemMessage: (message: string) => void }>(null);
 
   console.log(streamInfo, 'streamInfo state');
-
   console.log(username, 'username state');
 
   useEffect(() => {
-  if (!playbackId) return;
+    if (!playbackId) return;
 
-  let intervalId: NodeJS.Timeout;
+    let intervalId: NodeJS.Timeout;
 
-  const fetchStreamInfo = async () => {
-    try {
-      // Fetch stream info
-      const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream-by/${playbackId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          "ngrok-skip-browser-warning": 'true',
-        }
-      });
-
-      let data: any = {};
-      let fetchedUsername = "";
-      if (response.ok) {
-        data = await response.json();
-        if (data.userPrivyId) {
-          try {
-            fetchedUsername = await fetchUsername(data.userPrivyId);
-            setUsername(fetchedUsername);
-          } catch (error) {
-            console.error("Error fetching username:", error);
-          }
-        }
-      } else {
-        console.warn('Failed to fetch stream info, using defaults');
-      }
-
-      // Fetch viewers count
-      let viewers = 0;
+    const fetchStreamInfo = async () => {
       try {
-        const viewersRes = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/viewers/${playbackId}`, {
+        // Fetch stream info
+        const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream-by/${playbackId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             "ngrok-skip-browser-warning": 'true',
           }
         });
-        if (viewersRes.ok) {
-          const viewersData = await viewersRes.json();
-          viewers = viewersData.totalViews;
+
+        let data: any = {};
+        let fetchedUsername = "";
+        if (response.ok) {
+          data = await response.json();
+          setStreamKey(data.streamKey)
+          if (data.userPrivyId) {
+            try {
+              fetchedUsername = await fetchUsername(data.userPrivyId);
+              setUsername(fetchedUsername);
+            } catch (error) {
+              console.error("Error fetching username:", error);
+            }
+          }
+        } else {
+          console.warn('Failed to fetch stream info, using defaults');
+        }
+
+        // Fetch viewers count
+        let viewers = 0;
+        try {
+          const viewersRes = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/viewers/${playbackId}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              "ngrok-skip-browser-warning": 'true',
+            }
+          });
+          if (viewersRes.ok) {
+            const viewersData = await viewersRes.json();
+            viewers = viewersData.totalViews;
+          }
+        } catch (error) {
+          console.error('Error fetching viewers:', error);
+        }
+
+        // Properly determine if stream is live
+        const isStreamLive = !data.is_terminate;
+        const prevIsLive = streamInfo.isLive;
+        
+        setStreamInfo(prevInfo => ({
+          title: data.name || prevInfo.title,
+          streamer: fetchedUsername || data.streamName || prevInfo.streamer,
+          description: data.description || prevInfo.description,
+          viewers: viewers,
+          isLive: isStreamLive
+        }));
+
+        // Send system message when user first joins a live stream
+        if (isStreamLive && !prevIsLive && !hasJoinedRoom && fetchedUsername) {
+          setHasJoinedRoom(true);
+          
+          // Small delay to ensure ChatRoom is ready
+          setTimeout(() => {
+            if (chatRoomRef.current) {
+              chatRoomRef.current.sendSystemMessage(
+                `${fetchedUsername} joined the live stream`
+              );
+            }
+          }, 1000);
         }
       } catch (error) {
-        console.error('Error fetching viewers:', error);
+        console.error('Error fetching stream info:', error);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Properly determine if stream is live
-      const isStreamLive = !data.is_terminate;
-      setStreamInfo(prevInfo => ({
-        title: data.name || prevInfo.title,
-        streamer: fetchedUsername || data.streamName || prevInfo.streamer,
-        description: data.description || prevInfo.description,
-        viewers: viewers,
-        isLive: isStreamLive
-      }));
-    } catch (error) {
-      console.error('Error fetching stream info:', error);
-    } finally {
-      setLoading(false);
+    fetchStreamInfo();
+    intervalId = setInterval(fetchStreamInfo, 30000);
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [playbackId, hasJoinedRoom, streamInfo.isLive]);
+
+  // Generate or get viewer username for anonymous users
+  const getViewerUsername = () => {
+    if (username) return username;
+    
+    // Generate anonymous username if not logged in
+    let anonymousName = localStorage.getItem('anonymousUsername');
+    if (!anonymousName) {
+      anonymousName = `Viewer_${Math.random().toString(36).substr(2, 6)}`;
+      localStorage.setItem('anonymousUsername', anonymousName);
+    }
+    return anonymousName;
+  };
+
+  // Handle when user actually joins the chat room
+  const handleChatRoomReady = () => {
+    if (streamInfo.isLive && !hasJoinedRoom) {
+      setHasJoinedRoom(true);
+      const viewerName = getViewerUsername();
+      
+      // Send system message about user joining
+      setTimeout(() => {
+        if (chatRoomRef.current) {
+          chatRoomRef.current.sendSystemMessage(
+            `${viewerName} joined the live stream`
+          );
+        }
+      }, 500);
     }
   };
-
-  fetchStreamInfo();
-  intervalId = setInterval(fetchStreamInfo, 30000);
-
-  return () => {
-    if (intervalId) clearInterval(intervalId);
-  };
-}, [playbackId]);
-
-  // useEffect(() => {
-  //   if (!playbackId) return;
-
-  //   let intervalId: NodeJS.Timeout;
-
-  //   const fetchStreamInfo = async () => {
-  //     try {
-  //       // Fetch stream info
-  //       const response = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream-by/${playbackId}`, {
-  //         method: 'GET',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           "ngrok-skip-browser-warning": 'true',
-  //         }
-  //       });
-
-  //       let data: any = {};
-  //       if (response.ok) {
-  //         data = await response.json();
-  //         console.log('Stream data:', data); // Debug log to see the actual response
-          
-  //         // Fetch username from the API response userPrivyId
-  //         if (data.userPrivyId) {
-  //           try {
-  //             const fetchedUsername = await fetchUsername(data.userPrivyId);
-  //             setUsername(fetchedUsername);
-  //             console.log("Username set to:", fetchedUsername);
-  //           } catch (error) {
-  //             console.error("Error fetching username:", error);
-  //           }
-  //         }
-  //       } else {
-  //         console.warn('Failed to fetch stream info, using defaults');
-  //       }
-
-  //       // Fetch viewers count
-  //       let viewers = 0;
-  //       try {
-  //         const viewersRes = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/viewers/${playbackId}`, {
-  //           method: 'GET',
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //             "ngrok-skip-browser-warning": 'true',
-  //           }
-  //         });
-  //         if (viewersRes.ok) {
-  //           const viewersData = await viewersRes.json();
-  //           viewers = viewersData.totalViews;
-  //         }
-  //       } catch (error) {
-  //         console.error('Error fetching viewers:', error);
-  //       }
-
-  //       // Properly determine if stream is live
-  //       // If is_terminate is false or undefined/null, stream is LIVE
-  //       // If is_terminate is true, stream is ENDED
-  //       const isStreamLive = !data.is_terminate;
-  //       console.log('is_terminate:', data.is_terminate, 'isStreamLive:', isStreamLive); // Debug log
-
-  //       setStreamInfo(prevInfo => ({
-  //         title: data.name || prevInfo.title, // Use 'name' from API response
-  //         streamer: username || data.streamName || prevInfo.streamer, // Use 'streamName' from API response
-  //         description: data.description || prevInfo.description,
-  //         viewers: viewers, // Use viewers from the viewers endpoint
-  //         isLive: isStreamLive
-  //       }));
-  //     } catch (error) {
-  //       console.error('Error fetching stream info:', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchStreamInfo();
-  //   intervalId = setInterval(fetchStreamInfo, 30000);
-
-  //   return () => {
-  //     if (intervalId) clearInterval(intervalId);
-  //   };
-  // }, [playbackId, username]);
 
   if (!playbackId) {
     return (
@@ -250,7 +217,10 @@ const PlayerPage = () => {
           
           {/* Chat Room Component */}
           <div className="flex-shrink-0">
-            <ChatRoom streamId={playbackId} onChatToggle={setIsChatOpen} />
+            <ChatRoom
+              streamId={streamKey} 
+              onChatToggle={setIsChatOpen}
+            />
           </div>
         </div>
         
