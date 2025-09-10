@@ -134,21 +134,21 @@ const PlayerPage = () => {
   };
 
   // Handle when user actually joins the chat room
-  const handleChatRoomReady = () => {
-    if (streamInfo.isLive && !hasJoinedRoom) {
-      setHasJoinedRoom(true);
-      const viewerName = getViewerUsername();
+  // const handleChatRoomReady = () => {
+  //   if (streamInfo.isLive && !hasJoinedRoom) {
+  //     setHasJoinedRoom(true);
+  //     const viewerName = getViewerUsername();
       
-      // Send system message about user joining
-      setTimeout(() => {
-        if (chatRoomRef.current) {
-          chatRoomRef.current.sendSystemMessage(
-            `${viewerName} joined the live stream`
-          );
-        }
-      }, 500);
-    }
-  };
+  //     // Send system message about user joining
+  //     setTimeout(() => {
+  //       if (chatRoomRef.current) {
+  //         chatRoomRef.current.sendSystemMessage(
+  //           `${viewerName} joined the live stream`
+  //         );
+  //       }
+  //     }, 500);
+  //   }
+  // };
 
   if (!playbackId) {
     return (
