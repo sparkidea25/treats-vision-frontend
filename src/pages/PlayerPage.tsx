@@ -121,17 +121,17 @@ const PlayerPage = () => {
   }, [playbackId, hasJoinedRoom, streamInfo.isLive]);
 
   // Generate or get viewer username for anonymous users
-  const getViewerUsername = () => {
-    if (username) return username;
+  // const getViewerUsername = () => {
+  //   if (username) return username;
     
-    // Generate anonymous username if not logged in
-    let anonymousName = localStorage.getItem('anonymousUsername');
-    if (!anonymousName) {
-      anonymousName = `Viewer_${Math.random().toString(36).substr(2, 6)}`;
-      localStorage.setItem('anonymousUsername', anonymousName);
-    }
-    return anonymousName;
-  };
+  //   // Generate anonymous username if not logged in
+  //   let anonymousName = localStorage.getItem('anonymousUsername');
+  //   if (!anonymousName) {
+  //     anonymousName = `Viewer_${Math.random().toString(36).substr(2, 6)}`;
+  //     localStorage.setItem('anonymousUsername', anonymousName);
+  //   }
+  //   return anonymousName;
+  // };
 
   // Handle when user actually joins the chat room
   // const handleChatRoomReady = () => {
