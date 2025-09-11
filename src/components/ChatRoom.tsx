@@ -107,7 +107,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     const effectiveUsername = getEffectiveUsername();
     console.log(`Initializing socket for streamId: ${streamId} with username: ${effectiveUsername}`);
     
-    const newSocket = io("https://api.treats.vision", {
+    const newSocket = io("https://bannered-nocuously-zaria.ngrok-free.app", {
       path: "/socket.io/",
       transports: ["websocket"],
       timeout: 20000,
