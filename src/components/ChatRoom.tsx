@@ -85,6 +85,19 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     }
   }, [authenticated, user]);
 
+
+  useEffect(() => {
+  if (!streamId) return;
+
+  console.log("Fetching approved messages for:", streamId);
+  fetchApprovedMessages(streamId).then((approvedMsgs) => {
+    if (approvedMsgs.length > 0) {
+      setMessages((prev) => [...approvedMsgs, ...prev]);
+    }
+  });
+}, [streamId]);
+
+
   useEffect(() => {
   if (socket && socket.connected && streamId) {
     const effectiveUsername = getEffectiveUsername();
@@ -292,6 +305,9 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     }
   };
 
+
+
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -342,6 +358,43 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       });
     }
   };
+
+  // 👇 Add this before ChatRoom component
+async function fetchApprovedMessages(streamKey: string) {
+  try {
+    const res = await fetch(
+      `${ApiStrings.API_BASE_URL}/chat/approved-messages?streamKey=${streamKey}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+      }
+    );
+
+    if (!res.ok) {
+      console.error("Failed to fetch approved messages", res.status);
+      return [];
+    }
+
+    const data = await res.json();
+    console.log(data, 'approved messages');
+
+    // Transform backend messages to the same shape your ChatRoom uses
+    return data.map((msg: any) => ({
+      user: msg.username,
+      message: msg.status === "PENDING" ? "Message removed by Admin" : msg.text,
+      streamId: msg.streamKey,
+      timestamp: msg.createdAt ? new Date(msg.createdAt).getTime() : Date.now(),
+      isSystemMessage: false,
+    }));
+  } catch (e) {
+    console.error("Error fetching approved messages:", e);
+    return [];
+  }
+}
+
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
