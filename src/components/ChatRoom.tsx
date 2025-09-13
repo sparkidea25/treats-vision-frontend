@@ -383,13 +383,15 @@ async function fetchApprovedMessages(streamKey: string) {
     console.log(data, 'approved messages');
 
     // Transform backend messages to the same shape your ChatRoom uses
-    return data.map((msg: any) => ({
+    let checK_return =  data.map((msg: any) => ({
       user: msg.username,
       message: msg.status === "PENDING" ? "Message removed by Admin" : msg.text,
       streamId: msg.streamKey,
       timestamp: msg.createdAt ? new Date(msg.createdAt).getTime() : Date.now(),
       isSystemMessage: false,
     }));
+    console.log(checK_return, 'transformed approved messages');
+    return checK_return
   } catch (e) {
     console.error("Error fetching approved messages:", e);
     return [];
@@ -474,7 +476,7 @@ async function fetchApprovedMessages(streamKey: string) {
               </div>
             ) : (
               <div className="space-y-2">
-                {messages.map((msg, index) => (
+                {/* {messages.map((msg, index) => (
                   <div key={`${msg.timestamp || index}-${index}`} className="flex items-start p-2">
                     <img
                       src="/assets/Icons.png"
@@ -487,7 +489,28 @@ async function fetchApprovedMessages(streamKey: string) {
                       {msg.isLocalMessage && <span className="text-xs text-gray-400 ml-1">(offline)</span>}
                     </p>
                   </div>
-                ))}
+                ))} */}
+                {messages.map((msg, index) => (
+  <div key={`${msg.timestamp || index}-${index}`} className="flex items-start p-2">
+    <div className="flex flex-col">
+      {/* Special styling for removed messages */}
+      {msg.message === "Message removed by Admin" ? (
+        <div className="flex flex-col items-start">
+          <span className="text-sm text-gray-500 italic bg-red-50 px-2 py-1 rounded">
+            <span className="font-bold">{msg.user || "Anonymous"}: </span>
+            {msg.message}
+          </span>
+        </div>
+      ) : (
+        <p className={`text-left text-base break-words ${msg.isSystemMessage ? 'text-gray-500 italic' : 'text-gray-800'}`}>
+          <span className="font-bold">{msg.user || "Anonymous"}: </span>
+          <span>{msg.message}</span>
+          {msg.isLocalMessage && <span className="text-xs text-gray-400 ml-1">(offline)</span>}
+        </p>
+      )}
+    </div>
+  </div>
+))}
               </div>
             )}
           </div>
