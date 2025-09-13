@@ -220,6 +220,7 @@ const PlayerPage = () => {
             <ChatRoom
               streamId={streamKey} 
               onChatToggle={setIsChatOpen}
+              viewers={streamInfo.viewers}
             />
           </div>
         </div>

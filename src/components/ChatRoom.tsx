@@ -6,9 +6,10 @@ import { io, Socket } from "socket.io-client";
 interface ChatRoomProps {
   streamId: string;
   onChatToggle?: (isOpen: boolean) => void;
+  viewers?: number;
 }
 
-function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
+function ChatRoom({ streamId, onChatToggle, viewers }: ChatRoomProps) {
   const [isOpen, setIsOpen] = useState(true);
   const { authenticated, user } = usePrivy();
   const [username, setUsername] = useState("");
@@ -411,7 +412,7 @@ async function fetchApprovedMessages(streamKey: string) {
           <div className="flex-1 flex flex-col items-center pt-4">
             <div className="flex items-center">
              <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
-              <span className="text-lg font-bold ml-1">100</span>
+              <span className="text-lg font-bold ml-1">{viewers}</span>
             </div>
 
             <span className="text-sm text-gray-800 mb-4">tv chat</span>
@@ -433,7 +434,7 @@ async function fetchApprovedMessages(streamKey: string) {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
-                <span className="text-lg font-bold ml-1">100</span>
+                <span className="text-lg font-bold ml-1">{viewers}</span>
                 <span className="text-sm text-gray-800 ml-2">tv chat</span>
               </div>
               <button
