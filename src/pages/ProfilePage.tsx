@@ -24,6 +24,9 @@ type ModerationResult = {
   category_scores: Record<ModerationCategory, number>;
 };
 
+type UserStatus = "BANNED" | "ACTIVE";
+type User = { name: string; status: UserStatus };
+
 
 type PendingMessage = {
   id: number;
@@ -43,14 +46,41 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-    const [pendingMessages, setPendingMessages] = useState<PendingMessage[]>([]);
+  const [pendingMessages, setPendingMessages] = useState<PendingMessage[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
 
   useEffect(() => {
     fetchUserName();
     fetchPendingMessages()
     checkUserRole().then(setIsAdmin); // 2. Check admin status on user change
-  }, [user]);
+    if (isAdmin) {
+    fetchAllUsers();
+  }
+  }, [user, isAdmin]);
+
+
+  const fetchAllUsers = async () => {
+  try {
+    const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/admin/all-users`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        "ngrok-skip-browser-warning": 'true',
+      }
+    });
+    if (!response.ok) throw new Error('Failed to fetch users');
+    const data = await response.json();
+    console.log(data, 'all users data');
+    // Adjust this mapping if your API returns different field names
+    setUsers(data.map((u: any) => ({
+      name: u.name,
+      status: u.status as UserStatus,
+    })));
+  } catch (e) {
+    console.error(e);
+  }
+};
 
 
   // fetch user name from /auth/:privyId passing privyId from user object
@@ -119,21 +149,20 @@ export default function ProfilePage() {
       return false;
     }
   };
-  type UserStatus = "banned" | "active" | "access requested";
+  type UserStatus = "BANNED" | "ACTIVE" | "ACCESS_REQUESTED";
 
-  const users: { name: string; status: UserStatus }[] = [
-    { name: "Ernest", status: "banned" },
-    { name: "User1", status: "active" },
-    { name: "User 2", status: "access requested" },
-    { name: "User 3", status: "active" },
-    { name: "User 4", status: "banned" },
-  ];
+
+  // const statusColors: Record<UserStatus, string> = {
+  //   BANNED: "bg-red-400 text-white",
+  //   ACTIVE: "bg-lime-50 text-black",
+  //   ACCESS_REQUESTED: "bg-yellow-300 text-black",
+  // };
 
   const statusColors: Record<UserStatus, string> = {
-    banned: "bg-red-400 text-white",
-    active: "bg-lime-50 text-black",
-    "access requested": "bg-lime-50 text-black",
-  };
+  BANNED: "bg-[#D05C4B]",
+  ACTIVE: "bg-[#E6FF7F]",
+  ACCESS_REQUESTED: "bg-[#FFF700]",
+};
 
   const fetchPendingMessages = async () => {
     try {
@@ -197,6 +226,68 @@ export default function ProfilePage() {
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return `${Math.floor(diff / 86400)}d ago`;
   };
+
+//   const banUser = async (username: string) => {
+//   try {
+//     // If username is not privyId, fetch privyId by username here
+//     // For now, assuming username is privyId
+//     const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/admin/ban/${user.id}`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         "ngrok-skip-browser-warning": 'true',
+//         "Access-Control-Allow-Origin": "*",
+//       },
+//     });
+//     if (!response.ok) throw new Error('Failed to ban user');
+//     // Optionally update UI: remove banned user's messages from pendingMessages
+//     setPendingMessages(prev => prev.filter(msg => msg.username !== username));
+//     // Optionally refresh users list
+//     fetchAllUsers();
+//     alert('User banned successfully');
+//   } catch (e) {
+//     console.error(e);
+//     alert('Failed to ban user');
+//   }
+// };
+
+// ...existing code...
+const banUser = async (username: string) => {
+  try {
+    // 1. Fetch privyId by username
+    const userRes = await fetch(`${ApiStrings.API_BASE_URL}/auth/admin/user/${username}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        "ngrok-skip-browser-warning": 'true',
+      },
+    });
+    if (!userRes.ok) throw new Error('Failed to fetch user by username');
+    const userData = await userRes.json();
+    console.log(userData, 'userData by username for banning');
+    const privyId = userData.privy_id; // Adjust field as per your API
+
+    if (!privyId) throw new Error('privyId not found for user');
+
+    // 2. Ban user by privyId
+    const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/admin/ban/${privyId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        "ngrok-skip-browser-warning": 'true',
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+    if (!response.ok) throw new Error('Failed to ban user');
+    setPendingMessages(prev => prev.filter(msg => msg.username !== username));
+    fetchAllUsers();
+    alert('User banned successfully');
+  } catch (e) {
+    console.error(e);
+    alert('Failed to ban user');
+  }
+};
+// ...existing code...
 
 
   // const handleClaimRewards = () => {
@@ -308,7 +399,13 @@ export default function ProfilePage() {
                             <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded font-medium text-sm">Pending Review</span>
                           </td>
                           <td className="px-4 py-3 space-x-2">
-                            <button className="bg-red-100 text-red-600 border border-red-300 px-3 py-1 rounded text-sm font-medium hover:bg-red-200">Ban</button>
+                            {/* <button className="bg-red-100 text-red-600 border border-red-300 px-3 py-1 rounded text-sm font-medium hover:bg-red-200">Ban</button> */}
+                            <button
+                            className="bg-red-100 text-red-600 border border-red-300 px-3 py-1 rounded text-sm font-medium hover:bg-red-200"
+                            onClick={() => banUser(msg.username)}
+                          >
+                            Ban
+                          </button>
                             <button className="bg-white text-gray-700 border border-gray-300 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100">Ignore</button>
                           </td>
                         </tr>
@@ -331,14 +428,26 @@ export default function ProfilePage() {
                       <th className="px-6 py-2 border-b border-gray-400 bg-lime-100 font-normal">status</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  {/* <tbody>
                     {users.map((u) => (
                       <tr key={u.name}>
                         <td className="px-6 py-2 border-b border-gray-300 bg-lime-100">{u.name}</td>
                         <td className={`px-6 py-2 border-b border-gray-300 ${statusColors[u.status] || ""}`}>{u.status}</td>
                       </tr>
                     ))}
-                  </tbody>
+                  </tbody> */}
+                  <tbody>
+  {users.map((u) => (
+    <tr key={u.name}>
+      <td className="px-6 py-2 border-b border-gray-300 bg-lime-100">{u.name}</td>
+      <td className={`px-6 py-2 border-b border-gray-300 font-bold capitalize ${statusColors[u.status] || ""}`}>
+        {u.status.replace("_", " ").toLowerCase()}
+      </td>
+    </tr>
+  ))}
+</tbody>
+
+
                 </table>
               </div>
             </div>
