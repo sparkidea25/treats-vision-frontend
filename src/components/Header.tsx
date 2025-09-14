@@ -353,7 +353,7 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
     try {
       // 1. Check if user already exists
       const checkResponse = await axios.get(
-        `${ApiStrings.API_BASE_URL}/auth/user-by-privy/${user.id}`,
+        `${ApiStrings.API_BASE_URL}/auth/${user.id}`,
         {
           headers: {
             'Content-Type': 'application/json',

@@ -48,6 +48,10 @@ export default function ProfilePage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [pendingMessages, setPendingMessages] = useState<PendingMessage[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [bannedUsers, setBannedUsers] = useState<User[]>([]);
+
+  const [activeTab, setActiveTab] = useState<"flagged" | "reports" | "banlist">("flagged");
+
 
 
   useEffect(() => {
@@ -56,6 +60,7 @@ export default function ProfilePage() {
     checkUserRole().then(setIsAdmin); // 2. Check admin status on user change
     if (isAdmin) {
     fetchAllUsers();
+    fetchBannedUsers();
   }
   }, [user, isAdmin]);
 
@@ -103,6 +108,28 @@ export default function ProfilePage() {
       console.error('Error fetching user name:', error);
     }
   };
+
+  const fetchBannedUsers = async () => {
+  try {
+    const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/admin/banned-users`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        "ngrok-skip-browser-warning": 'true',
+      }
+    });
+    if (!response.ok) throw new Error('Failed to fetch banned users');
+    const data = await response.json();
+    console.log(data, 'banned users data');
+
+    setBannedUsers(data.map((u: any) => ({
+      name: u.name || "Unknown",
+      status: u.status || "BANNED", // fallback in case API only returns empty string
+    })));
+  } catch (e) {
+    console.error(e);
+  }
+};
 
   // add function to update username by privyId
   const updateUserName = async (newName: string) => {
@@ -348,76 +375,79 @@ const banUser = async (username: string) => {
               <h2 className="text-4xl font-bold text-gray-900 mb-8">Admin</h2>
               {/* Flagged Content Table */}
               <div className="mb-12">
-                <div className="border-b border-gray-300 flex space-x-8 mb-4">
-                  <span className="text-green-700 font-semibold border-b-2 border-green-700 pb-2">Flagged Content</span>
+                {/* <div className="border-b border-gray-300 flex space-x-8 mb-4"> */}
+                  {/* <span className="text-green-700 font-semibold border-b-2 border-green-700 pb-2">Flagged Content</span>
                   <span className="text-gray-400 pb-2">User Reports</span>
                   <span className="text-gray-400 pb-2">Ban List</span>
+                   */}
+                   <div className="border-b border-gray-300 flex space-x-8 mb-4">
+                      <button
+                        className={`pb-2 ${activeTab === "flagged" ? "text-green-700 font-semibold border-b-2 border-green-700" : "text-gray-400"}`}
+                        onClick={() => setActiveTab("flagged")}
+                      >
+                        Flagged Content
+                      </button>
+                      <button
+                        className={`pb-2 ${activeTab === "reports" ? "text-green-700 font-semibold border-b-2 border-green-700" : "text-gray-400"}`}
+                        onClick={() => setActiveTab("reports")}
+                      >
+                        User Reports
+                      </button>
+                      <button
+                        className={`pb-2 ${activeTab === "banlist" ? "text-green-700 font-semibold border-b-2 border-green-700" : "text-gray-400"}`}
+                        onClick={() => setActiveTab("banlist")}
+                      >
+                        Ban List
+                      </button>
+                    </div>
+
+                {/* </div> */}
+
+                {/* Flagged Content Table */}
+
+                
+{activeTab === "flagged" && (
+  <table className="w-full border border-gray-300 rounded-lg overflow-hidden text-left">
+    {/* ...existing flagged content table code... */}
+  </table>
+)}
+
+{/* Ban List Table */}
+{activeTab === "banlist" && (
+  <table className="w-full border border-gray-300 rounded-lg overflow-hidden text-left">
+    <thead className="bg-white">
+      <tr>
+        <th className="px-4 py-2 font-normal">Name</th>
+        <th className="px-4 py-2 font-normal">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {bannedUsers.length === 0 && (
+        <tr>
+          <td colSpan={2} className="text-center py-8 text-gray-400">No banned users</td>
+        </tr>
+      )}
+      {bannedUsers.map((u, idx) => (
+        <tr key={idx} className="border-t border-gray-200">
+          <td className="px-4 py-3">{u.name}</td>
+          <td className={`px-4 py-3 font-bold capitalize ${statusColors[u.status] || ""}`}>
+            {u.status.toLowerCase()}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)}
+
+
+
                 </div>
-                <table className="w-full border border-gray-300 rounded-lg overflow-hidden text-left">
-                  <thead className="bg-white">
-                    <tr>
-                      <th className="px-4 py-2 font-normal">Stream</th>
-                      <th className="px-4 py-2 font-normal">Violation</th>
-                      <th className="px-4 py-2 font-normal">Time</th>
-                      <th className="px-4 py-2 font-normal">AI Confidence</th>
-                      <th className="px-4 py-2 font-normal">Status</th>
-                      <th className="px-4 py-2 font-normal"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pendingMessages.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="text-center py-8 text-gray-400">No flagged content</td>
-                      </tr>
-                    )}
-                    {pendingMessages.map((msg) => {
-                      const violation = getViolation(msg.moderationResult.categories);
-                      const aiConfidence = getAIConfidence(msg.moderationResult.category_scores, msg.moderationResult.categories);
-                      return (
-                        <tr key={msg.id} className="border-t border-gray-200">
-                          <td className="px-4 py-3">
-                            <span className="inline-flex items-center">
-                              <span className="w-7 h-7 rounded-full bg-lime-100 border border-lime-400 text-lime-700 font-bold flex items-center justify-center mr-2 uppercase">
-                                {msg.username[0]}
-                              </span>
-                              <span>{msg.username}</span>
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="bg-red-100 text-red-600 px-3 py-1 rounded font-medium text-sm">{violation}</span>
-                          </td>
-                          <td className="px-4 py-3">{timeAgo(msg.createdAt)}</td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center">
-                              <div className="w-28 h-3 bg-gray-200 rounded-full mr-2">
-                                <div className="h-3 bg-green-500 rounded-full" style={{ width: `${aiConfidence}%` }}></div>
-                              </div>
-                              <span className="text-green-700 font-semibold text-xs">{aiConfidence}%</span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded font-medium text-sm">Pending Review</span>
-                          </td>
-                          <td className="px-4 py-3 space-x-2">
-                            {/* <button className="bg-red-100 text-red-600 border border-red-300 px-3 py-1 rounded text-sm font-medium hover:bg-red-200">Ban</button> */}
-                            <button
-                            className="bg-red-100 text-red-600 border border-red-300 px-3 py-1 rounded text-sm font-medium hover:bg-red-200"
-                            onClick={() => banUser(msg.username)}
-                          >
-                            Ban
-                          </button>
-                            <button className="bg-white text-gray-700 border border-gray-300 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100">Ignore</button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              {/* ...existing admin table and note... */}
-              {/* ...existing code... */}
+                {/* ...existing admin table and note... */}
+                {/* ...existing code... */}
 
               <div>
+
+
               <div className="absolute top-12 left-10"></div>
               {/* Table and Note */}
               <div className="flex flex-col items-center justify-center flex-1">
@@ -437,15 +467,15 @@ const banUser = async (username: string) => {
                     ))}
                   </tbody> */}
                   <tbody>
-  {users.map((u) => (
-    <tr key={u.name}>
-      <td className="px-6 py-2 border-b border-gray-300 bg-lime-100">{u.name}</td>
-      <td className={`px-6 py-2 border-b border-gray-300 font-bold capitalize ${statusColors[u.status] || ""}`}>
-        {u.status.replace("_", " ").toLowerCase()}
-      </td>
-    </tr>
-  ))}
-</tbody>
+                    {users.map((u) => (
+                      <tr key={u.name}>
+                        <td className="px-6 py-2 border-b border-gray-300 bg-lime-100">{u.name}</td>
+                        <td className={`px-6 py-2 border-b border-gray-300 font-bold capitalize ${statusColors[u.status] || ""}`}>
+                          {u.status.replace("_", " ").toLowerCase()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
 
 
                 </table>

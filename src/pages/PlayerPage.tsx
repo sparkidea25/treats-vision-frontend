@@ -26,12 +26,29 @@ const PlayerPage = () => {
   });
   const [loading, setLoading] = useState(true);
   const [hasJoinedRoom, setHasJoinedRoom] = useState(false);
-  const { user, authenticated } = usePrivy();
+  const { user, authenticated, login } = usePrivy();
   const navigate = useNavigate();
   const chatRoomRef = useRef<{ sendSystemMessage: (message: string) => void }>(null);
 
   console.log(streamInfo, 'streamInfo state');
   console.log(username, 'username state');
+
+  //   const handleStreamClick = (streamPlaybackId: string, isTerminated: boolean) => {
+  //   if (!authenticated) {
+  //     Notify.failure("Please connect your wallet to watch streams.");
+  //     login(); // Optionally trigger Privy login modal
+  //     return;
+  //   }
+  //   navigate(`/player/${streamPlaybackId}`);
+  // };
+
+  useEffect(() => {
+  if (!authenticated) {
+    Notify.failure("Please connect your wallet to watch streams.");
+    login(); // Optionally trigger Privy login modal
+    navigate("/"); // Or redirect to home/login
+  }
+}, [authenticated, login, navigate]);
 
   useEffect(() => {
     const checkUserName = async () => {
