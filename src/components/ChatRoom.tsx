@@ -390,8 +390,7 @@ async function fetchApprovedMessages(streamKey: string) {
       timestamp: msg.createdAt ? new Date(msg.createdAt).getTime() : Date.now(),
       isSystemMessage: false,
     }));
-    console.log(checK_return, 'transformed approved messages');
-    return checK_return
+    return checK_return;
   } catch (e) {
     console.error("Error fetching approved messages:", e);
     return [];
