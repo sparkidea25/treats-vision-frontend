@@ -50,6 +50,8 @@ export default function ProfilePage() {
   const [users, setUsers] = useState<User[]>([]);
   const [bannedUsers, setBannedUsers] = useState<User[]>([]);
 
+  console.log(bannedUsers, 'banned users');
+
   const [activeTab, setActiveTab] = useState<"flagged" | "reports" | "banlist">("flagged");
 
 
