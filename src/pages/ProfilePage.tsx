@@ -314,6 +314,29 @@ const banUser = async (username: string) => {
     alert('Failed to ban user');
   }
 };
+
+const deleteChat = async (chatId: number) => {
+  try {
+    const response = await fetch(`${ApiStrings.API_BASE_URL}/chat/${chatId}/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        "ngrok-skip-browser-warning": 'true',
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+
+    if (!response.ok) throw new Error('Failed to delete chat');
+
+    // Remove deleted chat from state
+    setPendingMessages(prev => prev.filter(msg => msg.id !== chatId));
+
+    alert('Chat deleted successfully');
+  } catch (e) {
+    console.error(e);
+    alert('Failed to delete chat');
+  }
+};
 // ...existing code...
 
 
@@ -402,42 +425,83 @@ const banUser = async (username: string) => {
                     </div>
 
                 {/* </div> */}
-
                 {/* Flagged Content Table */}
 
-                
-{activeTab === "flagged" && (
-  <table className="w-full border border-gray-300 rounded-lg overflow-hidden text-left">
-    {/* ...existing flagged content table code... */}
-  </table>
-)}
-
-{/* Ban List Table */}
-{activeTab === "banlist" && (
+                {activeTab === "flagged" && (
   <table className="w-full border border-gray-300 rounded-lg overflow-hidden text-left">
     <thead className="bg-white">
       <tr>
-        <th className="px-4 py-2 font-normal">Name</th>
-        <th className="px-4 py-2 font-normal">Status</th>
+        <th className="px-4 py-2 font-normal">Username</th>
+        <th className="px-4 py-2 font-normal">Message</th>
+        <th className="px-4 py-2 font-normal">Violation</th>
+        <th className="px-4 py-2 font-normal">AI Confidence</th>
+        <th className="px-4 py-2 font-normal">Created</th>
+        <th className="px-4 py-2 font-normal">Actions</th>
       </tr>
     </thead>
     <tbody>
-      {bannedUsers.length === 0 && (
+      {pendingMessages.length === 0 && (
         <tr>
-          <td colSpan={2} className="text-center py-8 text-gray-400">No banned users</td>
+          <td colSpan={6} className="text-center py-8 text-gray-400">
+            No flagged content
+          </td>
         </tr>
       )}
-      {bannedUsers.map((u, idx) => (
-        <tr key={idx} className="border-t border-gray-200">
-          <td className="px-4 py-3">{u.name}</td>
-          <td className={`px-4 py-3 font-bold capitalize ${statusColors[u.status] || ""}`}>
-            {u.status.toLowerCase()}
+      {pendingMessages.map((msg) => (
+        <tr key={msg.id} className="border-t border-gray-200">
+          <td className="px-4 py-3">{msg.username}</td>
+          <td className="px-4 py-3">{msg.text}</td>
+          <td className="px-4 py-3">
+            {getViolation(msg.moderationResult.categories)}
           </td>
+          <td className="px-4 py-3">
+            {getAIConfidence(
+              msg.moderationResult.category_scores,
+              msg.moderationResult.categories
+            )}
+            %
+          </td>
+          <td className="px-4 py-3">{timeAgo(msg.createdAt)}</td>
+          {/* <td className="px-4 py-3">
+            <button
+              onClick={() => banUser(msg.username)}
+              className="px-3 py-1 bg-red-600 text-white rounded"
+            >
+              Ban User
+            </button>
+            <button
+            onClick={() => deleteChat(msg.id)}
+            className="px-3 py-1 bg-gray-700 text-white rounded"
+          >
+            Delete Chat
+          </button>
+          </td> */}
+          <td className="px-4 py-3">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => banUser(msg.username)}
+              className="px-3 py-1 bg-red-600 text-white rounded"
+            >
+              Ban User
+            </button>
+            <button
+              onClick={() => deleteChat(msg.id)}
+              className="px-3 py-1 bg-gray-700 text-white rounded"
+            >
+              Delete Chat
+            </button>
+          </div>
+        </td>
+
         </tr>
       ))}
     </tbody>
   </table>
 )}
+
+
+                
+
 
 
 

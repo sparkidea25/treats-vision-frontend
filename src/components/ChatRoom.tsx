@@ -121,7 +121,7 @@ function ChatRoom({ streamId, onChatToggle, viewers }: ChatRoomProps) {
     const effectiveUsername = getEffectiveUsername();
     console.log(`Initializing socket for streamId: ${streamId} with username: ${effectiveUsername}`);
     
-    const newSocket = io("https://bannered-nocuously-zaria.ngrok-free.app", {
+    const newSocket = io("https://api.treats.vision", {
       path: "/socket.io/",
       transports: ["websocket"],
       timeout: 20000,
@@ -361,7 +361,7 @@ function ChatRoom({ streamId, onChatToggle, viewers }: ChatRoomProps) {
   };
 
   // 👇 Add this before ChatRoom component
-async function fetchApprovedMessages(streamKey: string) {
+  async function fetchApprovedMessages(streamKey: string) {
   try {
     const res = await fetch(
       `${ApiStrings.API_BASE_URL}/chat/approved-messages?streamKey=${streamKey}`,
@@ -380,22 +380,27 @@ async function fetchApprovedMessages(streamKey: string) {
     }
 
     const data = await res.json();
-    console.log(data, 'approved messages');
+    console.log(data, "approved messages");
 
     // Transform backend messages to the same shape your ChatRoom uses
-    let checK_return =  data.map((msg: any) => ({
+    let checK_return = data.map((msg: any) => ({
       user: msg.username,
-      message: msg.status === "PENDING" ? "Message removed by Admin" : msg.text,
+      message:
+        msg.status === "PENDING" || msg.status === "REJECTED"
+          ? "Message removed by Admin"
+          : msg.text,
       streamId: msg.streamKey,
       timestamp: msg.createdAt ? new Date(msg.createdAt).getTime() : Date.now(),
       isSystemMessage: false,
     }));
+
     return checK_return;
   } catch (e) {
     console.error("Error fetching approved messages:", e);
     return [];
   }
 }
+
 
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

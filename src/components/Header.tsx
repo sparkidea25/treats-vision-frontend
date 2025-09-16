@@ -348,10 +348,71 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
   const navigate = useNavigate();
   const isOnStreamingPage = location.pathname === '/stream' || location.pathname.includes('/stream');
 
+  // const handlePrivyLogin = async () => {
+  //   if (!user) return;
+  //   try {
+  //     // 1. Check if user already exists
+  //     const checkResponse = await axios.get(
+  //       `${ApiStrings.API_BASE_URL}/auth/${user.id}`,
+  //       {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           "ngrok-skip-browser-warning": 'true',
+  //           "Access-Control-Allow-Origin": "*",
+  //         },
+  //       }
+  //     );
+
+  //     const existingUser = checkResponse.data;
+
+  //     // 2. If user exists and is banned, notify and return
+  //     if (existingUser && existingUser.status === 'BANNED') {
+  //       setUserStatus('BANNED');
+  //       Notify.failure('You are BANNED.');
+  //       logout();
+  //       navigate('/');
+  //       return;
+  //     }
+
+  //     // 3. If user does not exist, register the user
+  //     if (!existingUser) {
+  //       const registerResponse = await axios.post(
+  //         `${ApiStrings.API_BASE_URL}/auth/connect-wallet`,
+  //         {
+  //           email: user.email,
+  //           privy_id: user.id,
+  //           wallet_address: user.wallet?.address,
+  //         },
+  //         {
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             "ngrok-skip-browser-warning": 'true',
+  //             "Access-Control-Allow-Origin": "*",
+  //           },
+  //         }
+  //       );
+  //       console.log('User registered:', registerResponse.data);
+  //       setUserStatus('ACTIVE');
+  //     } else {
+  //       // 4. User exists and is not banned, proceed as normal
+  //       console.log('User connected:', existingUser);
+  //       setUserStatus(existingUser.status || 'ACTIVE');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error connecting wallet:', error);
+  //     Notify.failure('Error connecting wallet.');
+  //     logout();
+  //       navigate('/');
+  //   }
+  // };
+
   const handlePrivyLogin = async () => {
-    if (!user) return;
+  if (!user) return;
+
+  try {
+    // 1. Check if user already exists
+    let existingUser: any = null;
     try {
-      // 1. Check if user already exists
       const checkResponse = await axios.get(
         `${ApiStrings.API_BASE_URL}/auth/${user.id}`,
         {
@@ -363,48 +424,58 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
         }
       );
 
-      const existingUser = checkResponse.data;
-
-      // 2. If user exists and is banned, notify and return
-      if (existingUser && existingUser.status === 'BANNED') {
-        setUserStatus('BANNED');
-        Notify.failure('You are BANNED.');
-        logout();
-        navigate('/');
-        return;
-      }
-
-      // 3. If user does not exist, register the user
-      if (!existingUser) {
-        const registerResponse = await axios.post(
-          `${ApiStrings.API_BASE_URL}/auth/connect-wallet`,
-          {
-            email: user.email,
-            privy_id: user.id,
-            wallet_address: user.wallet?.address,
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              "ngrok-skip-browser-warning": 'true',
-              "Access-Control-Allow-Origin": "*",
-            },
-          }
-        );
-        console.log('User registered:', registerResponse.data);
-        setUserStatus('ACTIVE');
+      // Make sure we got a valid user object
+      existingUser = checkResponse.data ?? null;
+    } catch (err: any) {
+      if (err.response && err.response.status === 404) {
+        // No user found → that's fine, we'll register
+        existingUser = null;
       } else {
-        // 4. User exists and is not banned, proceed as normal
-        console.log('User connected:', existingUser);
-        setUserStatus(existingUser.status || 'ACTIVE');
+        throw err; // rethrow if it's another error
       }
-    } catch (error) {
-      console.error('Error connecting wallet:', error);
-      Notify.failure('Error connecting wallet.');
-      logout();
-        navigate('/');
     }
-  };
+
+    // 2. If user exists and is banned, notify and return
+    if (existingUser && existingUser.status === 'BANNED') {
+      setUserStatus('BANNED');
+      Notify.failure('You are BANNED.');
+      logout();
+      navigate('/');
+      return;
+    }
+
+    // 3. If user does not exist, register the user
+    if (!existingUser) {
+      const registerResponse = await axios.post(
+        `${ApiStrings.API_BASE_URL}/auth/connect-wallet`,
+        {
+          email: user.email,
+          privy_id: user.id,
+          wallet_address: user.wallet?.address,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            "ngrok-skip-browser-warning": 'true',
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
+      console.log('User registered:', registerResponse.data);
+      setUserStatus('ACTIVE');
+    } else {
+      // 4. User exists and is not banned
+      console.log('User connected:', existingUser);
+      setUserStatus(existingUser.status || 'ACTIVE');
+    }
+  } catch (error) {
+    console.error('Error connecting wallet:', error);
+    Notify.failure('Error connecting wallet.');
+    logout();
+    navigate('/');
+  }
+};
+
 
   // Function to check if user can access streaming features
   const canAccessStreaming = () => {
