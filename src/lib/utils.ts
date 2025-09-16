@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
   export const getUserUserId = async (privyId: string) => {
-    const fetchUser = await fetch(`${ApiStrings.API_BASE_URL}/livepeer/stream/${privyId}`, {
+    const fetchUser = await fetch(`${ApiStrings.API_BASE_URL}/auth/${privyId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

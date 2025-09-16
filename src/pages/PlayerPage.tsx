@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { useState, useEffect, useRef } from 'react';
@@ -7,7 +7,9 @@ import { LiveStreamCard } from '@/components/LiveStream';
 import ChatRoom from '@/components/ChatRoom';
 import { ToastContainer } from 'react-toastify';
 import { ApiStrings } from '@/lib/apiStrings';
-import { fetchUsername } from '@/lib/utils';
+import { fetchUsername, getUserUserId } from '@/lib/utils';
+import { usePrivy } from '@privy-io/react-auth';
+import { Notify } from 'notiflix';
 
 const PlayerPage = () => {
   const { playbackId } = useParams<{ playbackId: string }>();
@@ -24,10 +26,44 @@ const PlayerPage = () => {
   });
   const [loading, setLoading] = useState(true);
   const [hasJoinedRoom, setHasJoinedRoom] = useState(false);
+  const { user, authenticated, login } = usePrivy();
+  const navigate = useNavigate();
   const chatRoomRef = useRef<{ sendSystemMessage: (message: string) => void }>(null);
 
   console.log(streamInfo, 'streamInfo state');
   console.log(username, 'username state');
+
+  //   const handleStreamClick = (streamPlaybackId: string, isTerminated: boolean) => {
+  //   if (!authenticated) {
+  //     Notify.failure("Please connect your wallet to watch streams.");
+  //     login(); // Optionally trigger Privy login modal
+  //     return;
+  //   }
+  //   navigate(`/player/${streamPlaybackId}`);
+  // };
+
+  useEffect(() => {
+  if (!authenticated) {
+    Notify.failure("Please connect your wallet to watch streams.");
+    login(); // Optionally trigger Privy login modal
+    navigate("/"); // Or redirect to home/login
+  }
+}, [authenticated, login, navigate]);
+
+  useEffect(() => {
+    const checkUserName = async () => {
+      if (authenticated && user) {
+        const getId = await getUserUserId(user.id);
+        if (!getId.name) {
+          Notify.warning('Please complete your profile setup to continue', {
+            timeout: 5000,
+          });
+          navigate('/profile?from=player', { state: { from: 'player' } });
+        }
+      }
+    };
+    checkUserName();
+  }, [authenticated, user, navigate]);
 
   useEffect(() => {
     if (!playbackId) return;
@@ -220,6 +256,7 @@ const PlayerPage = () => {
             <ChatRoom
               streamId={streamKey} 
               onChatToggle={setIsChatOpen}
+              viewers={streamInfo.viewers}
             />
           </div>
         </div>

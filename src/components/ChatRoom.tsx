@@ -6,9 +6,10 @@ import { io, Socket } from "socket.io-client";
 interface ChatRoomProps {
   streamId: string;
   onChatToggle?: (isOpen: boolean) => void;
+  viewers?: number;
 }
 
-function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
+function ChatRoom({ streamId, onChatToggle, viewers }: ChatRoomProps) {
   const [isOpen, setIsOpen] = useState(true);
   const { authenticated, user } = usePrivy();
   const [username, setUsername] = useState("");
@@ -84,6 +85,19 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
       });
     }
   }, [authenticated, user]);
+
+
+  useEffect(() => {
+  if (!streamId) return;
+
+  console.log("Fetching approved messages for:", streamId);
+  fetchApprovedMessages(streamId).then((approvedMsgs) => {
+    if (approvedMsgs.length > 0) {
+      setMessages((prev) => [...approvedMsgs, ...prev]);
+    }
+  });
+}, [streamId]);
+
 
   useEffect(() => {
   if (socket && socket.connected && streamId) {
@@ -292,6 +306,9 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     }
   };
 
+
+
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setMessage(value);
@@ -343,6 +360,49 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
     }
   };
 
+  // 👇 Add this before ChatRoom component
+  async function fetchApprovedMessages(streamKey: string) {
+  try {
+    const res = await fetch(
+      `${ApiStrings.API_BASE_URL}/chat/approved-messages?streamKey=${streamKey}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+      }
+    );
+
+    if (!res.ok) {
+      console.error("Failed to fetch approved messages", res.status);
+      return [];
+    }
+
+    const data = await res.json();
+    console.log(data, "approved messages");
+
+    // Transform backend messages to the same shape your ChatRoom uses
+    let checK_return = data.map((msg: any) => ({
+      user: msg.username,
+      message:
+        msg.status === "PENDING" || msg.status === "REJECTED"
+          ? "Message removed by Admin"
+          : msg.text,
+      streamId: msg.streamKey,
+      timestamp: msg.createdAt ? new Date(msg.createdAt).getTime() : Date.now(),
+      isSystemMessage: false,
+    }));
+
+    return checK_return;
+  } catch (e) {
+    console.error("Error fetching approved messages:", e);
+    return [];
+  }
+}
+
+
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -358,7 +418,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
           <div className="flex-1 flex flex-col items-center pt-4">
             <div className="flex items-center">
              <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
-              <span className="text-lg font-bold ml-1">100</span>
+              <span className="text-lg font-bold ml-1">{viewers}</span>
             </div>
 
             <span className="text-sm text-gray-800 mb-4">tv chat</span>
@@ -380,7 +440,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
-                <span className="text-lg font-bold ml-1">100</span>
+                <span className="text-lg font-bold ml-1">{viewers}</span>
                 <span className="text-sm text-gray-800 ml-2">tv chat</span>
               </div>
               <button
@@ -420,7 +480,7 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
               </div>
             ) : (
               <div className="space-y-2">
-                {messages.map((msg, index) => (
+                {/* {messages.map((msg, index) => (
                   <div key={`${msg.timestamp || index}-${index}`} className="flex items-start p-2">
                     <img
                       src="/assets/Icons.png"
@@ -433,7 +493,28 @@ function ChatRoom({ streamId, onChatToggle }: ChatRoomProps) {
                       {msg.isLocalMessage && <span className="text-xs text-gray-400 ml-1">(offline)</span>}
                     </p>
                   </div>
-                ))}
+                ))} */}
+                {messages.map((msg, index) => (
+  <div key={`${msg.timestamp || index}-${index}`} className="flex items-start p-2">
+    <div className="flex flex-col">
+      {/* Special styling for removed messages */}
+      {msg.message === "Message removed by Admin" ? (
+        <div className="flex flex-col items-start">
+          <span className="text-sm text-gray-500 italic bg-red-50 px-2 py-1 rounded">
+            <span className="font-bold">{msg.user || "Anonymous"}: </span>
+            {msg.message}
+          </span>
+        </div>
+      ) : (
+        <p className={`text-left text-base break-words ${msg.isSystemMessage ? 'text-gray-500 italic' : 'text-gray-800'}`}>
+          <span className="font-bold">{msg.user || "Anonymous"}: </span>
+          <span>{msg.message}</span>
+          {msg.isLocalMessage && <span className="text-xs text-gray-400 ml-1">(offline)</span>}
+        </p>
+      )}
+    </div>
+  </div>
+))}
               </div>
             )}
           </div>
