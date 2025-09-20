@@ -88,64 +88,101 @@ export function LiveSection({ navVariant, currentStreamId }: LiveSectionProps) {
     navigate(`/player/${streamPlaybackId}`);
   };
 
-  if (isLoading) {
-    return (
-      <section className="bg-lime-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-gray-800 text-8xl font-normal font-Redaction">live</h2>
-          </div>
-          <div className="text-center text-gray-500 text-xl py-12">Loading...</div>
-        </div>
-      </section>
-    );
-  }
-
+if (isLoading) {
   return (
-    <section className="bg-lime-50 p-6">
+    <section className="bg-lime-50 p-6 border-t border-b border-black">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <h2 className="text-gray-800 text-8xl font-normal font-Redaction">live</h2>
         </div>
-        {fetchError || liveStreams.length === 0 ? (
-          <div className="text-center text-gray-500 text-xl py-12">
-            No live streams available
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-            <div className="absolute inset-y-0 left-0 w-px bg-black z-10"></div>
-            <div className="absolute inset-y-0 right-0 w-px bg-black z-10"></div>
-            {liveStreams.slice(0, 2).map((stream) => (
-              <div
-                key={stream.id}
-                onClick={() =>
-                  handleStreamClick(stream.streamPlaybackId, stream.terminate || false)
-                }
-                className="cursor-pointer"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    handleStreamClick(stream.streamPlaybackId, stream.terminate || false);
-                  }
-                }}
-              >
-                <LiveStreamCard
-                  title={
-                    stream.terminate
-                      ? 'LIVE ENDED'
-                      : stream.name || stream.title || 'Untitled Stream'
-                  }
-                  streamer={stream.username || 'Unknown Streamer'}
-                  viewers={stream.viewers || 0}
-                  isLive={!stream.terminate}
-                  playbackId={stream.playbackId || stream.streamPlaybackId}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="text-center text-gray-500 text-xl py-12">Loading...</div>
       </div>
     </section>
   );
+}
+
+return (
+  <section className="bg-lime-50 p-6 border-t border-b border-black">
+    <div className="max-w-7xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-gray-800 text-8xl font-normal font-Redaction">live</h2>
+      </div>
+      {fetchError || liveStreams.length === 0 ? (
+        <div className="text-center text-gray-500 text-xl py-12">
+          No live streams available
+        </div>
+      ) : (
+        <div className="relative">
+          {/* Main container with edge positioning */}
+          <div className="flex justify-between items-start gap-8">
+            {/* Left stream */}
+            <div className="flex-1 border-l border-black pl-6 relative">
+              {liveStreams[0] && (
+                <div
+                  onClick={() =>
+                    handleStreamClick(liveStreams[0].streamPlaybackId, liveStreams[0].terminate || false)
+                  }
+                  className="cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      handleStreamClick(liveStreams[0].streamPlaybackId, liveStreams[0].terminate || false);
+                    }
+                  }}
+                >
+                  <LiveStreamCard
+                    title={
+                      liveStreams[0].terminate
+                        ? 'LIVE ENDED'
+                        : liveStreams[0].name || liveStreams[0].title || 'Untitled Stream'
+                    }
+                    streamer={liveStreams[0].username || 'Unknown Streamer'}
+                    viewers={liveStreams[0].viewers || 0}
+                    isLive={!liveStreams[0].terminate}
+                    playbackId={liveStreams[0].playbackId || liveStreams[0].streamPlaybackId}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Right stream */}
+            <div className="flex-1 border-r border-black pr-6 relative">
+              {liveStreams[1] && (
+                <div
+                  onClick={() =>
+                    handleStreamClick(liveStreams[1].streamPlaybackId, liveStreams[1].terminate || false)
+                  }
+                  className="cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      handleStreamClick(liveStreams[1].streamPlaybackId, liveStreams[1].terminate || false);
+                    }
+                  }}
+                >
+                  <LiveStreamCard
+                    title={
+                      liveStreams[1].terminate
+                        ? 'LIVE ENDED'
+                        : liveStreams[1].name || liveStreams[1].title || 'Untitled Stream'
+                    }
+                    streamer={liveStreams[1].username}
+                    viewers={liveStreams[1].viewers || 0}
+                    isLive={!liveStreams[1].terminate}
+                    playbackId={liveStreams[1].playbackId || liveStreams[1].streamPlaybackId}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Center dividing line */}
+          <div className="absolute inset-y-0 left-1/2 w-px bg-black transform -translate-x-0.5"></div>
+        </div>
+      )}
+    </div>
+  </section>
+);
 }

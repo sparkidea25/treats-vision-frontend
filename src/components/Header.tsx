@@ -346,7 +346,10 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
   const [userStatus, setUserStatus] = useState<string | null>(null); // Track user status
   const location = useLocation();
   const navigate = useNavigate();
-  const isOnStreamingPage = location.pathname === '/stream' || location.pathname.includes('/stream');
+  // const isOnStreamingPage = location.pathname === '/stream' || location.pathname.includes('/stream');
+  const isOnStreamingPage = ['/stream', '/player'].some(path =>
+  location.pathname === path || location.pathname.includes(path)
+);
 
   // const handlePrivyLogin = async () => {
   //   if (!user) return;

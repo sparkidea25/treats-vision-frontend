@@ -11,7 +11,7 @@ export function ReplaySection() {
   const fetchReplays = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_LINK}/livepeer/playbacks`,
+        `${ApiStrings.API_BASE_URL}/livepeer/playbacks`,
         {
           // method: 'GET',
           headers: {
@@ -71,6 +71,7 @@ export function ReplaySection() {
     (async () => {
       try {
         const replays = await fetchReplays();
+        console.log(replays, 'fetchReplays')
         const safeReplays = Array.isArray(replays) ? replays : [];
 
         // 🔹 enrich with usernames
