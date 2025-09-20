@@ -406,11 +406,13 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
   //   }
   // };
 
-  const handlePrivyLogin = async () => {
+
+
+const handlePrivyLogin = async () => {
   if (!user) return;
 
   try {
-    // 1. Check if user already exists
+    // Check if user exists by privyId
     let existingUser: any = null;
     try {
       const checkResponse = await axios.get(
@@ -423,33 +425,20 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
           },
         }
       );
-
-      // Make sure we got a valid user object
       existingUser = checkResponse.data ?? null;
     } catch (err: any) {
       if (err.response && err.response.status === 404) {
-        // No user found → that's fine, we'll register
-        existingUser = null;
+        existingUser = null; // user not found
       } else {
-        throw err; // rethrow if it's another error
+        throw err;
       }
     }
 
-    // 2. If user exists and is banned, notify and return
-    if (existingUser && existingUser.status === 'BANNED') {
-      setUserStatus('BANNED');
-      Notify.failure('You are BANNED.');
-      logout();
-      navigate('/');
-      return;
-    }
-
-    // 3. If user does not exist, register the user
-    if (!existingUser) {
-      const registerResponse = await axios.post(
+    // If user exists → connect wallet
+    if (existingUser) {
+      const connectResponse = await axios.post(
         `${ApiStrings.API_BASE_URL}/auth/connect-wallet`,
         {
-          email: user.email,
           privy_id: user.id,
           wallet_address: user.wallet?.address,
         },
@@ -461,18 +450,35 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
           },
         }
       );
-      console.log('User registered:', registerResponse.data);
-      setUserStatus('ACTIVE');
-    } else {
-      // 4. User exists and is not banned
-      console.log('User connected:', existingUser);
-      setUserStatus(existingUser.status || 'ACTIVE');
+      console.log("Wallet connected:", connectResponse.data);
+      setUserStatus(existingUser.status || "ACTIVE");
+      return;
     }
+
+    // If user does not exist → register & connect wallet
+    const registerResponse = await axios.post(
+      `${ApiStrings.API_BASE_URL}/auth/connect-wallet`,
+      {
+        email: user.email,
+        privy_id: user.id,
+        wallet_address: user.wallet?.address,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          "ngrok-skip-browser-warning": 'true',
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
+    );
+
+    console.log("User registered:", registerResponse.data);
+    setUserStatus("ACTIVE");
   } catch (error) {
-    console.error('Error connecting wallet:', error);
-    Notify.failure('Error connecting wallet.');
+    console.error("Error connecting wallet:", error);
+    Notify.failure("Error connecting wallet.");
     logout();
-    navigate('/');
+    navigate("/");
   }
 };
 
@@ -527,7 +533,8 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              "ngrok-skip-browser-warning": 'true'
+              "ngrok-skip-browser-warning": 'true',
+              "Access-Control-Allow-Origin": "*",
             },
             body: JSON.stringify({ streamId: currentStreamId })
           }
@@ -577,10 +584,10 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
   }, [authenticated, user]);
 
   return (
-    <header className="w-full pt-6 bg-lime-50">
+   <header className="w-full pt-6 bg-lime-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className={`flex-1 bg-lime-50 relative pl-10 pb-8 ${navVariant === '/' ? 'bg-lime-50' : 'bg-lime-50'}`}> 
-          <a href="/">
+          <a href="/" className="hover:opacity-80 transition-opacity">
             <img
               src="/assets/logo.png"
               alt="Livestream Logo"
@@ -608,19 +615,19 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
                 </h3>
                 <div className="flex justify-center space-x-4">
                   <button
-                    onClick={handleConfirmEndStream}
+                     onClick={handleConfirmEndStream}
                     disabled={isEndingStream}
                     className={`px-8 py-3 rounded-full border-2 border-black transition-colors ${
                       isEndingStream 
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                        : 'bg-white text-black hover:bg-gray-50'
+                        : 'bg-white text-black hover:bg-lime-400 hover:border-lime-600'
                     }`}
                   >
                     {isEndingStream ? 'ending stream...' : 'yes, end stream'}
                   </button>
                   <button
                     onClick={() => setConfirmEndStreamOpen(false)}
-                    className="px-8 py-3 rounded-full border-2 border-black bg-white text-black hover:bg-gray-50"
+                    className="px-8 py-3 rounded-full border-2 border-black bg-white text-black hover:bg-lime-400 hover:border-lime-600 transition-colors"
                   >
                     cancel
                   </button>
@@ -633,10 +640,10 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
             <button
               onClick={handleEndStreamClick} // Updated to include banned user check
               disabled={isEndingStream || !canAccessStreaming()}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 ${
                 isEndingStream || !canAccessStreaming()
                   ? 'text-gray-400 bg-gray-100 cursor-not-allowed' 
-                  : 'text-red-600 hover:text-red-800 hover:bg-red-50'
+                  : 'text-red-600 hover:text-white hover:bg-lime-400 hover:border-lime-400 border-2 border-transparent'
               }`}
             >
               <img 
@@ -650,8 +657,10 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
             <button
               onClick={handleGoLiveClick} // Updated to include banned user check
               disabled={!canAccessStreaming()}
-              className={`flex items-center gap-2 px-4 py-2 ${
-                !canAccessStreaming() ? 'opacity-50 cursor-not-allowed' : ''
+              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 border-2 border-transparent ${
+                !canAccessStreaming() 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-lime-400 hover:text-black hover:border-lime-500'
               }`}
             >
               <img src="/assets/live.png" alt="live icon" className="w-5 h-5 object-contain" />
@@ -663,12 +672,12 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
           {ready && authenticated && canAccessStreaming() && (
             <Button 
               variant="ghost" 
-              className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+              className="text-gray-700 hover:bg-lime-400 hover:text-black transition-all duration-200 text-sm font-normal flex items-center rounded-md px-4 py-2"
             >
               <img
                 src="/assets/rewards.png"
                 alt="Featured livestream"
-                className="w-full h-full"
+                className="w-4 h-4 mr-2"
               />
               rewards
             </Button>
@@ -678,23 +687,29 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
             <Menu as="div" className="relative">
               <Menu.Button as={Button}
                 variant="ghost"
-                className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+                className="text-gray-700 hover:bg-lime-400 hover:text-black transition-all duration-200 text-sm font-normal flex items-center rounded-md px-4 py-2"
               >
                 <img 
                   src="/assets/account.png"
-                  alt="Login icon"
-                  className="w-4 h-4 mr-1"
+                  alt="Profile icon"
+                  className="w-4 h-4 mr-2"
                 />
                 Profile
               </Menu.Button>
-              <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-cyan-100 border border-gray-200 rounded-md shadow-lg focus:outline-none z-50">
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900">{user?.wallet?.address ?? 'User'}</p>
+              <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-white border border-lime-300 rounded-md shadow-lg focus:outline-none z-50">
+                <div className="px-4 py-3 border-b border-lime-200 bg-lime-50">
+                  {/* <p className="text-sm font-medium text-gray-900">{user?.wallet?.address ?? 'User'}</p> */}
+                  <p className="text-sm font-medium text-gray-900">
+                    {user?.wallet?.address 
+                      ? `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}` 
+                      : 'User'
+                    }
+                  </p>
                 </div>
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      className={`${active ? 'bg-gray-100' : ''} w-full text-left px-4 py-2 text-sm text-gray-700`}
+                      className={`${active ? 'bg-lime-400 text-black' : 'text-gray-700'} w-full text-left px-4 py-2 text-sm transition-colors`}
                       onClick={() => window.location.href = '/profile'}
                     >
                       Go to Profile
@@ -705,7 +720,7 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
                   <Menu.Item>
                     {({ active }) => (
                       <button
-                        className={`${active ? 'bg-gray-100' : ''} w-full text-left px-4 py-2 text-sm text-gray-700`}
+                        className={`${active ? 'bg-lime-400 text-black' : 'text-gray-700'} w-full text-left px-4 py-2 text-sm transition-colors`}
                         onClick={logout}
                       >
                         Log Out
@@ -718,13 +733,13 @@ export function Header({ navVariant, currentStreamId }: HeaderProps) {
           ) : (
             <Button onClick={login}
               variant="ghost" 
-              className="text-gray-700 hover:bg-gray-100 text-sm font-normal flex items-center"
+              className="text-gray-700 hover:bg-lime-400 hover:text-black transition-all duration-200 text-sm font-normal flex items-center rounded-md px-4 py-2"
               disabled={!ready}
             >
               <img 
                 src="/assets/account.png"
                 alt="Login icon"
-                className="w-4 h-4 mr-1"
+                className="w-4 h-4 mr-2"
               />
               Connect Wallet
             </Button>

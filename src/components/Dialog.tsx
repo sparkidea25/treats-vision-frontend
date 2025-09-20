@@ -35,10 +35,10 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
 
   const sources = [
     { name: 'Logitech Webcam', icon: <Camera className="w-4 h-4 mr-2 inline" /> },
-    { 
-      name: 'Built-in Camera', 
-      icon: <Camera className="w-5 h-5 text-gray-400" /> 
-    },
+    {
+       name: 'Built-in Camera',
+       icon: <Camera className="w-5 h-5 text-gray-400" />
+     },
   ];
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
         .catch(() => {
           setCameraError('Unable to access camera');
         });
-      
+        
       return () => {
         if (videoRef.current && videoRef.current.srcObject) {
           const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
@@ -157,9 +157,9 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
                 checked={form.tvChat}
                 onChange={e => setForm({ ...form, tvChat: e.target.checked })}
               />
-              <label htmlFor="tv-chat" className="font-medium text-gray-800">tv chat</label>
+              <label htmlFor="tv-chat" className="font-small text-gray-800">tv chat</label>
             </div>
-            <div className="ml-6 mb-3 text-gray-600 text-sm font-medium">ENABLE DURING STREAM</div>
+            <div className="ml-6 mb-3 text-gray-600 text-sm font-small">LIVE CHAT DURING STREAM</div>
 
             <div className="flex items-center mb-1">
               <input
@@ -169,7 +169,7 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
                 checked={form.tokenAccess}
                 onChange={e => setForm({ ...form, tokenAccess: e.target.checked })}
               />
-              <label htmlFor="token-access" className="font-medium text-gray-800 mr-4">token access</label>
+              <label htmlFor="token-access" className="font-small text-gray-800 mr-4">token access</label>
               <input
                 id="public-access"
                 type="checkbox"
@@ -177,18 +177,19 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
                 checked={form.publicAccess}
                 onChange={e => setForm({ ...form, publicAccess: e.target.checked })}
               />
-              <label htmlFor="public-access" className="font-medium text-gray-800">public access</label>
+              <label htmlFor="public-access" className="font-small text-gray-800">public access</label>
             </div>
-            <div className="ml-6 text-gray-600 text-sm font-medium">
-              SET TO PRIVATE<br />
-              ONLY ACCESSIBLE TO NIBS HOLDERS
+            <div className="ml-6 text-gray-600 text-sm font-small">
+             USER REQUIRES<br />
+              TOKEN/NFT TO<br />
+               VIEW STREAM
             </div>
             <br />
 
             <StreamPreviewButton onClick={() => setStep(2)} title="stream preview" />
           </div>
         );
-      
+        
       case 2:
         return (
           <div>
@@ -214,8 +215,8 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
               </div>
             )}
             <StreamPreviewButton onClick={() => setStep(1)} title="go back" />
-            <StreamPreviewButton 
-              onClick={async () => {
+            <StreamPreviewButton
+               onClick={async () => {
                 // Check if user has a name before proceeding to go live
                 if (authenticated && user) {
                   const getId = await getUserUserId(user.id);
@@ -229,12 +230,12 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
                   }
                 }
                 setStep(3);
-              }} 
-              title="go live" 
-            />
+              }}
+               title="go live"
+             />
           </div>
         );
-      
+        
       case 3:
         return (
           <div>
@@ -253,16 +254,16 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
               onChange={e => setForm({ ...form, tokenAmount: parseInt(e.target.value, 10) || 0 })}
             />
             <StreamPreviewButton onClick={() => setStep(2)} title="back" />
-            <StreamPreviewButton 
-              onClick={() => {
+            <StreamPreviewButton
+               onClick={() => {
                 navigate('/stream', {state: form});
                 onClose();
-              }} 
-              title="Create Stream" 
-            />
+              }}
+               title="Create Stream"
+             />
           </div>
         );
-      
+        
       default:
         return null;
     }
@@ -270,52 +271,73 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, className }) => {
 
   return (
     <HeadlessDialog
-      open={open}
-      onClose={onClose}
-      className={`fixed z-50 inset-0 overflow-y-auto ${className || ''}`}
-    >
-      <div className="flex items-center justify-center min-h-screen px-4">
-        <div className="fixed inset-0 bg-black bg-opacity-25" aria-hidden="true" onClick={onClose} />
-        <DialogPanel className="border-r-4 border-lime-400 shadow-[0_0_16px_4px_rgba(163,230,53,0.15)] bg-lime-50 border-4 border-gray-950 p-0 w-full max-w-md rounded-lg relative z-10">
-          <div className="flex items-center justify-between p-4 border-b border-lime-300">
-            <div className="flex flex-col gap-2 w-full">
-              {/* Stepper */}
-              <div className="flex items-center justify-center mb-2">
-                {[1, 2, 3].map((s, idx) => (
-                  <React.Fragment key={s}>
-                    <div className="flex flex-col items-center">
-                      <div
-                        className={`flex items-center justify-center rounded-full w-8 h-8 border-2 
-                          ${step === s ? 'bg-lime-400 border-lime-600 text-white font-bold shadow-lg' : 'bg-white border-lime-400 text-lime-600'}
-                          transition-all duration-200`}
-                      >
-                        {s}
-                      </div>
-                      <span className={`text-xs mt-1 ${step === s ? 'text-lime-700 font-semibold' : 'text-gray-500'}`}>
-                        {s === 1 ? 'Create' : s === 2 ? 'Preview' : 'Token'}
-                      </span>
+  open={open}
+  onClose={onClose}
+  className={`fixed z-50 inset-0 overflow-y-auto ${className || ''}`}
+>
+  <div className="flex items-center justify-center min-h-screen px-4">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-25"
+      aria-hidden="true"
+      onClick={onClose}
+    />
+
+    {/* Wrapper with neon border offset */}
+    <div className="relative w-full max-w-md">
+      {/* Neon border layer */}
+      <div className="absolute inset-0 translate-x-2 translate-y-2 border-r-8 border-b-8 border-lime-400 pointer-events-none"></div>
+
+      {/* Dialog content */}
+      <DialogPanel className="relative min-h-80 shadow-[0_0_16px_4px_rgba(163,230,53,0.15)] bg-lime-50 p-0 w-full z-10">
+        <div className="flex items-center justify-between p-4 border-b border-lime-300">
+          <div className="flex flex-col gap-2 w-full">
+            {/* Stepper */}
+            <div className="flex items-center justify-center mb-2">
+              {[1, 2, 3].map((s, idx) => (
+                <React.Fragment key={s}>
+                  <div className="flex flex-col items-center">
+                    <div
+                      className={`flex items-center justify-center rounded-full w-8 h-8 border-2
+                         ${
+                           step === s
+                             ? 'bg-lime-400 border-lime-600 text-white font-bold shadow-lg'
+                             : 'bg-white border-lime-400 text-lime-600'
+                         }
+                        transition-all duration-200`}
+                    >
+                      {s}
                     </div>
-                    {idx < 2 && (
-                      <div className="w-8 h-1 bg-lime-300 mx-1 rounded-full" />
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
+                    <span
+                      className={`text-xs mt-1 ${
+                        step === s
+                          ? 'text-lime-700 font-semibold'
+                          : 'text-gray-500'
+                      }`}
+                    >
+                      {s === 1 ? 'Create' : s === 2 ? 'Preview' : 'Token'}
+                    </span>
+                  </div>
+                  {idx < 2 && (
+                    <div className="w-8 h-1 bg-lime-300 mx-1 rounded-full" />
+                  )}
+                </React.Fragment>
+              ))}
             </div>
-            <button
-              className="text-gray-700 hover:text-black ml-4"
-              onClick={onClose}
-              aria-label="Close"
-              type="button"
-            >
-              <X className="h-6 w-6" />
-            </button>
           </div>
-          <div className="p-6">
-            {renderStepContent()}
-          </div>
-        </DialogPanel>
-      </div>
-    </HeadlessDialog>
+          <button
+            className="text-gray-700 hover:text-black ml-4"
+            onClick={onClose}
+            aria-label="Close"
+            type="button"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        <div className="p-6">{renderStepContent()}</div>
+      </DialogPanel>
+    </div>
+  </div>
+</HeadlessDialog>
+
   );
 };

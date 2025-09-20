@@ -37,7 +37,8 @@ export const StreamPreviewButton: React.FC<StreamPreviewButtonProps> = ({
         ${className}
       `}
       style={{
-        backgroundColor: '#fefdf8'
+        // backgroundColor: '#fefdf8'
+        backgroundColor: 'rgb(247 254 231 / var(--tw-bg-opacity, 1))'
       }}
     >
       {title}

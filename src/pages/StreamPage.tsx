@@ -37,6 +37,7 @@ const StreamingPage = () => {
                 headers: {
                     'Content-Type': 'application/json',
                     "ngrok-skip-browser-warning": 'true',
+                    "Access-Control-Allow-Origin": "*",
                 }
             });
             if (!response.ok) {
@@ -73,7 +74,8 @@ const StreamingPage = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    "ngrok-skip-browser-warning": 'true'
+                    "ngrok-skip-browser-warning": 'true',
+                    "Access-Control-Allow-Origin": "*",
                 },
                 body: JSON.stringify({ 
                     name: form.title || "stream - treatsvision ama",

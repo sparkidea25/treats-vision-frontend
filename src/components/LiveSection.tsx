@@ -38,6 +38,7 @@ export function LiveSection({ navVariant, currentStreamId }: LiveSectionProps) {
         headers: {
           'content-type': 'application/json',
           'ngrok-skip-browser-warning': 'true',
+          'Access-Control-Allow-Origin': '*',
         },
       });
       if (!response.ok) throw new Error('Network response was not ok');

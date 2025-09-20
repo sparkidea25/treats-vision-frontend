@@ -11,11 +11,11 @@ export function ReplaySection() {
   const fetchReplays = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_LINK}/v1.0/livepeer/playbacks`,
+        `${import.meta.env.VITE_API_LINK}/livepeer/playbacks`,
         {
-          method: 'GET',
+          // method: 'GET',
           headers: {
-            contentType: 'application/json',
+            'content-type': 'application/json',
             'ngrok-skip-browser-warning': 'true',
             'Access-Control-Allow-Origin': '*',
           },

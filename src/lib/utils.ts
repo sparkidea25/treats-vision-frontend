@@ -11,8 +11,8 @@ export function cn(...inputs: ClassValue[]) {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        "ngrok-skip-browser-warning": 'true'
-
+        "ngrok-skip-browser-warning": 'true',
+        "Access-Control-Allow-Origin": "*",
       },
     });
     const userData = await fetchUser.json();
@@ -27,6 +27,7 @@ export function cn(...inputs: ClassValue[]) {
                   headers: {
                       'Content-Type': 'application/json',
                       "ngrok-skip-browser-warning": 'true',
+                      "Access-Control-Allow-Origin": "*",
                   }
         });
         const data = await res.json();
