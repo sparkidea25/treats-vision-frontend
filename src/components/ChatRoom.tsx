@@ -665,7 +665,7 @@ function ChatRoom({ streamId, onChatToggle, viewers }: ChatRoomProps) {
 
   const checkUserRole = async (username: string) => {
     try {
-      const response = await fetch(`${ApiStrings.API_BASE_URL}/admin/user/${username}`, {
+      const response = await fetch(`${ApiStrings.API_BASE_URL}/auth/admin/user/${username}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -734,8 +734,11 @@ function ChatRoom({ streamId, onChatToggle, viewers }: ChatRoomProps) {
   const deleteMessage = async (messageIndex: number) => {
     try {
       const messageToDelete = messages[messageIndex];
+
+      // fetch chatId from database
+      let chatId = 1;
       
-      const response = await fetch(`${ApiStrings.API_BASE_URL}/admin/delete-message`, {
+      const response = await fetch(`${ApiStrings.API_BASE_URL}/chat/${chatId}/delete-`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -867,7 +870,7 @@ function ChatRoom({ streamId, onChatToggle, viewers }: ChatRoomProps) {
     const effectiveUsername = getEffectiveUsername();
     console.log(`Initializing socket for streamId: ${streamId} with username: ${effectiveUsername}`);
     
-    const newSocket = io(`${ApiStrings.API_BASE_URL}`, {
+    const newSocket = io(`${ApiStrings.CHAT_BASE_URL}`, {
       path: "/socket.io/",
       transports: ["websocket"],
       timeout: 20000,
@@ -1185,11 +1188,13 @@ function ChatRoom({ streamId, onChatToggle, viewers }: ChatRoomProps) {
 
       {/* Collapsed chat */}
       {!isOpen && (
+       
         <div className="w-16 bg-lime-50 border-l border-black flex flex-col">
           <div className="flex-1 flex flex-col items-center pt-4">
             <div className="flex items-center">
+               <br/>
              <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
-              <span className="text-lg font-bold ml-1">{viewers}</span>
+              <span className="text-lg font-bold ml-1">{viewers || 0}</span>
             </div>
 
             <span className="text-sm text-gray-800 mb-4">tv chat</span>
@@ -1207,11 +1212,12 @@ function ChatRoom({ streamId, onChatToggle, viewers }: ChatRoomProps) {
       {isOpen && (
         <div className="w-80 bg-lime-50 border-l border-black flex flex-col h-full max-h-screen">
           {/* Chat header */}
+           <br />
           <div className="p-4 border-b border-black bg-lime-50">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <img src="/assets/eyes.png" alt="Eyes" className="w-6 h-6" />
-                <span className="text-lg font-bold ml-1">{viewers}</span>
+                <span className="text-lg font-bold ml-1">{viewers || 0}</span>
                 <span className="text-sm text-gray-800 ml-2">tv chat</span>
                 {isAdmin && (
                   <span className="text-xs bg-red-500 text-white px-2 py-1 rounded ml-2">ADMIN</span>

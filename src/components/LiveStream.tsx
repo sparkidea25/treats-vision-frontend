@@ -10,7 +10,7 @@ import { useLocation, matchPath } from "react-router-dom";
 
 interface LiveStreamCardProps {
   title: string | React.ReactNode;
-  streamer: string;
+  streamer: any;
   viewers: number;
   isLive: boolean;
   playbackId: string;
@@ -306,7 +306,7 @@ const checkStreamStatus = async () => {
         )}
 
         {/* Viewer count */}
-        <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
+        <div className="absolute top-3 left-3 bg-white/60 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
           <Eye className="w-3 h-3" />
           <span>{viewers} VIEWERS</span>
         </div>
