@@ -74,6 +74,7 @@ export default function ProfilePage() {
       headers: {
         'Content-Type': 'application/json',
         "ngrok-skip-browser-warning": 'true',
+        "Access-Control-Allow-Origin": "*",
       }
     });
     if (!response.ok) throw new Error('Failed to fetch users');
@@ -99,6 +100,7 @@ export default function ProfilePage() {
             headers: {
                 'Content-Type': 'application/json',
                 "ngrok-skip-browser-warning": 'true',
+                "Access-Control-Allow-Origin": "*",
             }
       });
       if (!response.ok) {
@@ -118,6 +120,7 @@ export default function ProfilePage() {
       headers: {
         'Content-Type': 'application/json',
         "ngrok-skip-browser-warning": 'true',
+        "Access-Control-Allow-Origin": "*",
       }
     });
     if (!response.ok) throw new Error('Failed to fetch banned users');
@@ -141,7 +144,8 @@ export default function ProfilePage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          "ngrok-skip-browser-warning": 'true'
+          "ngrok-skip-browser-warning": 'true',
+          "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({ name: newName }),
       });
@@ -164,6 +168,7 @@ export default function ProfilePage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({ role }),
       });
@@ -200,6 +205,7 @@ export default function ProfilePage() {
         headers: {
           'Content-Type': 'application/json',
           "ngrok-skip-browser-warning": 'true',
+          "Access-Control-Allow-Origin": "*",
         }
       });
       if (!response.ok) {
